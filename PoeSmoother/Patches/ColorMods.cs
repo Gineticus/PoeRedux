@@ -39,6 +39,7 @@ public class ColorMods : IPatch
         new ColorModsOption("map_supporter_maven_follower", "red", true),
         new ColorModsOption("map_player_global_defences_+%", "red", true),
         new ColorModsOption("map_monsters_base_block_%", "red", true),
+        new ColorModsOption("map_monsters_steal_charges", "green", true),
         // strongboxes
         new ColorModsOption("chest_display_explodes_corpses", "red", true),
         new ColorModsOption("chest_display_explosion", "red", true),
