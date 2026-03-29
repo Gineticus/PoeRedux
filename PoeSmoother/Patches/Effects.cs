@@ -1,109 +1,167 @@
 using LibBundle3.Nodes;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PoeSmoother.Patches;
 
-public class Effects : IPatch
+public partial class Effects : IPatch
 {
-    public string Name => "Effects Patch (Experimental)";
+    public string Name => "Effects Patch";
     public object Description => "Disables all effects in the game.";
+
+    private List<FileNode> fileNodes = [];
 
     private readonly string[] extensions = {
         ".aoc",
+        ".ao",
     };
 
-    private readonly string[] _functions = {
-        "ParticleEffects",
-        "TrailsEffects",
-        "DecalEvents",
-        "ScreenShake",
-        "Lights",
-        // "WindEvents",
-        // "SoundEvents",
+    private readonly HashSet<string> _clientKeep = new(StringComparer.Ordinal) {
+        "ClientAnimationController",
+        "SoundEvents",
+        "BoneGroups",
+        "AnimatedRender",
+        "SkinMesh",
     };
 
-    private string RemoveFunctionBlock(string data, string functionName)
+    private void CollectFileNodesRecursively(DirectoryNode dir)
     {
-        int index = 0;
-        while (index < data.Length)
+        foreach (var node in dir.Children)
         {
-            int funcIndex = data.IndexOf(functionName, index);
-            if (funcIndex < 0) break;
+            switch (node)
+            {
+                case DirectoryNode childDir:
+                    CollectFileNodesRecursively(childDir);
+                    break;
 
-            int openBraceIndex = data.IndexOf('{', funcIndex + functionName.Length);
-            if (openBraceIndex < 0) break;
-            int braceCount = 1;
-            int i = openBraceIndex + 1;
-            
-            while (i < data.Length && braceCount > 0)
-            {
-                if (data[i] == '{') braceCount++;
-                else if (data[i] == '}') braceCount--;
-                i++;
-            }
-
-            if (braceCount == 0)
-            {
-                data = data.Remove(funcIndex, i - funcIndex);
-                index = funcIndex;
-            }
-            else
-            {
-                break;
+                case FileNode fileNode:
+                    if (HasTargetExtension(fileNode.Name))
+                        fileNodes.Add(fileNode);
+                    break;
             }
         }
-        return data;
+    }
+    
+    private static int FindMatchingBrace(string text, int openIndex)
+    {
+        int depth = 1;
+        for (int i = openIndex + 1; i < text.Length; i++)
+        {
+            if (text[i] == '{') depth++;
+            else if (text[i] == '}') depth--;
+            if (depth == 0) return i;
+        }
+        return -1;
     }
 
-    private void RecursivePatcher(DirectoryNode dir)
+    private static string StripClientBlocks(string data, HashSet<string> keepSet)
     {
-        foreach (var d in dir.Children)
+        // Find the top-level "client" block
+        var clientMatch = ClientBlockRegex().Match(data);
+        if (!clientMatch.Success)
+            return data;
+
+        int clientOpenBrace = data.IndexOf('{', clientMatch.Index + clientMatch.Length - 1);
+        if (clientOpenBrace < 0)
+            return data;
+
+        int clientCloseBrace = FindMatchingBrace(data, clientOpenBrace);
+        if (clientCloseBrace < 0)
+            return data;
+
+        string clientBody = data.Substring(clientOpenBrace + 1, clientCloseBrace - clientOpenBrace - 1);
+
+        // Extract sub-blocks: name followed by { ... }
+        var result = new StringBuilder();
+        int pos = 0;
+        while (pos < clientBody.Length)
         {
-            if (d is DirectoryNode childDir)
+            var blockMatch = SubBlockRegex().Match(clientBody, pos);
+            if (!blockMatch.Success)
             {
-                RecursivePatcher(childDir);
+                // Append remaining whitespace/newlines
+                result.Append(clientBody.AsSpan(pos));
+                break;
             }
-            else if (d is FileNode file)
+
+            // Append text before this block (whitespace/newlines)
+            string beforeBlock = clientBody[pos..blockMatch.Index];
+
+            string blockName = blockMatch.Groups[1].Value;
+            int blockOpenBrace = clientBody.IndexOf('{', blockMatch.Index + blockMatch.Length - 1);
+            if (blockOpenBrace < 0) break;
+
+            int blockCloseBrace = FindMatchingBrace(clientBody, blockOpenBrace);
+            if (blockCloseBrace < 0) break;
+
+            int blockEnd = blockCloseBrace + 1;
+
+            if (keepSet.Contains(blockName))
             {
-
-                if (Array.Exists(extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                {
-                    var record = file.Record;
-                    var bytes = record.Read();
-                    string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-
-                    foreach (var func in _functions)
-                    {
-                        data = RemoveFunctionBlock(data, func);
-                    }
-
-                    var newBytes = System.Text.Encoding.Unicode.GetBytes(data);
-                    record.Write(newBytes);
-                }
+                result.Append(beforeBlock);
+                result.Append(clientBody.AsSpan(blockMatch.Index, blockEnd - blockMatch.Index));
             }
+
+            pos = blockEnd;
         }
+
+        // Rebuild the full data with the filtered client block
+        return string.Concat(
+            data.AsSpan(0, clientOpenBrace + 1),
+            result.ToString(),
+            data.AsSpan(clientCloseBrace));
+    }
+
+    private void TryPatchFile(FileNode file)
+    {
+        var record = file.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+
+        if (string.IsNullOrEmpty(data))
+            return;
+
+        data = StripClientBlocks(data, _clientKeep);
+
+        var newBytes = Encoding.Unicode.GetBytes(data);
+        if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
+        {
+            newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
+        }
+        record.Write(newBytes);
+    }
+
+    private bool HasTargetExtension(string fileName) =>
+        extensions.Any(ext =>
+            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    {
+        DirectoryNode current = root;
+        foreach (var name in path)
+        {
+            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
+            if (next is null) return null;
+            current = next;
+        }
+        return current;
     }
 
     public void Apply(DirectoryNode root)
     {
-        // go to metadata/effects/spells
-        foreach (var d in root.Children)
+        var dir = NavigateTo(root, "metadata", "effects", "spells");
+        if (dir is not null)
+            CollectFileNodesRecursively(dir);
+
+        foreach (var file in fileNodes)
         {
-            if (d is DirectoryNode dir && dir.Name == "metadata")
-            {
-                foreach (var d2 in dir.Children)
-                {
-                    if (d2 is DirectoryNode subDir && subDir.Name == "effects")
-                    {
-                        foreach (var d3 in subDir.Children)
-                        {
-                            if (d3 is DirectoryNode spellDir && spellDir.Name == "spells")
-                            {
-                                RecursivePatcher(spellDir);
-                            }
-                        }
-                    }
-                }
-            }
+            TryPatchFile(file);
         }
     }
+
+    [GeneratedRegex(@"(?:^|\n)\s*client\s*\{", RegexOptions.Singleline)]
+    private static partial Regex ClientBlockRegex();
+
+    [GeneratedRegex(@"(\w+)\s*\{", RegexOptions.Singleline)]
+    private static partial Regex SubBlockRegex();
 }

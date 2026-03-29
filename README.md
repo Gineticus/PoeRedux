@@ -36,7 +36,7 @@
 - **Particles Patch**
   - Disables all particle effects in the game
 
-- **Effects Patch (Experimental)**
+- **Effects Patch**
   - Disables all effects in the game
 
 ### PoE 2

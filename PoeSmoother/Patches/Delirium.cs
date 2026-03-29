@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using System.Text;
 
 namespace PoeSmoother.Patches;
 
@@ -6,43 +7,52 @@ public class Delirium : IPatch
 {
     public string Name => "Delirium Patch";
     public object Description => "Disables the delirium effects in the game.";
+
+    private List<FileNode> fileNodes = [];
+
     private readonly string[] extensions = {
         ".ao",
         ".aoc",
     };
 
-    private void RecursivePatcher(DirectoryNode dir)
+    private void CollectFileNodesRecursively(DirectoryNode dir)
     {
-        foreach (var d in dir.Children)
+        foreach (var node in dir.Children)
         {
-            if (d is DirectoryNode childDir)
+            switch (node)
             {
-                RecursivePatcher(childDir);
+                case DirectoryNode childDir:
+                    CollectFileNodesRecursively(childDir);
+                    break;
+
+                case FileNode fileNode:
+                    if (HasTargetExtension(fileNode.Name))
+                        fileNodes.Add(fileNode);
+                    break;
             }
-            else if (d is FileNode file)
-            {
+        }
+    }
 
-                if (Array.Exists(extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                {
+    private void TryPatchFile(FileNode file)
+    {
+        var record = file.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
 
-                    var record = file.Record;
-                    var bytes = record.Read();
-                    string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
+        if (string.IsNullOrEmpty(data))
+            return;
 
-
-                    if (string.IsNullOrEmpty(data)) continue;
-
-                    if (data.Contains("Metadata/FmtParent") && !data.Contains("AnimatedRender"))
-                    {
-                        data = "version 3\nextends \"Metadata/FmtParent\"";
-                    }
-                    else if (data.Contains("Metadata/FmtParent") && data.Contains("AnimatedRender"))
-                    {
-                        data = "version 3\nextends \"Metadata/FmtParent\"\n\nclient\n{\n\tAnimatedRender\n\t{\n\t\tcannot_be_disabled = true\n\t}\n}";
-                    }
-                    else if (data.Contains("Metadata/Parent"))
-                    {
-                        data = @"version 3
+        if (data.Contains("Metadata/FmtParent") && !data.Contains("AnimatedRender"))
+        {
+            data = "version 3\nextends \"Metadata/FmtParent\"";
+        }
+        else if (data.Contains("Metadata/FmtParent") && data.Contains("AnimatedRender"))
+        {
+            data = "version 3\nextends \"Metadata/FmtParent\"\n\nclient\n{\n\tAnimatedRender\n\t{\n\t\tcannot_be_disabled = true\n\t}\n}";
+        }
+        else if (data.Contains("Metadata/Parent"))
+        {
+            data = @"version 3
 extends ""Metadata/Parent""
 
 BaseAnimationEvents
@@ -66,46 +76,41 @@ client
         bone_group = ""box false aux_box1 aux_box2 aux_box3 ""
     }
 }";
-                    }
-
-                    var newBytes = System.Text.Encoding.Unicode.GetBytes(data);
-                    if (!newBytes.AsSpan().StartsWith(System.Text.Encoding.Unicode.GetPreamble()))
-                    {
-                        newBytes = System.Text.Encoding.Unicode.GetPreamble().Concat(newBytes).ToArray();
-                    }
-                    record.Write(newBytes);
-                }
-            }
         }
+
+        var newBytes = Encoding.Unicode.GetBytes(data);
+        if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
+        {
+            newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
+        }
+        record.Write(newBytes);
+    }
+
+    private bool HasTargetExtension(string fileName) =>
+        extensions.Any(ext =>
+            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    {
+        DirectoryNode current = root;
+        foreach (var name in path)
+        {
+            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
+            if (next is null) return null;
+            current = next;
+        }
+        return current;
     }
 
     public void Apply(DirectoryNode root)
     {
-        // go to metadata/effects/environment/league_affliction
-        foreach (var d in root.Children)
+        var dir = NavigateTo(root, "metadata", "effects", "environment", "league_affliction");
+        if (dir is not null)
+            CollectFileNodesRecursively(dir);
+
+        foreach (var file in fileNodes)
         {
-            if (d is DirectoryNode dir && dir.Name == "metadata")
-            {
-                foreach (var d2 in dir.Children)
-                {
-                    if (d2 is DirectoryNode subDir && subDir.Name == "effects")
-                    {
-                        foreach (var d3 in subDir.Children)
-                        {
-                            if (d3 is DirectoryNode subDir2 && subDir2.Name == "environment")
-                            {
-                                foreach (var d4 in subDir2.Children)
-                                {
-                                    if (d4 is DirectoryNode subDir3 && subDir3.Name == "league_affliction")
-                                    {
-                                        RecursivePatcher(subDir3);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            TryPatchFile(file);
         }
     }
 }

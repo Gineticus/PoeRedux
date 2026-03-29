@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using System.Text;
 
 namespace PoeSmoother.Patches;
 
@@ -9,19 +10,23 @@ public class Camera : IPatch
 
     public double ZoomLevel { get; set; } = 2.4;
 
+    private List<FileNode> fileNodes = [];
+
     private readonly string[] _extensions = {
         ".ot",
         ".otc",
     };
 
-    private readonly string[] _functions = {
+    private readonly HashSet<string> _functions = new(StringComparer.Ordinal) {
         "CreateCameraZoomNode",
         "ClearCameraZoomNodes",
         "CreateCameraLookAtNode",
         "CreateCameraPanNode",
         "ClearCameraPanNode",
+        "ClearCameraPanNodes",
         "SetCustomCameraSpeed",
         "RemoveCustomCameraSpeed",
+        "FaceCamera"
     };
     
     private string RemoveCameraFunctions(string data)
@@ -91,85 +96,107 @@ public class Camera : IPatch
         return data;
     }
 
-    private void RecursivePatcher(DirectoryNode dir)
+    private void CollectFileNodesRecursively(DirectoryNode dir)
     {
-        foreach (var d in dir.Children)
+        foreach (var node in dir.Children)
         {
-            if (d is DirectoryNode childDir)
+            switch (node)
             {
-                RecursivePatcher(childDir);
-            }
-            else if (d is FileNode file)
-            {
+                case DirectoryNode childDir:
+                    CollectFileNodesRecursively(childDir);
+                    break;
 
-                if (Array.Exists(_extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                {
-                    if (file.Name == "character.ot")
-                    {
-                        continue;
-                    }
-
-                    var record = file.Record;
-                    var bytes = record.Read();
-                    string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-
-                    if (!_functions.Any(func => data.Contains(func)))
-                    {
-                        continue;
-                    }
-
-                    data = RemoveCameraFunctions(data);
-                    
-                    var newBytes = System.Text.Encoding.Unicode.GetBytes(data);
-                    record.Write(newBytes);
-                }
+                case FileNode fileNode:
+                    if (HasTargetExtension(fileNode.Name) && fileNode.Name != "character.ot")
+                        fileNodes.Add(fileNode);
+                    break;
             }
         }
     }
 
+    private void TryPatchFile(FileNode file)
+    {
+        var record = file.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+
+        if (string.IsNullOrEmpty(data))
+            return;
+
+        if (data.Contains("camera", StringComparison.OrdinalIgnoreCase)) {
+            Console.WriteLine(record.Path);
+        }
+
+        if (!_functions.Any(func => data.Contains(func)))
+            return;
+
+        data = RemoveCameraFunctions(data);
+
+        var newBytes = Encoding.Unicode.GetBytes(data);
+        if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
+        {
+            newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
+        }
+        record.Write(newBytes);
+    }
+
+    private bool HasTargetExtension(string fileName) =>
+        _extensions.Any(ext =>
+            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    {
+        DirectoryNode current = root;
+        foreach (var name in path)
+        {
+            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
+            if (next is null) return null;
+            current = next;
+        }
+        return current;
+    }
+
     public void Apply(DirectoryNode root)
     {
-        // go to metadata/
-        foreach (var d in root.Children)
+        var metadata = NavigateTo(root, "metadata");
+        if (metadata is null)
+            return;
+
+        CollectFileNodesRecursively(metadata);
+
+        // Patch metadata/characters/character.ot
+        var characters = NavigateTo(metadata, "characters");
+        if (characters is not null)
         {
-            if (d is DirectoryNode dir && dir.Name == "metadata")
+            var characterFile = characters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "character.ot");
+            if (characterFile is not null)
             {
-                RecursivePatcher(dir);
+                var record = characterFile.Record;
+                var bytes = record.Read();
+                string data = Encoding.Unicode.GetString(bytes.ToArray());
+                List<string> lines = data.Split("\r\n").ToList();
+                string zoomLevelString = ZoomLevel.ToString().Replace(',', '.');
 
-                // go to metadata/characters/character.ot
-                foreach (var dir1 in dir.Children)
+                if (data.Contains("CreateCameraZoomNode"))
                 {
-                    if (dir1 is DirectoryNode subDir && subDir.Name == "characters")
-                    {
-                        foreach (var dir2 in subDir.Children)
-                        {
-                            if (dir2 is FileNode file && file.Name == "character.ot")
-                            {
-                                var record = file.Record;
-                                var bytes = record.Read();
-                                string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-                                List<string> lines = data.Split("\r\n").ToList();
-                                string zoomLevelString = ZoomLevel.ToString().Replace(',', '.');
-
-                                if (data.Contains("CreateCameraZoomNode"))
-                                {
-                                    int x = lines.FindIndex(line => line.Contains("CreateCameraZoomNode"));
-                                    lines[x] = $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ";
-                                }
-                                else
-                                {
-                                    int index = lines.FindIndex(x => x.Contains("team = 1"));
-                                    if (index == -1) continue;
-                                    lines.Insert(index + 1, $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ");
-                                }
-                                string newData = string.Join("\r\n", lines);
-                                var newBytes = System.Text.Encoding.Unicode.GetBytes(newData);
-                                record.Write(newBytes);
-                            }
-                        }
-                    }
+                    int x = lines.FindIndex(line => line.Contains("CreateCameraZoomNode"));
+                    lines[x] = $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ";
                 }
+                else
+                {
+                    int index = lines.FindIndex(x => x.Contains("team = 1"));
+                    if (index != -1)
+                        lines.Insert(index + 1, $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ");
+                }
+                string newData = string.Join("\r\n", lines);
+                var newBytes = Encoding.Unicode.GetBytes(newData);
+                record.Write(newBytes);
             }
+        }
+
+        foreach (var file in fileNodes)
+        {
+            TryPatchFile(file);
         }
     }
 }

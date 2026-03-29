@@ -1,5 +1,6 @@
 ﻿using LibBundle3.Nodes;
 using PoeSmoother.Models;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PoeSmoother.Patches;
@@ -95,157 +96,181 @@ public class ColorMods : IPatch
         ".txt",
     };
 
-    private void RecursivePatcher(DirectoryNode dir)
+    private List<FileNode> fileNodes = [];
+
+    private void CollectFileNodesRecursively(DirectoryNode dir)
     {
-        foreach (var d in dir.Children)
+        foreach (var node in dir.Children)
         {
-            if (d is DirectoryNode childDir)
+            switch (node)
             {
-                RecursivePatcher(childDir);
-            }
-            else if (d is FileNode file)
-            {
+                case DirectoryNode childDir:
+                    CollectFileNodesRecursively(childDir);
+                    break;
 
-                if (Array.Exists(_extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                {
-                    var record = file.Record;
-                    var bytes = record.Read();
-                    string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-                    var lines = data.Split("\r\n").ToList();
-
-                    ReadState state = ReadState.ReadingToDescription;
-
-                    string? currentAnnotation = null;
-                    bool? currentIsEnabled = null;
-
-                    int linesToWrite = 0;
-
-                    for (int i = 0; i < lines.Count; i++)
-                    {
-                        string line = lines[i];
-
-                        if (line.StartsWith("description"))
-                        {
-                            state = ReadState.ReadingDescription;
-                            continue;
-                        }
-
-                        if (state == ReadState.ReadingToDescription) continue;
-
-                        // Read the description on the next line.
-                        if (state == ReadState.ReadingDescription)
-                        {
-                            string[] description = line.Split(' ');
-                            if (description.Length < 2)
-                            {
-                                state = ReadState.ReadingToDescription;
-                                continue;
-                            }
-
-                            string modType = description[1];
-
-                            if (ColorModsOptions.FirstOrDefault(x => x.Name == modType) is ColorModsOption option
-                                && _color_conversions.TryGetValue(option.Color.ToLower(), out string? annotation))
-                            {
-                                currentAnnotation = annotation;
-                                currentIsEnabled = option.IsEnabled;
-                                state = ReadState.ReadingData;
-                            }
-                            else
-                            {
-                                currentAnnotation = null;
-                                state = ReadState.ReadingToDescription;
-                            }
-
-                            continue;
-                        }
-
-                        if (state == ReadState.ReadingData)
-                        {
-                            // Replace tabs in line with nothing.
-                            string firstNumber = line.Replace("\t", "").Split(' ')[0];
-
-                            // May be a "lang" value. If the value is a number write those lines.
-                            if (int.TryParse(firstNumber, out int value))
-                            {
-                                state = ReadState.WritingData;
-                                linesToWrite = value;
-                                continue;
-                            }
-                            ;
-                        }
-
-                        if (state == ReadState.WritingData)
-                        {
-                            if (line.Contains('<')) // Already annotated.
-                            {
-                                if (currentIsEnabled == false)
-                                {
-                                    // Remove annotation.
-                                    // <.*?>{{value}} -> "value".
-                                    string pattern = "<.*?>{{(.*?)}}";
-                                    string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
-                                    {
-                                        return $"{match.Groups[1].Value}";
-                                    }));
-                                    lines[i] = replacement;
-                                }
-                                else
-                                {
-                                    // Replace text between brackets with new annotation.
-                                    string pattern = "<.*?>";
-                                    string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
-                                    {
-                                        return $"<{currentAnnotation}>";
-                                    }));
-                                    lines[i] = replacement;
-                                }
-                            }
-                            else
-                            {
-                                // Surround the value with the annotation.
-                                // "value" -> "<annotation>{{value}}".
-
-                                string pattern = "\".*?\"";
-                                string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
-                                {
-                                    return $"\"<{currentAnnotation}>{{{{{match.Value.Replace("\"", "")}}}}}\"";
-                                }));
-                                lines[i] = replacement;
-                            }
-
-                            linesToWrite--;
-                            if (linesToWrite == 0)
-                            {
-                                state = ReadState.ReadingData;
-                                continue;
-                            }
-                        }
-                    }
-
-                    var newData = string.Join("\r\n", lines);
-                    var newBytes = System.Text.Encoding.Unicode.GetBytes(newData);
-                    record.Write(newBytes);
-                }
+                case FileNode fileNode:
+                    if (HasTargetExtension(fileNode.Name))
+                        fileNodes.Add(fileNode);
+                    break;
             }
         }
     }
 
-    public void Apply(DirectoryNode root)
+    private void TryPatchFile(FileNode file)
     {
-        // go to metadata/statdescriptions/
-        foreach (var d in root.Children)
+        var record = file.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+
+        if (string.IsNullOrEmpty(data))
+            return;
+
+        var lines = data.Split("\r\n").ToList();
+
+        ReadState state = ReadState.ReadingToDescription;
+
+        string? currentAnnotation = null;
+        bool? currentIsEnabled = null;
+
+        int linesToWrite = 0;
+
+        for (int i = 0; i < lines.Count; i++)
         {
-            if (d is DirectoryNode dir && dir.Name == "metadata")
+            string line = lines[i];
+
+            if (line.StartsWith("description"))
             {
-                foreach (var dir1 in dir.Children)
+                state = ReadState.ReadingDescription;
+                continue;
+            }
+
+            if (state == ReadState.ReadingToDescription) continue;
+
+            // Read the description on the next line.
+            if (state == ReadState.ReadingDescription)
+            {
+                string[] description = line.Split(' ');
+                if (description.Length < 2)
                 {
-                    if (dir1 is DirectoryNode subDir && subDir.Name == "statdescriptions")
+                    state = ReadState.ReadingToDescription;
+                    continue;
+                }
+
+                string modType = description[1];
+
+                if (ColorModsOptions.FirstOrDefault(x => x.Name == modType) is ColorModsOption option
+                    && _color_conversions.TryGetValue(option.Color.ToLower(), out string? annotation))
+                {
+                    currentAnnotation = annotation;
+                    currentIsEnabled = option.IsEnabled;
+                    state = ReadState.ReadingData;
+                }
+                else
+                {
+                    currentAnnotation = null;
+                    state = ReadState.ReadingToDescription;
+                }
+
+                continue;
+            }
+
+            if (state == ReadState.ReadingData)
+            {
+                // Replace tabs in line with nothing.
+                string firstNumber = line.Replace("\t", "").Split(' ')[0];
+
+                // May be a "lang" value. If the value is a number write those lines.
+                if (int.TryParse(firstNumber, out int value))
+                {
+                    state = ReadState.WritingData;
+                    linesToWrite = value;
+                    continue;
+                }
+                ;
+            }
+
+            if (state == ReadState.WritingData)
+            {
+                if (line.Contains('<')) // Already annotated.
+                {
+                    if (currentIsEnabled == false)
                     {
-                        RecursivePatcher(subDir);
+                        // Remove annotation.
+                        // <.*?>{{value}} -> "value".
+                        string pattern = "<.*?>{{(.*?)}}";
+                        string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
+                        {
+                            return $"{match.Groups[1].Value}";
+                        }));
+                        lines[i] = replacement;
+                    }
+                    else
+                    {
+                        // Replace text between brackets with new annotation.
+                        string pattern = "<.*?>";
+                        string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
+                        {
+                            return $"<{currentAnnotation}>";
+                        }));
+                        lines[i] = replacement;
                     }
                 }
+                else
+                {
+                    // Surround the value with the annotation.
+                    // "value" -> "<annotation>{{value}}".
+
+                    string pattern = "\".*?\"";
+                    string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
+                    {
+                        return $"\"<{currentAnnotation}>{{{{{match.Value.Replace("\"", "")}}}}}\"";
+                    }));
+                    lines[i] = replacement;
+                }
+
+                linesToWrite--;
+                if (linesToWrite == 0)
+                {
+                    state = ReadState.ReadingData;
+                    continue;
+                }
             }
+        }
+
+        var newData = string.Join("\r\n", lines);
+        var newBytes = Encoding.Unicode.GetBytes(newData);
+        if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
+        {
+            newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
+        }
+        record.Write(newBytes);
+    }
+
+    private bool HasTargetExtension(string fileName) =>
+        _extensions.Any(ext =>
+            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    {
+        DirectoryNode current = root;
+        foreach (var name in path)
+        {
+            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
+            if (next is null) return null;
+            current = next;
+        }
+        return current;
+    }
+
+    public void Apply(DirectoryNode root)
+    {
+        var dir = NavigateTo(root, "metadata", "statdescriptions");
+        if (dir is not null)
+            CollectFileNodesRecursively(dir);
+
+        foreach (var file in fileNodes)
+        {
+            TryPatchFile(file);
         }
     }
 }

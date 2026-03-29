@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using System.Text;
 
 namespace PoeSmoother.Patches;
 
@@ -6,55 +7,78 @@ public class Light : IPatch
 {
     public string Name => "Light Patch";
     public object Description => "Disables the default light effect in the game.";
+
+    private List<FileNode> fileNodes = [];
+
     private readonly string[] extensions = {
         ".env",
     };
 
-    private void RecursivePatcher(DirectoryNode dir)
+    private void CollectFileNodesRecursively(DirectoryNode dir)
     {
-        foreach (var d in dir.Children)
+        foreach (var node in dir.Children)
         {
-            if (d is DirectoryNode childDir)
+            switch (node)
             {
-                RecursivePatcher(childDir);
-            }
-            else if (d is FileNode file)
-            {
+                case DirectoryNode childDir:
+                    CollectFileNodesRecursively(childDir);
+                    break;
 
-                if (Array.Exists(extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                {
-
-                    var record = file.Record;
-                    var bytes = record.Read();
-                    string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-
-                    data = data.Replace("\"directional_light\"", "\"xirectional_light\"")
-                        .Replace("\"player_light\"", "\"xlayer_light\"")
-                        .Replace("\"environment_mapping\"", "\"xnvironment_mapping\"")
-                        .Replace("\"global_illumination\"", "\"xlobal_illumination\"");
-                    
-                    var newBytes = System.Text.Encoding.Unicode.GetBytes(data);
-                    record.Write(newBytes);
-                }
+                case FileNode fileNode:
+                    if (HasTargetExtension(fileNode.Name))
+                        fileNodes.Add(fileNode);
+                    break;
             }
         }
     }
 
+    private void TryPatchFile(FileNode file)
+    {
+        var record = file.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+
+        if (string.IsNullOrEmpty(data))
+            return;
+
+        data = data.Replace("\"directional_light\"", "\"xirectional_light\"")
+            .Replace("\"player_light\"", "\"xlayer_light\"")
+            .Replace("\"environment_mapping\"", "\"xnvironment_mapping\"")
+            .Replace("\"global_illumination\"", "\"xlobal_illumination\"");
+
+        var newBytes = Encoding.Unicode.GetBytes(data);
+        if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
+        {
+            newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
+        }
+        record.Write(newBytes);
+    }
+
+    private bool HasTargetExtension(string fileName) =>
+        extensions.Any(ext =>
+            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    {
+        DirectoryNode current = root;
+        foreach (var name in path)
+        {
+            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
+            if (next is null) return null;
+            current = next;
+        }
+        return current;
+    }
+
     public void Apply(DirectoryNode root)
     {
-        // go to metadata/environmentsettings/
-        foreach (var d in root.Children)
+        var dir = NavigateTo(root, "metadata", "environmentsettings");
+        if (dir is not null)
+            CollectFileNodesRecursively(dir);
+
+        foreach (var file in fileNodes)
         {
-            if (d is DirectoryNode dir && dir.Name == "metadata")
-            {
-                foreach (var d2 in dir.Children)
-                {
-                    if (d2 is DirectoryNode subDir && subDir.Name == "environmentsettings")
-                    {
-                        RecursivePatcher(subDir);
-                    }
-                }
-            }
+            TryPatchFile(file);
         }
     }
 }
