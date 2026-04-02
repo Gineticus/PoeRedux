@@ -1,0 +1,99 @@
+﻿<Window x:Class="PoeRedux.ColorModsEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PoE Redux"
+        Height="400"
+        Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Text="Mods Colors"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,16"/>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Style="{StaticResource DarkScrollViewer}"
+                      Margin="4,0">
+            <ItemsControl x:Name="ColorModsItemsControl">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="{StaticResource DarkBorder}"
+                                BorderThickness="0"
+                                Padding="4"
+                                Background="{StaticResource DarkSurface}"
+                                Margin="0,0,0,2"
+                                CornerRadius="2">
+                            <CheckBox IsChecked="{Binding IsSelected}"
+                                      FontWeight="SemiBold"
+                                      FontSize="12"
+                                      Foreground="{StaticResource DarkTextPrimary}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12"
+                                               Foreground="{StaticResource DarkTextPrimary}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+                                    <ComboBox ItemsSource="{Binding AvailableColors}"
+                                              SelectedItem="{Binding SelectedColor}"
+                                              Width="80"
+                                              FontSize="11"
+                                              Style="{StaticResource DarkComboBox}"/>
+                                </StackPanel>
+                            </CheckBox>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="2"
+              Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel HorizontalAlignment="Left"
+                    Grid.Column="0"
+                        Orientation="Horizontal">
+                <Button x:Name="SaveConfigButton"
+                        Content="Save Config"
+                        MinWidth="80"
+                        Click="SaveConfigButton_Click"/>
+                <Button x:Name="LoadConfigButton"
+                        Content="Load Config"
+                        MinWidth="80"
+                        Click="LoadConfigButton_Click"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Right"
+                    Grid.Column="2"
+                        Orientation="Horizontal">
+
+                <Button x:Name="SaveButton"
+                        Content="Save"
+                        MinWidth="80"
+                        Click="SaveButton_Click"/>
+                <Button x:Name="ExitButton"
+                        Content="Exit"
+                        MinWidth="80"
+                        Click="ExitButton_Click"
+                        Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

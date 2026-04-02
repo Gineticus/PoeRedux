@@ -22,26 +22,26 @@ jobs:
         dotnet-version: '10.0.x'
         
     - name: Restore dependencies
-      run: dotnet restore PoeSmoother/PoeSmoother.csproj
+      run: dotnet restore PoeRedux/PoeRedux.csproj
       
     - name: Build Release
-      run: dotnet publish PoeSmoother/PoeSmoother.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
+      run: dotnet publish PoeRedux/PoeRedux.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
       
     - name: Rename executable
       run: |
-        Move-Item -Path ./publish/PoeSmoother.exe -Destination ./PoeSmoother-${{ github.ref_name }}-win-x64.exe
+        Move-Item -Path ./publish/PoeRedux.exe -Destination ./PoeRedux-${{ github.ref_name }}-win-x64.exe
       shell: pwsh
       
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          PoeSmoother-${{ github.ref_name }}-win-x64.exe
+          PoeRedux-${{ github.ref_name }}-win-x64.exe
         body: |
-          ## PoE Smoother ${{ github.ref_name }}
+          ## PoE Redux ${{ github.ref_name }}
           
           ### Installation
-          1. Download `PoeSmoother-${{ github.ref_name }}-win-x64.exe`
+          1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`
           2. Run the executable
           
           ### System Requirements

@@ -1,4 +1,4 @@
-# PoeSmoother
+# PoeRedux
 
 ![Window](Images/window.png)
 
@@ -79,8 +79,8 @@
 
 ## Installation
 
-1. Go to the [Releases page](https://github.com/Gineticus/PoeSmoother/releases)
-2. Download the latest `PoeSmoother-win-x64.exe`
+1. Go to the [Releases page](https://github.com/Gineticus/PoeRedux/releases)
+2. Download the latest `PoeRedux-win-x64.exe`
 3. Run the executable
 
 **Note:** The application is self-contained and includes all required dependencies.
@@ -106,4 +106,4 @@
 
 ## Support
 
-For issues, suggestions, or contributions, please visit the [GitHub repository](https://github.com/Gineticus/PoeSmoother).
+For issues, suggestions, or contributions, please visit the [GitHub repository](https://github.com/Gineticus/PoeRedux).
