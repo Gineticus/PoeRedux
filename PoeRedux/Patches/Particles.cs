@@ -15,6 +15,23 @@ public class Particles : IPatch
         ".trl",
     };
 
+    private readonly HashSet<string> _pathProtect = new(StringComparer.Ordinal) {
+    // legion particles
+        "metadata/particles/monster_effects/league_legion/rewardsystem",
+        "metadata/particles/monster_effects/league_legion/endgame",
+    // delve particles
+        "metadata/particles/monster_effects/league_delve/general",
+    // drox, the warlord particles
+        "metadata/particles/monster_effects/atlasexiles/adjudicator",
+        "metadata/particles/monster_effects/atlasexiles/adjudicatormonsters",
+    // guardian of the chimera particles
+        "metadata/particles/enviro_effects/act3/blood_temple",
+        "metadata/particles/ground_effects_v2/smoke_blind_chimera",
+        "metadata/particles/monster_effects/atlasofworldsbosses/chimera",
+    // sirus, awakener of worlds particles
+        "metadata/particles/monster_effects/atlasexiles/orion",
+    };
+
     private void CollectFileNodesRecursively(DirectoryNode dir)
     {
         foreach (var node in dir.Children)
@@ -36,6 +53,10 @@ public class Particles : IPatch
     private void TryPatchFile(FileNode file)
     {
         var record = file.Record;
+
+        if (_pathProtect.Any(p => record.Path.Replace('\\', '/').StartsWith(p, StringComparison.Ordinal)))
+            return;
+
         var newBytes = Encoding.Unicode.GetBytes("0");
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
         {
