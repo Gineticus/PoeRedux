@@ -208,8 +208,18 @@
                        Foreground="{StaticResource DarkTextSecondary}"
                        Margin="8,0"/>
 
-            <Button Grid.Column="1" 
-                    Content="Apply Patches" 
+            <Button Grid.Column="1"
+                    Content="Restore Original"
+                    Click="RestoreButton_Click"
+                    MinWidth="120"
+                    FontSize="11"
+                    Margin="0,0,8,0"
+                    IsEnabled="False"
+                    Style="{StaticResource SecondaryButton}"
+                    x:Name="RestoreButton"/>
+
+            <Button Grid.Column="2"
+                    Content="Apply Patches"
                     Click="ApplyButton_Click"
                     MinWidth="100"
                     FontSize="11"

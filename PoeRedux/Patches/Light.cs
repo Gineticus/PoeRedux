@@ -1,5 +1,6 @@
 using LibBundle3.Nodes;
 using System.Text;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
@@ -51,6 +52,7 @@ public class Light : IPatch
         {
             newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
         }
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 

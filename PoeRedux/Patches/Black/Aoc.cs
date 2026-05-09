@@ -1,6 +1,7 @@
 using LibBundle3.Nodes;
 using System.Text;
 using System.Text.RegularExpressions;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches.Black;
 
@@ -133,6 +134,7 @@ public partial class Aoc : IPatch
         {
             newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
         }
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 

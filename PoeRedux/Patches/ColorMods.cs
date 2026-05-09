@@ -1,7 +1,8 @@
-﻿using LibBundle3.Nodes;
+using LibBundle3.Nodes;
 using PoeRedux.Models;
 using System.Text;
 using System.Text.RegularExpressions;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
@@ -243,6 +244,7 @@ public class ColorMods : IPatch
         {
             newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
         }
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 

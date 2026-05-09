@@ -1,5 +1,6 @@
 using LibBundle3.Nodes;
 using System.Text;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
@@ -133,6 +134,7 @@ public class Camera : IPatch
         {
             newBytes = [.. Encoding.Unicode.GetPreamble(), .. newBytes];
         }
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 
@@ -186,6 +188,7 @@ public class Camera : IPatch
                 }
                 string newData = string.Join("\r\n", lines);
                 var newBytes = Encoding.Unicode.GetBytes(newData);
+                BackupManager.RecordOriginal(record);
                 record.Write(newBytes);
             }
         }

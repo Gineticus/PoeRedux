@@ -1,5 +1,6 @@
 using LibBundle3.Nodes;
 using System.Text;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
@@ -38,6 +39,7 @@ public class Corpse : IPatch
         data = data.Replace("slow_animations_go_to_idle = true\r\n}", "slow_animations_go_to_idle = true\r\n\ton_start_Revive = {RemoveEffects(); EnableRendering();}\r\n}");
 
         var newBytes = Encoding.Unicode.GetBytes(data);
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 }

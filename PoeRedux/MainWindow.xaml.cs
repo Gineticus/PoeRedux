@@ -30,7 +30,11 @@ public partial class MainWindow : Window
         UpdateStatus();
 
         SourceInitialized += (s, e) => ApplyDarkTitleBar();
-        Loaded += async (s, e) => await CheckForUpdatesAsync();
+        Loaded += async (s, e) =>
+        {
+            UpdateRestoreButtonState();
+            await CheckForUpdatesAsync();
+        };
     }
 
     private void ApplyDarkTitleBar()
@@ -127,6 +131,8 @@ public partial class MainWindow : Window
         {
             ModsColorsButton.Visibility = _colorMods.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        UpdateRestoreButtonState();
     }
 
     private void ModsColorsButton_Click(object sender, RoutedEventArgs e)
@@ -226,8 +232,11 @@ public partial class MainWindow : Window
 
         StatusTextBlock.Text = "Starting patching process...";
 
+        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+
         // Disable buttons during operation
         ApplyButton.IsEnabled = false;
+        if (RestoreButton != null) RestoreButton.IsEnabled = false;
         //ZoomSlider.IsEnabled = false;
         ProgressBar.Visibility = Visibility.Visible;
         ProgressBar.IsIndeterminate = false;
@@ -239,24 +248,32 @@ public partial class MainWindow : Window
         {
             await Task.Run(() =>
             {
-                if (_ggpkPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+                BackupManager.Begin(game);
+                try
                 {
-                    var index = new LibBundle3.Index(_ggpkPath, false);
-                    index.ParsePaths();
-                    PatchIndex(index, patchesToApply);
-                    index.Dispose();
+                    if (_ggpkPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var index = new LibBundle3.Index(_ggpkPath, false);
+                        index.ParsePaths();
+                        PatchIndex(index, patchesToApply);
+                        index.Dispose();
+                    }
+                    else if (_ggpkPath.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
+                    {
+                        BundledGGPK ggpk = new(_ggpkPath, false);
+                        var index = ggpk.Index;
+                        index.ParsePaths();
+                        PatchIndex(index, patchesToApply);
+                        ggpk.Dispose();
+                    }
+                    else
+                    {
+                        throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
+                    }
                 }
-                else if (_ggpkPath.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
+                finally
                 {
-                    BundledGGPK ggpk = new(_ggpkPath, false);
-                    var index = ggpk.Index;
-                    index.ParsePaths();
-                    PatchIndex(index, patchesToApply);
-                    ggpk.Dispose();
-                }
-                else
-                {
-                    throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
+                    BackupManager.End();
                 }
             });
 
@@ -275,7 +292,99 @@ public partial class MainWindow : Window
             ProgressBar.Visibility = Visibility.Collapsed;
             ProgressBar.Value = 0;
             //ZoomSlider.IsEnabled = true;
+            UpdateRestoreButtonState();
         }
+    }
+
+    private async void RestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(_ggpkPath) || !File.Exists(_ggpkPath))
+        {
+            MessageBox.Show("Please select a valid game file first.", "Invalid File");
+            return;
+        }
+
+        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+
+        if (!BackupManager.HasBackup(game))
+        {
+            MessageBox.Show("No backup found for this game.", "Nothing to Restore");
+            return;
+        }
+
+        var fileCount = BackupManager.CountBackedUpFiles(game);
+        StatusTextBlock.Text = $"Restoring {fileCount} file(s)...";
+
+        ApplyButton.IsEnabled = false;
+        if (RestoreButton != null) RestoreButton.IsEnabled = false;
+        ProgressBar.Visibility = Visibility.Visible;
+        ProgressBar.IsIndeterminate = false;
+        ProgressBar.Minimum = 0;
+        ProgressBar.Maximum = fileCount;
+        ProgressBar.Value = 0;
+
+        int restored = 0;
+        try
+        {
+            await Task.Run(() =>
+            {
+                void Progress(int done, int total, string path)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        StatusTextBlock.Text = $"Restoring ({done}/{total}): {Path.GetFileName(path)}";
+                        ProgressBar.Value = done;
+                    });
+                }
+
+                if (_ggpkPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+                {
+                    var index = new LibBundle3.Index(_ggpkPath, false);
+                    index.ParsePaths();
+                    restored = BackupManager.Restore(index, game, Progress);
+                    index.Save();
+                    index.Dispose();
+                }
+                else if (_ggpkPath.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
+                {
+                    BundledGGPK ggpk = new(_ggpkPath, false);
+                    var index = ggpk.Index;
+                    index.ParsePaths();
+                    restored = BackupManager.Restore(index, game, Progress);
+                    index.Save();
+                    ggpk.Dispose();
+                }
+                else
+                {
+                    throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
+                }
+            });
+
+            BackupManager.DeleteBackup(game);
+            StatusTextBlock.Text = $"Restored {restored} file(s) to original.";
+            MessageBox.Show($"Restored {restored} file(s) to original.\n\nBackup cleared.", "Restore Complete");
+        }
+        catch (Exception ex)
+        {
+            StatusTextBlock.Text = "Error occurred while restoring.";
+            MessageBox.Show($"Error restoring:\n\n{ex.Message}", "Error");
+        }
+        finally
+        {
+            ApplyButton.IsEnabled = true;
+            ProgressBar.Visibility = Visibility.Collapsed;
+            ProgressBar.Value = 0;
+            UpdateRestoreButtonState();
+        }
+    }
+
+    private void UpdateRestoreButtonState()
+    {
+        if (RestoreButton == null) return;
+        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+        var count = BackupManager.CountBackedUpFiles(game);
+        RestoreButton.IsEnabled = count > 0;
+        RestoreButton.Content = count > 0 ? $"Restore Original ({count})" : "Restore Original";
     }
 
     private void PatchIndex(LibBundle3.Index index, List<PatchViewModel> patches)

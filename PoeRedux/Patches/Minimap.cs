@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
@@ -45,6 +46,7 @@ public class Minimap : IPatch
 
                 string newData = string.Join("\r\n", lines);
                 var newBytes = System.Text.Encoding.ASCII.GetBytes(newData);
+                BackupManager.RecordOriginal(record);
                 record.Write(newBytes);
             }
             
@@ -58,6 +60,7 @@ public class Minimap : IPatch
                 data = data.Replace("float4 walkability_map_color = lerp(walkable_color, float4(0.5f, 0.5f, 1.0f, 0.5f), walkable_to_edge_ratio);", "float4 walkability_map_color = lerp(walkable_color, float4(12.0f, 12.0f, 12.0f, 0.1f), walkable_to_edge_ratio);");
                 
                 var newBytes = System.Text.Encoding.ASCII.GetBytes(data);
+                BackupManager.RecordOriginal(record);
                 record.Write(newBytes);
             }
         }

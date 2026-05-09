@@ -1,6 +1,7 @@
 using LibBundle3.Nodes;
 using System.Text;
 using System.Text.RegularExpressions;
+using PoeRedux.Services;
 
 namespace PoeRedux.Patches.Black;
 
@@ -85,6 +86,7 @@ public class Hlsl : IPatch
         }
 
         var newBytes = System.Text.Encoding.UTF8.GetBytes(data);
+        BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
 
