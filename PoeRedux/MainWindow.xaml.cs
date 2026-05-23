@@ -21,6 +21,10 @@ public partial class MainWindow : Window
     private double _cameraZoom = 2.4;
     private string? _updateDownloadUrl;
 
+    private DetectedInstall? _detectedPoe1;
+    private DetectedInstall? _detectedPoe2;
+    private bool _userBrowsedPath;
+
     public MainWindow()
     {
         _patches = new ObservableCollection<PatchViewModel>();
@@ -34,6 +38,7 @@ public partial class MainWindow : Window
         Loaded += async (s, e) =>
         {
             UpdateRestoreButtonState();
+            await AutoDetectGamesAsync();
             await CheckForUpdatesAsync();
         };
     }
@@ -141,6 +146,7 @@ public partial class MainWindow : Window
             ModsColorsButton.Visibility = _colorMods.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        ApplyDetectedPathForCurrentGame();
         UpdateRestoreButtonState();
     }
 
@@ -177,8 +183,41 @@ public partial class MainWindow : Window
         {
             _ggpkPath = openFileDialog.FileName;
             GgpkPathTextBox.Text = _ggpkPath;
+            _userBrowsedPath = true;
             UpdateStatus();
         }
+    }
+
+    private async Task AutoDetectGamesAsync()
+    {
+        var found = await Task.Run(GameDetector.Detect);
+        _detectedPoe1 = found.FirstOrDefault(d => d.Game == PoeGame.PoE1);
+        _detectedPoe2 = found.FirstOrDefault(d => d.Game == PoeGame.PoE2);
+
+        if (_userBrowsedPath) return;
+
+        // If the current dropdown game wasn't detected but the other was, switch.
+        // The SelectionChanged handler then calls ApplyDetectedPathForCurrentGame.
+        var current = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+        if (current == PoeGame.PoE1 && _detectedPoe1 == null && _detectedPoe2 != null)
+            GameSelector!.SelectedIndex = 1;
+        else if (current == PoeGame.PoE2 && _detectedPoe2 == null && _detectedPoe1 != null)
+            GameSelector!.SelectedIndex = 0;
+        else
+            ApplyDetectedPathForCurrentGame();
+    }
+
+    private void ApplyDetectedPathForCurrentGame()
+    {
+        if (_userBrowsedPath) return;
+
+        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+        var hit = game == PoeGame.PoE2 ? _detectedPoe2 : _detectedPoe1;
+
+        _ggpkPath = hit?.Path ?? string.Empty;
+        if (GgpkPathTextBox != null) GgpkPathTextBox.Text = _ggpkPath;
+        UpdateStatus();
+        UpdateRestoreButtonState();
     }
 
     private void SelectAllButton_Click(object sender, RoutedEventArgs e)
@@ -418,6 +457,10 @@ public partial class MainWindow : Window
 
     private void UpdateStatus()
     {
+        // GameSelector raises SelectionChanged during InitializeComponent, before
+        // StatusTextBlock exists. Match the null-guard pattern used elsewhere.
+        if (StatusTextBlock == null) return;
+
         if (string.IsNullOrEmpty(_ggpkPath))
         {
             StatusTextBlock.Text = "Please select a GGPK file to begin.";
