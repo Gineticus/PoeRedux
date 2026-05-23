@@ -102,6 +102,20 @@
 
 **Note:** File verification will restore original game files, removing any applied patches.
 
+## Backups
+
+Before any patch overwrites a game file, PoeRedux saves the original bytes to a local backup file. The **Restore Original** button in the app uses this backup to revert all changes for the currently selected game.
+
+Backups are stored per game under your Windows Local AppData folder:
+
+```
+%LOCALAPPDATA%\PoeRedux\Backups\
+    poe1.bak    (Path of Exile 1)
+    poe2.bak    (Path of Exile 2)
+```
+
+**Note:** If you verify game files via PackCheck or Steam, the backup is no longer needed — you can safely delete the `.bak` file manually.
+
 ## System Requirements
 
 - **Operating System:** Windows 10 version 2004 or later / Windows 11
