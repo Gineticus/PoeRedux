@@ -80,6 +80,9 @@
 - **Effects Patch**
   - Disables all effects in the game
 
+- **Black Screen Patch (Experimental)**
+  - Makes the screen black
+
 ## Installation
 
 1. Go to the [Releases page](https://github.com/Gineticus/PoeRedux/releases)
