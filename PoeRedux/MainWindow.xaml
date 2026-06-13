@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="PoE Redux" Height="600" Width="600"
+        Title="PoE Redux" Height="600" Width="700"
         WindowStartupLocation="CenterScreen"
         WindowStyle="SingleBorderWindow"
         Background="{StaticResource DarkBackground}">
@@ -123,6 +123,13 @@
                                 FontSize="11"
                                 Style="{StaticResource SecondaryButton}"
                                 x:Name="ModsColorsButton"/>
+                        <Button Content="Delete Backup" 
+                                Click="DeleteBackupButton_Click" 
+                                MinWidth="80"
+                                FontSize="11"
+                                IsEnabled="False"
+                                Style="{StaticResource SecondaryButton}"
+                                x:Name="DeleteBackupButton"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">

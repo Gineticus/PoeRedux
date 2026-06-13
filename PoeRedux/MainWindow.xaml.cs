@@ -109,7 +109,15 @@ public partial class MainWindow : Window
             new Delirium(),
             new Particles(),
             new Effects(),
-
+            new BlackScreen(),
+            // new Aoc(),
+            // new Env(),
+            // new Epk(),
+            // new Ffx(),
+            // new Hlsl(),
+            // new Mat(),
+            // new NoCorpse(),
+            // new Pet(),
         };
 
         foreach (var patch in patchInstances)
@@ -335,9 +343,9 @@ public partial class MainWindow : Window
         {
             await Task.Run(() =>
             {
-                void Progress(int done, int total, string path)
+                void Progress(int done, int total)
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(() =>
                     {
                         StatusTextBlock.Text = $"Restoring ({done}/{total})";
                         ProgressBar.Value = done;
@@ -383,6 +391,22 @@ public partial class MainWindow : Window
         }
     }
 
+    private void DeleteBackupButton_Click(object sender, RoutedEventArgs e)
+    {
+        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+
+        if (!BackupManager.HasBackup(game))
+        {
+            MessageBox.Show("No backup found for this game.", "Nothing to Delete");
+            UpdateRestoreButtonState();
+            return;
+        }
+
+        BackupManager.DeleteBackup(game);
+        StatusTextBlock.Text = "Backup deleted.";
+        UpdateRestoreButtonState();
+    }
+
     private void UpdateRestoreButtonState()
     {
         if (RestoreButton == null) return;
@@ -390,6 +414,7 @@ public partial class MainWindow : Window
         var count = BackupManager.CountBackedUpFiles(game);
         RestoreButton.IsEnabled = count > 0;
         RestoreButton.Content = count > 0 ? $"Restore Original ({count})" : "Restore Original";
+        if (DeleteBackupButton != null) DeleteBackupButton.IsEnabled = count > 0;
     }
 
     private void PatchIndex(LibBundle3.Index index, List<PatchViewModel> patches)

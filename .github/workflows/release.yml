@@ -36,6 +36,10 @@ jobs:
           PoeRedux-${{ github.ref_name }}-win-x64.exe
         body: |
           ## PoE Redux ${{ github.ref_name }}
+
+          ### Changelog
+          - Improved backup system
+          - Added Black Screen for PoE 2
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`

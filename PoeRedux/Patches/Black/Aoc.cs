@@ -23,7 +23,7 @@ public class Aoc : IPatch
         "BoneGroups",
         // "AnimatedRender",
         // "FixedMesh",
-        // "SkinMesh",
+        "SkinMesh",
     };
 
     private void CollectFileNodesRecursively(DirectoryNode dir)
