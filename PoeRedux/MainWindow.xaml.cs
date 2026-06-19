@@ -190,10 +190,14 @@ public partial class MainWindow : Window
 
         if (openFileDialog.ShowDialog() == true)
         {
-            _ggpkPath = openFileDialog.FileName;
-            GgpkPathTextBox.Text = _ggpkPath;
-            UpdateStatus();
+            GgpkPathTextBox.Text = openFileDialog.FileName;
         }
+    }
+
+    private void GgpkPathTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        _ggpkPath = GgpkPathTextBox.Text.Trim();
+        UpdateStatus();
     }
 
     private void SelectAllButton_Click(object sender, RoutedEventArgs e)

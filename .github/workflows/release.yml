@@ -38,7 +38,7 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Fixed Color Mods for PoE 2
+          - Updated Ggpk Path Text Box 
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`

@@ -76,8 +76,7 @@
 
                 <TextBox x:Name="GgpkPathTextBox" 
                          Grid.Column="0"
-                         Text="{Binding GgpkPath, UpdateSourceTrigger=PropertyChanged}"
-                         IsReadOnly="True"
+                         TextChanged="GgpkPathTextBox_TextChanged"
                          Margin="0,0,8,0"
                          FontSize="11"
                          VerticalContentAlignment="Center"/>
