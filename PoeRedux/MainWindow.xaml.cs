@@ -99,7 +99,7 @@ public partial class MainWindow : Window
         {
             new Camera(),
             new Minimap(),
-            new ColorMods(),
+            new ColorMods2(),
             new AtlasFog(),
             new Fog(),
             new Rain(),
@@ -124,8 +124,8 @@ public partial class MainWindow : Window
         foreach (var patch in patchInstances)
         {
             _patches.Add(new PatchViewModel(patch));
-            if (patch is ColorMods colorModsPatch)            {
-                foreach (var option in colorModsPatch.ColorModsOptions2)
+            if (patch is ColorMods2 colorModsPatch)            {
+                foreach (var option in colorModsPatch.ColorModsOptions)
                 {
                     _colorMods.Add(new ColorModsViewModel(option.Copy()));
                 }
@@ -234,6 +234,10 @@ public partial class MainWindow : Window
             if (patch.Patch is ColorMods colorModsPatch)
             {
                 colorModsPatch.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
+            }
+            if (patch.Patch is ColorMods2 colorModsPatch2)
+            {
+                colorModsPatch2.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
             }
         }
 

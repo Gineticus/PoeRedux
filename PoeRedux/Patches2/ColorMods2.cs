@@ -6,75 +6,77 @@ using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
-public class ColorMods : IPatch
+public class ColorMods2 : IPatch
 {
     public string Name => "Color Mods Patch";
     public object Description => "Changes colors of mods in the game.";
+
     public List<ColorModsOption> ColorModsOptions { get; set; } = new()
     {
-        // maps and more
-        new ColorModsOption("map_monsters_reflect_%_physical_damage", "yellow", true),
-        new ColorModsOption("map_monsters_reflect_%_elemental_damage", "green", true),
-        new ColorModsOption("map_player_cannot_expose", "red", true),
-        new ColorModsOption("map_players_no_regeneration_including_es", "red", true),
-        new ColorModsOption("map_player_non_curse_aura_effect_+%", "red", true),
-        new ColorModsOption("map_monsters_avoid_elemental_ailments_%", "red", true),
-        new ColorModsOption("map_monsters_cannot_be_leeched_from", "red", true),
-        new ColorModsOption("map_monsters_cannot_be_stunned", "red", true),
+        // red
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_fire", "red", true),
+        new ColorModsOption("map_monsters_%_physical_damage_to_gain_as_fire", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_cold", "red", true),
+        new ColorModsOption("map_monsters_%_physical_damage_to_gain_as_cold", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_lightning", "red", true),
+        new ColorModsOption("map_monsters_%_physical_damage_to_gain_as_lightning", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_chaos", "red", true),
+        new ColorModsOption("map_monsters_%_physical_damage_to_gain_as_chaos", "red", true),
+        new ColorModsOption("map_monsters_damage_+%", "red", true),
+        new ColorModsOption("map_monster_damage_+%_final_from_deadly_atlas", "red", true),
+        new ColorModsOption("map_monster_damage_+%_final_from_vital_atlas", "red", true),
+        new ColorModsOption("map_monsters_attack_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_cast_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_movement_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_critical_strike_chance_+%", "red", true),
+        new ColorModsOption("map_monsters_critical_strike_multiplier_+", "red", true),
+        new ColorModsOption("map_monsters_chance_to_poison_on_hit_%", "red", true),
+        new ColorModsOption("map_monsters_chance_to_inflict_bleeding_%", "red", true),
+        new ColorModsOption("map_packs_fire_projectiles", "red", true),
+        new ColorModsOption("map_monsters_penetrate_elemental_resistances_%", "red", true),
+        new ColorModsOption("map_monsters_elemental_ailment_chance_+%", "red", true),
         new ColorModsOption("map_additional_player_maximum_resistances_%", "red", true),
-        new ColorModsOption("map_monsters_are_hexproof", "red", true),
-        new ColorModsOption("map_player_cooldown_speed_+%_final", "red", true),
         new ColorModsOption("map_player_life_and_es_recovery_speed_+%_final", "red", true),
-        new ColorModsOption("map_ground_orion_meteor", "red", true),
-        new ColorModsOption("map_player_create_enemy_meteor_daemon_on_flask_use_%_chance", "red", true),
-        new ColorModsOption("map_uber_drowning_orb_ambush", "red", true),
-        new ColorModsOption("map_petrificiation_statue_ambush", "red", true),
-        new ColorModsOption("map_exarch_traps", "red", true),
-        new ColorModsOption("map_packs_have_uber_tentacle_fiends", "red", true),
-        new ColorModsOption("map_uber_map_additional_synthesis_boss", "red", true),
-        new ColorModsOption("map_monster_add_x_grasping_vines_on_hit", "red", true),
-        new ColorModsOption("map_uber_map_player_damage_cycle", "red", true),
-        new ColorModsOption("map_player_death_mark_on_rare_unique_kill_ms", "red", true),
-        new ColorModsOption("map_uber_sawblades_ambush", "red", true),
-        new ColorModsOption("map_rare_monster_volatile_on_death_%", "red", true),
-        new ColorModsOption("map_rare_monsters_shaper_touched", "red", true),
-        new ColorModsOption("map_supporter_maven_follower", "red", true),
-        new ColorModsOption("map_player_global_defences_+%", "red", true),
-        new ColorModsOption("map_monsters_base_block_%", "red", true),
-        // strongboxes
-        new ColorModsOption("chest_display_explodes_corpses", "red", true),
-        new ColorModsOption("chest_display_explosion", "red", true),
-        new ColorModsOption("chest_display_freeze", "red", true),
-        new ColorModsOption("chest_display_ice_nova", "red", true),
-        new ColorModsOption("chest_spawn_rogue_exiles", "red", true),
-        // expedition
-        new ColorModsOption("all_damage_can_freeze", "red", true),
-        new ColorModsOption("apply_petrification_for_X_seconds_on_hit", "red", true),
-        new ColorModsOption("base_cold_immunity", "red", true),
-        new ColorModsOption("base_fire_immunity", "red", true),
-        new ColorModsOption("base_lightning_immunity", "red", true),
-        new ColorModsOption("chaos_immunity", "red", true),
-        new ColorModsOption("physical_immunity", "red", true),
-        new ColorModsOption("cannot_have_life_leeched_from", "red", true),
-        new ColorModsOption("cannot_have_mana_leeched_from", "red", true),
-        // altars
-        new ColorModsOption("life_mana_es_recovery_rate_+%_per_endurance_charge", "red", true),
-        new ColorModsOption("global_defences_+%_per_frenzy_charge", "red", true),
-        new ColorModsOption("critical_strike_multiplier_+_per_power_charge", "red", true),
-        new ColorModsOption("random_projectile_direction", "red", true),
-        new ColorModsOption("chaos_damage_per_minute_while_affected_by_flask", "red", true),
-        new ColorModsOption("create_enemy_meteor_daemon_on_flask_use_%_chance", "red", true),
-        new ColorModsOption("drain_x_flask_charges_over_time_on_hit_for_6_seconds", "red", true),
-        // altars
-        new ColorModsOption("map_item_drop_quantity_+%", "pink", true),
-        new ColorModsOption("map_item_drop_rarity_+%", "pink", true),
-        // altars
-        new ColorModsOption("chance_%_to_drop_additional_divine_orb", "yellow", true),
-        new ColorModsOption("map_boss_additional_divine_orb_to_drop", "yellow", true),
-        new ColorModsOption("%_chance_to_duplicate_dropped_currency", "blue", true),
-        new ColorModsOption("%_chance_to_duplicate_dropped_divination_cards", "blue", true),
-        new ColorModsOption("%_chance_to_duplicate_dropped_scarabs", "blue", true),
-        new ColorModsOption("%_chance_to_duplicate_dropped_uniques", "blue", true),
+        // green 
+        new ColorModsOption("map_monsters_life_+%", "green", true),
+        new ColorModsOption("monster_life_+%_final_from_map", "green", true),
+        new ColorModsOption("map_heist_monster_life_+%_final_from_sextant", "green", true),
+        new ColorModsOption("map_monsters_armour_break_physical_damage_%_dealt_as_armour_break", "green", true),
+        new ColorModsOption("map_monsters_accuracy_rating_+%", "green", true),
+        new ColorModsOption("map_monsters_hit_damage_stun_multiplier_+%", "green", true),
+        new ColorModsOption("map_monsters_additional_fire_resistance", "green", true),
+        new ColorModsOption("map_monsters_additional_cold_resistance", "green", true),
+        new ColorModsOption("map_monsters_additional_lightning_resistance", "green", true),
+        new ColorModsOption("map_monsters_additional_chaos_resistance", "green", true),
+        new ColorModsOption("map_monsters_ailment_threshold_+%", "green", true),
+        new ColorModsOption("map_monsters_stun_threshold_+%", "green", true),
+        new ColorModsOption("map_base_ground_fire_damage_to_deal_per_10_seconds", "green", true),
+        new ColorModsOption("map_base_ground_fire_damage_to_deal_per_minute", "green", true),
+        new ColorModsOption("map_ground_ice_base_magnitude", "green", true),
+        new ColorModsOption("map_ground_ice", "green", true),
+        new ColorModsOption("map_ground_lightning", "green", true),
+        new ColorModsOption("map_ground_lightning_base_magnitude", "green", true),
+        new ColorModsOption("flask_charges_gained_+%", "green", true),
+        new ColorModsOption("map_players_cannot_gain_flask_charges", "green", true),
+        new ColorModsOption("map_player_cooldown_speed_+%_final", "green", true),
+        new ColorModsOption("map_monsters_base_self_critical_strike_multiplier_-%", "green", true),
+        new ColorModsOption("map_monsters_curse_effect_on_self_+%_final", "green", true),
+        new ColorModsOption("map_monsters_curse_effect_+%", "green", true),
+        // yellow
+        new ColorModsOption("map_monster_potency_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_monster_potency_+%", "yellow", true),
+        new ColorModsOption("map_item_drop_rarity_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_item_drop_rarity_+%", "yellow", true),
+        new ColorModsOption("map_pack_size_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_pack_size_+%", "yellow", true),
+        new ColorModsOption("map_number_of_magic_and_rare_packs_+%_final_and_rare_monster_modifiers_chance_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_number_of_magic_and_rare_packs_+%_and_rare_monster_modifiers_chance_%", "yellow", true),
+        new ColorModsOption("map_number_of_magic_packs_+%", "yellow", true),
+        new ColorModsOption("map_number_of_rare_packs_+%", "yellow", true),
+        new ColorModsOption("map_rare_monster_modifiers_chance_%", "yellow", true),
+        // white
+        new ColorModsOption("map_map_item_drop_chance_+%_final_from_map", "blue", true),
+        new ColorModsOption("map_map_item_drop_chance_+%", "blue", true),
     };
 
     private readonly Dictionary<string, string> _color_conversions = new()
@@ -94,7 +96,7 @@ public class ColorMods : IPatch
     }
 
     private readonly string[] _extensions = {
-        ".txt",
+        ".csd",
     };
 
     private List<FileNode> fileNodes = [];
@@ -266,7 +268,7 @@ public class ColorMods : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        var dir = NavigateTo(root, "metadata", "statdescriptions");
+        var dir = NavigateTo(root, "data", "statdescriptions");
         if (dir is not null)
             CollectFileNodesRecursively(dir);
 
