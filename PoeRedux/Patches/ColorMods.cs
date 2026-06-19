@@ -77,6 +77,52 @@ public class ColorMods : IPatch
         new ColorModsOption("%_chance_to_duplicate_dropped_uniques", "blue", true),
     };
 
+    public List<ColorModsOption> ColorModsOptions2 { get; set; } = new()
+    {
+        // red
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_fire", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_cold", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_lightning", "red", true),
+        new ColorModsOption("map_monsters_%_all_damage_to_gain_as_chaos", "red", true),
+        new ColorModsOption("map_monsters_damage_+%", "red", true),
+        new ColorModsOption("map_monsters_attack_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_cast_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_movement_speed_+%", "red", true),
+        new ColorModsOption("map_monsters_critical_strike_chance_+%", "red", true),
+        new ColorModsOption("map_monsters_critical_strike_multiplier_+", "red", true),
+        new ColorModsOption("map_monsters_chance_to_poison_on_hit_%", "red", true),
+        new ColorModsOption("map_monsters_chance_to_inflict_bleeding_%", "red", true),
+        new ColorModsOption("map_packs_fire_projectiles", "red", true),
+        new ColorModsOption("map_monsters_penetrate_elemental_resistances_%", "red", true),
+        new ColorModsOption("map_monsters_elemental_ailment_chance_+%", "red", true),
+        new ColorModsOption("map_additional_player_maximum_resistances_%", "red", true),
+        new ColorModsOption("map_player_life_and_es_recovery_speed_+%_final", "red", true),
+        // green 
+        new ColorModsOption("map_monsters_life_+%", "green", true),
+        new ColorModsOption("map_monsters_armour_break_physical_damage_%_dealt_as_armour_break", "green", true),
+        new ColorModsOption("map_monsters_accuracy_rating_+%", "green", true),
+        new ColorModsOption("map_monsters_hit_damage_stun_multiplier_+%", "green", true),
+        new ColorModsOption("map_monsters_additional_fire_resistance", "green", true),
+        new ColorModsOption("map_monsters_additional_cold_resistance", "green", true),
+        new ColorModsOption("map_monsters_additional_lightning_resistance", "green", true),
+        new ColorModsOption("map_monsters_ailment_threshold_+%", "green", true),
+        new ColorModsOption("map_monsters_stun_threshold_+%", "green", true),
+        new ColorModsOption("map_base_ground_fire_damage_to_deal_per_10_seconds", "green", true),
+        new ColorModsOption("map_ground_ice_base_magnitude", "green", true),
+        new ColorModsOption("map_ground_lightning", "green", true),
+        new ColorModsOption("flask_charges_gained_+%", "green", true),
+        new ColorModsOption("map_player_cooldown_speed_+%_final", "green", true),
+        new ColorModsOption("map_monsters_base_self_critical_strike_multiplier_-%", "green", true),
+        new ColorModsOption("map_monsters_curse_effect_on_self_+%_final", "green", true),
+        // yellow
+        new ColorModsOption("map_monster_potency_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_item_drop_rarity_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_pack_size_+%_final_from_map", "yellow", true),
+        new ColorModsOption("map_number_of_magic_and_rare_packs_+%_final_and_rare_monster_modifiers_chance_+%_final_from_map", "yellow", true),
+        // blue
+        new ColorModsOption("map_map_item_drop_chance_+%_final_from_map", "blue", true),
+    };
+
     private readonly Dictionary<string, string> _color_conversions = new()
     {
         { "red", "premiumchatoutline" },
