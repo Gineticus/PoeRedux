@@ -38,7 +38,7 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Added Monster HP patch to always show monster HP bars.
+          - Split the main window into two columns for better readability
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`

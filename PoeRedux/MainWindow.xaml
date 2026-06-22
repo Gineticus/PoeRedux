@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="PoE Redux" Height="600" Width="800"
+        Title="PoE Redux" Height="610" Width="800"
         WindowStartupLocation="CenterScreen"
         WindowStyle="SingleBorderWindow"
         Background="{StaticResource DarkBackground}">
@@ -159,14 +159,19 @@
 
                 <!-- Patches List -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Style="{StaticResource DarkScrollViewer}">
-                    <ItemsControl x:Name="PatchesItemsControl">
+                    <ItemsControl x:Name="PatchesItemsControl" VerticalAlignment="Top">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border BorderBrush="{StaticResource DarkBorder}" 
                                         BorderThickness="0" 
                                         Padding="4"
                                         Background="{StaticResource DarkSurface}"
-                                        Margin="0,0,0,2"
+                                        Margin="0,0,4,2"
                                         CornerRadius="2">
                                     <CheckBox IsChecked="{Binding IsSelected}"
                                               FontWeight="SemiBold"
