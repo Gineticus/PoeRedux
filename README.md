@@ -12,6 +12,9 @@
 - **Minimap Patch**
   - Reveals the entire minimap by default
 
+- **Monster HP Patch**
+  - Always shows monster HP bars
+
 - **Color Mods Patch**
   - Changes colors of mods in the game
 
@@ -52,6 +55,9 @@
 
 - **Color Mods Patch**
   - Changes colors of mods in the game
+
+- **Monster HP Patch**
+  - Always shows monster HP bars
 
 - **Atlas Fog Patch**
   - Removes fog from the Atlas

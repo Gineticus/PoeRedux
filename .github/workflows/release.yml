@@ -38,7 +38,7 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Updated Ggpk Path Text Box 
+          - Added Monster HP patch to always show monster HP bars.
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`
