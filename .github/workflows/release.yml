@@ -38,7 +38,7 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Split the main window into two columns for better readability
+          - Fixed Color Mods not being applied correctly in some cases.
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`

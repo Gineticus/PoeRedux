@@ -220,13 +220,15 @@ public class ColorMods : IPatch
                 {
                     // Surround the value with the annotation.
                     // "value" -> "<annotation>{{value}}".
-
-                    string pattern = "\".*?\"";
-                    string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
+                    if (currentIsEnabled == true)
                     {
-                        return $"\"<{currentAnnotation}>{{{{{match.Value.Replace("\"", "")}}}}}\"";
-                    }));
-                    lines[i] = replacement;
+                        string pattern = "\".*?\"";
+                        string replacement = Regex.Replace(line, pattern, new MatchEvaluator(match =>
+                        {
+                            return $"\"<{currentAnnotation}>{{{{{match.Value.Replace("\"", "")}}}}}\"";
+                        }));
+                        lines[i] = replacement;
+                    }
                 }
 
                 linesToWrite--;
