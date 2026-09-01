@@ -158,44 +158,58 @@ public class Camera : IPatch
     {
         var metadata = NavigateTo(root, "metadata");
         if (metadata is null)
+        {
+            PatchReport.FileMissing("metadata");
             return;
+        }
 
         CollectFileNodesRecursively(metadata);
 
-        // Patch metadata/characters/character.ot
-        var characters = NavigateTo(metadata, "characters");
-        if (characters is not null)
-        {
-            var characterFile = characters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "character.ot");
-            if (characterFile is not null)
-            {
-                var record = characterFile.Record;
-                var bytes = record.Read();
-                string data = Encoding.Unicode.GetString(bytes.ToArray());
-                List<string> lines = data.Split("\r\n").ToList();
-                string zoomLevelString = ZoomLevel.ToString().Replace(',', '.');
-
-                if (data.Contains("CreateCameraZoomNode"))
-                {
-                    int x = lines.FindIndex(line => line.Contains("CreateCameraZoomNode"));
-                    lines[x] = $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ";
-                }
-                else
-                {
-                    int index = lines.FindIndex(x => x.Contains("team = 1"));
-                    if (index != -1)
-                        lines.Insert(index + 1, $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ");
-                }
-                string newData = string.Join("\r\n", lines);
-                var newBytes = Encoding.Unicode.GetBytes(newData);
-                BackupManager.RecordOriginal(record);
-                record.Write(newBytes);
-            }
-        }
+        SetDefaultZoom(metadata);
 
         foreach (var file in fileNodes)
         {
             TryPatchFile(file);
         }
     }
+
+    private void SetDefaultZoom(DirectoryNode metadata)
+    {
+        var characterFile = NavigateTo(metadata, "characters")
+            ?.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "character.ot");
+        if (characterFile is null)
+        {
+            PatchReport.FileMissing("metadata/characters/character.ot");
+            return;
+        }
+
+        var record = characterFile.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+        List<string> lines = data.Split("\r\n").ToList();
+        string zoomLevelString = ZoomLevel.ToString().Replace(',', '.');
+        var zoomNode = $"\ton_initial_position_set = {{CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});}} ";
+
+        if (data.Contains("CreateCameraZoomNode"))
+        {
+            int x = lines.FindIndex(line => line.Contains("CreateCameraZoomNode"));
+            lines[x] = zoomNode;
+        }
+        else
+        {
+            int index = lines.FindIndex(x => x.Contains(PlayerAnchor));
+            if (index == -1)
+            {
+                PatchReport.AnchorMissing("character.ot", PlayerAnchor);
+                return;
+            }
+            lines.Insert(index + 1, zoomNode);
+        }
+        string newData = string.Join("\r\n", lines);
+        var newBytes = Encoding.Unicode.GetBytes(newData);
+        BackupManager.RecordOriginal(record);
+        record.Write(newBytes);
+    }
+
+    private const string PlayerAnchor = "team = 1";
 }

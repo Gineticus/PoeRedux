@@ -1,0 +1,365 @@
+<Window x:Class="PoeRedux.MinimapIconsEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="clr-namespace:PoeRedux.Models"
+        Title="PoE Redux"
+        Height="640"
+        Width="860"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Window.Resources>
+        <models:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibility"/>
+        <DataTemplate x:Key="VanillaGlyph">
+            <Viewbox Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center">
+                <Path Data="{Binding VanillaGeometry}"
+                      Fill="{Binding VanillaBrush}"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding VanillaScale}" ScaleY="{Binding VanillaScale}"/>
+                    </Path.RenderTransform>
+                </Path>
+            </Viewbox>
+        </DataTemplate>
+        <DataTemplate x:Key="ChosenGlyph">
+            <Viewbox Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center">
+                <Path Data="{Binding ChosenGeometry}"
+                      Fill="{Binding ChosenBrush}"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding ChosenScale}" ScaleY="{Binding ChosenScale}"/>
+                    </Path.RenderTransform>
+                </Path>
+            </Viewbox>
+        </DataTemplate>
+        <DataTemplate x:Key="PathGlyph">
+            <Viewbox Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center">
+                <Path Data="{Binding Geometry}"
+                      Fill="{Binding Brush}"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                    </Path.RenderTransform>
+                </Path>
+            </Viewbox>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Minimap Icons"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="0"
+                   Text="Restyles icons the minimap already draws. Monsters that have no icon cannot be given one."
+                   FontSize="11"
+                   Foreground="{StaticResource DarkTextSecondary}"
+                   Margin="0,22,0,12"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,8">
+            <Button Content="League Highlights"
+                    Click="PresetButton_Click"
+                    MinWidth="110"
+                    FontSize="11"
+                    Style="{StaticResource SecondaryButton}"/>
+            <Button Content="Select All"
+                    Click="SelectAllButton_Click"
+                    MinWidth="80"
+                    FontSize="11"
+                    Style="{StaticResource SecondaryButton}"/>
+            <Button Content="Select None"
+                    Click="SelectNoneButton_Click"
+                    MinWidth="80"
+                    FontSize="11"
+                    Style="{StaticResource SecondaryButton}"/>
+            <Button Content="Reset Choices"
+                    Click="ResetButton_Click"
+                    MinWidth="90"
+                    FontSize="11"
+                    Style="{StaticResource SecondaryButton}"/>
+        </StackPanel>
+
+        <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0">
+            <TabItem Header="Selected">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource DarkScrollViewer}"
+                              Margin="4,4,4,0">
+                    <ItemsControl x:Name="SelectedItemsControl">
+                        <ItemsControl.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,10,0,4">
+                                            <TextBlock FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkTextPrimary}">
+                                                <Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" ("/><Run Text="{Binding ItemCount, Mode=OneWay}"/><Run Text=")"/>
+                                            </TextBlock>
+                                            <Border Height="1"
+                                                    Margin="0,4,0,0"
+                                                    Background="{StaticResource DarkBorder}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ItemsControl.GroupStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="4"
+                                        Background="{StaticResource DarkSurface}"
+                                        Margin="0,0,4,2"
+                                        CornerRadius="2">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Grid.Column="0"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      VerticalAlignment="Center"
+                                                      Margin="2,0,6,0"/>
+                                            <ContentControl Grid.Column="1"
+                                                            Content="{Binding}"
+                                                            ContentTemplate="{StaticResource VanillaGlyph}"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding DisplayName}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center"
+                                                       Margin="8,0,8,0"
+                                                       Foreground="{StaticResource DarkTextPrimary}"/>
+                                            <Button Grid.Column="3"
+                                                    Content="{Binding FileCountText}"
+                                                    Click="ExpandButton_Click"
+                                                    Tag="{Binding}"
+                                                    Visibility="{Binding IsExpandable, Converter={StaticResource BooleanToVisibility}}"
+                                                    FontSize="10"
+                                                    Padding="6,1"
+                                                    Margin="0,0,10,0"
+                                                    Style="{StaticResource SecondaryButton}"/>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding FileCountText}"
+                                                       Visibility="{Binding IsExpandable, Converter={StaticResource InverseBooleanToVisibility}}"
+                                                       FontSize="10"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,10,0"
+                                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                                            <TextBlock Grid.Column="4"
+                                                       Text="{Binding ExpandGlyph}"
+                                                       Visibility="{Binding IsExpandable, Converter={StaticResource BooleanToVisibility}}"
+                                                       FontSize="10"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0"
+                                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                                            <TextBlock Grid.Column="5"
+                                                       Text="to"
+                                                       FontSize="10"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0"
+                                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                                            <ContentControl Grid.Column="6"
+                                                            Content="{Binding}"
+                                                            ContentTemplate="{StaticResource ChosenGlyph}"/>
+                                            <Button Grid.Column="7"
+                                                    Content="{Binding ChosenIcon}"
+                                                    Click="ChangeIconButton_Click"
+                                                    Tag="{Binding}"
+                                                    MinWidth="200"
+                                                    FontSize="10"
+                                                    Margin="6,0,0,0"
+                                                    Style="{StaticResource SecondaryButton}"/>
+                                            <Button Grid.Column="8"
+                                                    Content="Remove"
+                                                    Click="RemoveButton_Click"
+                                                    Tag="{Binding}"
+                                                    MinWidth="60"
+                                                    FontSize="10"
+                                                    Margin="6,0,0,0"
+                                                    Style="{StaticResource SecondaryButton}"/>
+                                        </Grid>
+                                        <ItemsControl ItemsSource="{Binding PathChoices}"
+                                                      Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibility}}"
+                                                      Margin="26,4,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,3">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding DisplayName}"
+                                                                   FontSize="11"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="0,0,8,0"
+                                                                   Foreground="{StaticResource DarkTextSecondary}"/>
+                                                        <ContentControl Grid.Column="1"
+                                                                        Content="{Binding}"
+                                                                        ContentTemplate="{StaticResource PathGlyph}"/>
+                                                        <Button Grid.Column="2"
+                                                                Content="{Binding EffectiveIcon}"
+                                                                Click="PathChangeIconButton_Click"
+                                                                Tag="{Binding}"
+                                                                MinWidth="180"
+                                                                FontSize="10"
+                                                                Margin="6,0,0,0"
+                                                                Style="{StaticResource SecondaryButton}"/>
+                                                        <Button Grid.Column="3"
+                                                                Content="Reset"
+                                                                Click="PathResetButton_Click"
+                                                                Tag="{Binding}"
+                                                                Visibility="{Binding HasOverride, Converter={StaticResource BooleanToVisibility}}"
+                                                                MinWidth="50"
+                                                                FontSize="10"
+                                                                Margin="6,0,0,0"
+                                                                Style="{StaticResource SecondaryButton}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="All Icons">
+                <Grid Margin="4,4,4,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <TextBox x:Name="SearchBox"
+                                     FontSize="12"
+                                     Padding="6,0,58,0"
+                                     TextChanged="SearchBox_TextChanged"/>
+                            <TextBlock x:Name="SearchHint"
+                                       Text="Search icon id or category"
+                                       IsHitTestVisible="False"
+                                       Margin="6,0,0,0"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                            <Button x:Name="ClearButton"
+                                    Content="Clear"
+                                    Click="ClearButton_Click"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,2,0"
+                                    Padding="6,1"
+                                    FontSize="10"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource SecondaryButton}"/>
+                        </Grid>
+                        <TextBlock x:Name="StatusText"
+                                   Grid.Column="1"
+                                   Margin="10,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Foreground="{StaticResource DarkTextSecondary}"/>
+                    </Grid>
+
+                    <ListBox x:Name="AllListBox"
+                             Grid.Row="1"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentControl Grid.Column="0"
+                                                    Content="{Binding}"
+                                                    ContentTemplate="{StaticResource VanillaGlyph}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding DisplayName}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               Margin="8,0,0,0"
+                                               Foreground="{StaticResource DarkTextPrimary}"/>
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding Category}"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"
+                                               Margin="8,0"
+                                               Foreground="{StaticResource DarkTextSecondary}"/>
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding FileCountText}"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"
+                                               Margin="8,0"
+                                               Foreground="{StaticResource DarkTextSecondary}"/>
+                                    <Button Grid.Column="4"
+                                            Content="{Binding ActionLabel}"
+                                            Click="ToggleButton_Click"
+                                            Tag="{Binding}"
+                                            MinWidth="60"
+                                            FontSize="10"
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource AddRemoveButton}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button x:Name="SaveButton"
+                        Content="Save"
+                        MinWidth="80"
+                        Click="SaveButton_Click"/>
+                <Button x:Name="ExitButton"
+                        Content="Exit"
+                        MinWidth="80"
+                        Click="ExitButton_Click"
+                        Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

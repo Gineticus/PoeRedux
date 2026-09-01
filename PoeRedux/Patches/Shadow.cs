@@ -7,7 +7,8 @@ namespace PoeRedux.Patches;
 public class Shadow : IPatch
 {
     public string Name => "Shadow Patch";
-    public object Description => "Disables the default shadow effect in the game.";
+    public object Description =>
+        "Turns off shadow casting. Already covered if you switch off Directional light.";
 
     private List<FileNode> fileNodes = [];
 
@@ -33,16 +34,19 @@ public class Shadow : IPatch
         }
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
         if (string.IsNullOrEmpty(data))
-            return;
+            return false;
 
-        data = data.Replace("\"shadows_enabled\": true", "\"shadows_enabled\": false");
+        var patched = data.Replace("\"shadows_enabled\": true", "\"shadows_enabled\": false");
+        if (patched == data)
+            return false;
+        data = patched;
 
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
@@ -51,6 +55,7 @@ public class Shadow : IPatch
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
@@ -72,12 +77,20 @@ public class Shadow : IPatch
     public void Apply(DirectoryNode root)
     {
         var dir = NavigateTo(root, "metadata", "environmentsettings");
-        if (dir is not null)
-            CollectFileNodesRecursively(dir);
-
-        foreach (var file in fileNodes)
+        if (dir is null)
         {
-            TryPatchFile(file);
+            PatchReport.FileMissing(Scope);
+            return;
         }
+        CollectFileNodesRecursively(dir);
+
+        var changed = 0;
+        foreach (var file in fileNodes)
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch(Scope, "\"shadows_enabled\": true");
     }
+
+    private const string Scope = "metadata/environmentsettings";
 }

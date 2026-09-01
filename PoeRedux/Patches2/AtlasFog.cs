@@ -57,17 +57,25 @@ public class AtlasFog : IPatch
     public void Apply(DirectoryNode root)
     {
         var dir = NavigateTo(root, "metadata", "materials", "environment", "worldmap");
-        if (dir is null) return;
-
-        var file = dir.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "worldmap_fogofwar.fxgraph");
-        if (file is null) return;
+        var file = dir?.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == FogGraph);
+        if (file is null)
+        {
+            PatchReport.FileMissing("metadata/materials/environment/worldmap/" + FogGraph);
+            return;
+        }
 
         var record = file.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
-        data = ReplaceArrayProperty(data, "nodes");
-        data = ReplaceArrayProperty(data, "links");
+        foreach (var property in new[] { "nodes", "links" })
+        {
+            var patched = ReplaceArrayProperty(data, property);
+            // Already emptied by a previous apply, or the graph no longer has the property.
+            if (patched == data && !data.Contains($"\"{property}\": []", StringComparison.Ordinal))
+                PatchReport.AnchorMissing(FogGraph, $"a non empty \"{property}\" array");
+            data = patched;
+        }
 
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
@@ -77,4 +85,6 @@ public class AtlasFog : IPatch
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
     }
+
+    private const string FogGraph = "worldmap_fogofwar.fxgraph";
 }

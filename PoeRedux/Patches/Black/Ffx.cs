@@ -34,7 +34,7 @@ public class Ffx : IPatch
         }
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
         var bytes = record.Read();
@@ -48,6 +48,9 @@ public class Ffx : IPatch
             m => $"{m.Groups[1].Value} {m.Groups[3].Value}",
             RegexOptions.Singleline);
 
+        if (result == data)
+            return false;
+
         var newBytes = Encoding.Unicode.GetBytes(result);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
         {
@@ -55,6 +58,7 @@ public class Ffx : IPatch
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
@@ -63,12 +67,13 @@ public class Ffx : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        if (root is not null)
-            CollectFileNodesRecursively(root);
+        CollectFileNodesRecursively(root);
 
+        var changed = 0;
         foreach (var file in fileNodes)
-        {
-            TryPatchFile(file);
-        }
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch("the game files", "a FRAGMENT body in " + string.Join(" or ", extensions));
     }
 }

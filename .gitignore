@@ -402,3 +402,16 @@ FodyWeavers.xsd
 
 # oo2core libraries
 oo2core/
+# Publish output of `just build`
+dist/
+
+# Reference clones, each its own git repository
+vendor/
+
+# Extracted game files and study dumps, hundreds of megabytes of GGPK content
+study/out/
+study/out2/
+study/out3/
+study/outsd/
+study/GgpkStudy/out/
+study/GgpkStudy/oo2core.dll

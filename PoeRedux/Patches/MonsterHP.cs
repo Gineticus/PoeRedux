@@ -7,20 +7,8 @@ namespace PoeRedux.Patches;
 public class MonsterHP : IPatch
 {
     public string Name => "Monster HP Patch";
-    public object Description => "Always shows monster HP.";
-
-    public double ZoomLevel { get; set; } = 2.4;
-
-    private List<FileNode> fileNodes = [];
-
-    private readonly string[] _extensions = {
-        ".ot",
-        ".otc",
-    };
-
-    private bool HasTargetExtension(string fileName) =>
-        _extensions.Any(ext =>
-            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    public object Description =>
+        "Gives every monster a life bar, including ones the game normally draws none for.";
 
     private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
     {
@@ -36,36 +24,35 @@ public class MonsterHP : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        var metadata = NavigateTo(root, "metadata");
-        if (metadata is null)
-            return;
-
-        // Patch metadata/monsters/monster.ot
-        var monsters = NavigateTo(metadata, "monsters");
-        if (monsters is not null)
+        var monsters = NavigateTo(root, "metadata", "monsters");
+        var monsterFile = monsters?.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
+        if (monsterFile is null)
         {
-            var monsterFile = monsters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
-            if (monsterFile is not null)
-            {
-                var record = monsterFile.Record;
-                var bytes = record.Read();
-                string data = Encoding.Unicode.GetString(bytes.ToArray());
-                List<string> lines = data.Split("\r\n").ToList();
-
-                if (!data.Contains("base_maximum_energy_shield = 1") && !data.Contains("base_maximum_life = 1"))
-                {
-                    int index = lines.FindIndex(x => x.Contains("item_drop_slots = 1"));
-                    if (index != -1)
-                    {
-                        lines.Insert(index + 1, "\tbase_maximum_life = 1");
-                        lines.Insert(index + 1, "\tbase_maximum_energy_shield = 1");
-                    }
-                }
-                string newData = string.Join("\r\n", lines);
-                var newBytes = Encoding.Unicode.GetBytes(newData);
-                BackupManager.RecordOriginal(record);
-                record.Write(newBytes);
-            }
+            PatchReport.FileMissing("metadata/monsters/monster.ot");
+            return;
         }
+
+        var record = monsterFile.Record;
+        var bytes = record.Read();
+        string data = Encoding.Unicode.GetString(bytes.ToArray());
+        List<string> lines = data.Split("\r\n").ToList();
+
+        if (!data.Contains("base_maximum_energy_shield = 1") && !data.Contains("base_maximum_life = 1"))
+        {
+            int index = lines.FindIndex(x => x.Contains(Anchor));
+            if (index == -1)
+            {
+                PatchReport.AnchorMissing("monster.ot", Anchor);
+                return;
+            }
+            lines.Insert(index + 1, "\tbase_maximum_life = 1");
+            lines.Insert(index + 1, "\tbase_maximum_energy_shield = 1");
+        }
+        string newData = string.Join("\r\n", lines);
+        var newBytes = Encoding.Unicode.GetBytes(newData);
+        BackupManager.RecordOriginal(record);
+        record.Write(newBytes);
     }
+
+    private const string Anchor = "item_drop_slots = 1";
 }

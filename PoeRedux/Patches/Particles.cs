@@ -4,19 +4,20 @@ using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
-public class Particles : IPatch
+public class Particles : IPatch, ISelectiveSweep
 {
     public string Name => "Particles Patch";
-    public object Description => "Disables all particle effects in the game.";
+    public object Description =>
+        "Blanks every particle definition, your own skills included. Microtransaction effects are untouched.";
 
     private List<FileNode> fileNodes = [];
 
-    private readonly string[] extensions = {
+    public IReadOnlyList<string> Extensions { get; } = [
         ".pet",
         ".trl",
-    };
+    ];
 
-    private readonly HashSet<string> _pathProtect = new(StringComparer.Ordinal) {
+    public HashSet<string> DisabledPrefixes { get; } = new(StringComparer.Ordinal) {
     // legion particles
         "metadata/particles/monster_effects/league_legion/rewardsystem",
         "metadata/particles/monster_effects/league_legion/endgame",
@@ -55,7 +56,7 @@ public class Particles : IPatch
     {
         var record = file.Record;
 
-        if (_pathProtect.Any(p => record.Path.Replace('\\', '/').StartsWith(p, StringComparison.Ordinal)))
+        if (DisabledPrefixes.Any(p => record.Path.Replace('\\', '/').StartsWith(p, StringComparison.Ordinal)))
             return;
 
         var newBytes = Encoding.Unicode.GetBytes("0");
@@ -68,7 +69,7 @@ public class Particles : IPatch
     }
 
     private bool HasTargetExtension(string fileName) =>
-        extensions.Any(ext =>
+        Extensions.Any(ext =>
             fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
 
     private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
@@ -86,12 +87,26 @@ public class Particles : IPatch
     public void Apply(DirectoryNode root)
     {
         var dir = NavigateTo(root, "metadata", "particles");
-        if (dir is not null)
-            CollectFileNodesRecursively(dir);
+        if (dir is null)
+        {
+            PatchReport.FileMissing(Scope);
+            return;
+        }
+        CollectFileNodesRecursively(dir);
+
+        if (fileNodes.Count == 0)
+        {
+            PatchReport.NoMatch(Scope, string.Join(" or ", Extensions) + " files");
+            return;
+        }
 
         foreach (var file in fileNodes)
         {
             TryPatchFile(file);
         }
     }
+
+    public string Root => Scope;
+
+    private const string Scope = "metadata/particles";
 }

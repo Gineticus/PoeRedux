@@ -145,8 +145,14 @@ public class Hlsl : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        if (root is not null)
-            CollectFileNodesRecursively(root);
+        CollectFileNodesRecursively(root);
+
+        var found = fileNodes
+            .Select(f => f.Record.Path.Replace('\\', '/'))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var target in targetFilesPath.Distinct(StringComparer.OrdinalIgnoreCase))
+            if (!found.Contains(target))
+                PatchReport.FileMissing(target);
 
         foreach (var file in fileNodes)
         {

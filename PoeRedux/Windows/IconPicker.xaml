@@ -1,0 +1,123 @@
+<Window x:Class="PoeRedux.IconPicker"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PoE Redux"
+        Height="620"
+        Width="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleText"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,12"/>
+
+        <!-- Filters -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+            <ComboBox x:Name="ColorFilter"
+                      Width="110"
+                      FontSize="11"
+                      Style="{StaticResource DarkComboBox}"
+                      SelectionChanged="Filter_Changed"/>
+            <ComboBox x:Name="ShapeFilter"
+                      Width="140"
+                      FontSize="11"
+                      Margin="6,0,0,0"
+                      Style="{StaticResource DarkComboBox}"
+                      SelectionChanged="Filter_Changed"/>
+            <ComboBox x:Name="SizeFilter"
+                      Width="100"
+                      FontSize="11"
+                      Margin="6,0,0,0"
+                      Style="{StaticResource DarkComboBox}"
+                      SelectionChanged="Filter_Changed"/>
+            <TextBlock x:Name="StatusText"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       FontSize="11"
+                       Foreground="{StaticResource DarkTextSecondary}"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2"
+                      VerticalScrollBarVisibility="Auto"
+                      Style="{StaticResource DarkScrollViewer}">
+            <StackPanel>
+                <ItemsControl x:Name="GlyphItemsControl">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Click="Choose_Click"
+                                    Tag="{Binding}"
+                                    Width="54"
+                                    Height="54"
+                                    Margin="0,0,4,4"
+                                    Padding="0"
+                                    ToolTip="{Binding Id}"
+                                    Style="{StaticResource SecondaryButton}">
+                                <Viewbox Width="30" Height="30" Stretch="Uniform">
+                                    <Path Data="{Binding Geometry}"
+                                          Fill="{Binding Brush}"
+                                          RenderTransformOrigin="0.5,0.5">
+                                        <Path.RenderTransform>
+                                            <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                </Viewbox>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Named game icons"
+                           Margin="0,12,0,4"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource DarkTextPrimary}"/>
+                <TextBlock Text="No addressable art for these, so they show as a plain chip. Useful for putting one back."
+                           Margin="0,0,0,6"
+                           FontSize="10"
+                           TextWrapping="Wrap"
+                           Foreground="{StaticResource DarkTextSecondary}"/>
+                <ItemsControl x:Name="NamedItemsControl">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Id}"
+                                    Click="Choose_Click"
+                                    Tag="{Binding}"
+                                    FontSize="10"
+                                    Margin="0,0,4,4"
+                                    Style="{StaticResource SecondaryButton}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,8,0,0">
+            <Button Content="Cancel"
+                    MinWidth="80"
+                    Click="CancelButton_Click"
+                    Style="{StaticResource SecondaryButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>

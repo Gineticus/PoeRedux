@@ -11,36 +11,38 @@
 
 - **Minimap Patch**
   - Reveals the entire minimap by default
+  - Adjust the reveal strength, and the colors of walkable ground and its edges
 
 - **Monster HP Patch**
-  - Always shows monster HP bars
+  - Gives every monster a life bar, including ones the game normally draws none for
 
 - **Color Mods Patch**
   - Changes colors of mods in the game
 
-- **Fog Patch**
-  - Disables the default fog effect in the game
-
 - **Environment Particles Patch**
   - Disables the default environment particles in the game
+  - Pick which ones: ground and weather, fog, screen space fog, effect spawners, bloom
 
 - **Shadow Patch**
-  - Disables the default shadow effect in the game
+  - Turns off shadow casting. Already covered if you switch off Directional light
 
 - **Light Patch**
   - Disables the default light effect in the game
+  - Pick which ones: directional light, player light, environment mapping, global illumination
 
 - **Corpse Patch**
-  - Removes corpses from the game
+  - Hides bodies a moment after they die. The corpse is still there for anything that consumes it
 
 - **Delirium Patch**
-  - Disables the delirium effects in the game
+  - Removes the Delirium fog and its gore props
 
 - **Particles Patch**
-  - Disables all particle effects in the game
+  - Blanks every particle definition, your own skills included. Microtransaction effects are untouched
+  - Pick which folders, one per monster family or skill, with a search box
 
 - **Effects Patch**
-  - Disables all effects in the game
+  - Strips spell effect visuals. Sound and animation timing stay, and effects you need to see to survive are kept
+  - Pick which folders, one per monster family or skill, with a search box
 
 - **Black Screen Patch (Experimental)**
   - Makes the screen black
@@ -52,42 +54,38 @@
 
 - **Minimap Patch**
   - Reveals the entire minimap by default
+  - Adjust the reveal strength, and the colors of walkable ground and its edges
 
 - **Color Mods Patch**
   - Changes colors of mods in the game
 
 - **Monster HP Patch**
-  - Always shows monster HP bars
+  - Gives every monster a life bar, including ones the game normally draws none for
 
 - **Atlas Fog Patch**
   - Removes fog from the Atlas
 
-- **Fog Patch**
-  - Disables the default fog effect in the game
-
-- **Rain Patch**
-  - Disables the default rain effect in the game
-
-- **Clouds Patch**
-  - Disables the default clouds effect in the game
-
 - **Environment Particles Patch**
   - Disables the default environment particles in the game
+  - Pick which ones: ground and weather, fog, screen space fog, effect spawners, bloom, clouds, rain
 
 - **Shadow Patch**
-  - Disables the default shadow effect in the game
+  - Turns off shadow casting. Already covered if you switch off Directional light
 
 - **Light Patch**
   - Disables the default light effect in the game
+  - Pick which ones: directional light, player light, environment mapping, global illumination
 
 - **Delirium Patch**
-  - Disables the delirium effects in the game
+  - Removes the Delirium fog and its gore props
 
 - **Particles Patch**
-  - Disables all particle effects in the game
+  - Blanks every particle definition, your own skills included. Microtransaction effects are untouched
+  - Pick which folders, one per monster family or skill, with a search box
 
 - **Effects Patch**
-  - Disables all effects in the game
+  - Strips spell effect visuals. Sound and animation timing stay, and effects you need to see to survive are kept
+  - Pick which folders, one per monster family or skill, with a search box
 
 - **Black Screen Patch (Experimental)**
   - Makes the screen black

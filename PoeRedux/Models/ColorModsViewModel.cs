@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+using PoeRedux.Services;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace PoeRedux.Models;
@@ -6,37 +7,35 @@ namespace PoeRedux.Models;
 public class ColorModsViewModel : INotifyPropertyChanged
 {
     private bool _isSelected;
-
-    private string _selectedColor;
+    private string _group;
 
     public ColorModsOption Option { get; }
     public string Name => Option.Name;
-
-    public List<string> AvailableColors { get; } = new() { "red", "green", "blue", "yellow", "pink" };
+    public string Category => Option.Category;
+    public IReadOnlyList<string> AvailableGroups => ModColorGroups.Names;
 
     public bool IsSelected
     {
         get => _isSelected;
         set
         {
-            if (_isSelected != value)
-            {
-                _isSelected = value;
-                OnPropertyChanged();
-            }
+            if (_isSelected == value)
+                return;
+            _isSelected = value;
+            OnPropertyChanged();
         }
     }
 
-    public string SelectedColor
+    /// <summary>Which color group this mod is in. The group owns the color.</summary>
+    public string Group
     {
-        get => _selectedColor;
+        get => _group;
         set
         {
-            if (_selectedColor != value)
-            {
-                _selectedColor = value;
-                OnPropertyChanged();
-            }
+            if (_group == value)
+                return;
+            _group = value;
+            OnPropertyChanged();
         }
     }
 
@@ -44,7 +43,7 @@ public class ColorModsViewModel : INotifyPropertyChanged
     {
         Option = option;
         _isSelected = option.IsEnabled;
-        _selectedColor = option.Color;
+        _group = ModColorGroups.Normalize(option.Group);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

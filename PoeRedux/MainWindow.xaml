@@ -32,21 +32,33 @@
                        VerticalAlignment="Center"
                        Foreground="{StaticResource DarkTextPrimary}"/>
 
-            <Button x:Name="UpdateNotificationButton"
-                    Grid.Column="1"
-                    Content="Update available"
-                    Visibility="Collapsed"
-                    Margin="10,0,10,0"
-                    Padding="8,4"
-                    FontSize="11"
-                    FontWeight="SemiBold"
-                    Foreground="White"
-                    Background="#FF4CAF50"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    Click="UpdateNotificationButton_Click"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="UpdateNotificationButton"
+                        Content="Update available"
+                        Visibility="Collapsed"
+                        Margin="10,0,0,0"
+                        Padding="8,4"
+                        FontSize="11"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Background="#FF4CAF50"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="UpdateNotificationButton_Click"/>
+
+                <Button x:Name="GameUpdateNotificationButton"
+                        Content="Game updated, click Apply to reapply"
+                        Visibility="Collapsed"
+                        Margin="10,0,0,0"
+                        Padding="8,4"
+                        FontSize="11"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Background="#FFFF9800"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="ApplyButton_Click"/>
+            </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Game:" 
@@ -97,15 +109,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Select All / None and Zoom Control -->
+                <!-- Select All / None -->
                 <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Button Content="Select All" 
                                 Click="SelectAllButton_Click" 
                                 MinWidth="80"
@@ -116,13 +122,7 @@
                                 MinWidth="80"
                                 FontSize="11"
                                 Style="{StaticResource SecondaryButton}"/>
-                        <Button Content="Mods Colors" 
-                                Click="ModsColorsButton_Click" 
-                                MinWidth="80"
-                                FontSize="11"
-                                Style="{StaticResource SecondaryButton}"
-                                x:Name="ModsColorsButton"/>
-                        <Button Content="Delete Backup" 
+                        <Button Content="Delete Backup"
                                 Click="DeleteBackupButton_Click" 
                                 MinWidth="80"
                                 FontSize="11"
@@ -130,36 +130,42 @@
                                 Style="{StaticResource SecondaryButton}"
                                 x:Name="DeleteBackupButton"/>
                     </StackPanel>
-
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBlock Text="Camera Zoom:" 
-                                   VerticalAlignment="Center" 
-                                   Margin="0,0,8,0"
-                                   FontSize="11"
-                                   Foreground="{StaticResource DarkTextPrimary}"/>
-                        <Slider x:Name="ZoomSlider"
-                                Width="120"
-                                Minimum="1.2"
-                                Maximum="2.4"
-                                Value="2.4"
-                                TickFrequency="0.2"
-                                IsSnapToTickEnabled="True"
-                Style="{StaticResource RoundGreySlider}"
-                                VerticalAlignment="Center"
-                                ValueChanged="ZoomSlider_ValueChanged"/>
-                        <TextBlock x:Name="ZoomValueText"
-                                   Text="2.4"
-                                   VerticalAlignment="Center"
-                                   Margin="8,0,0,0"
-                                   Width="20"
-                                   FontSize="11"
-                                   Foreground="{StaticResource DarkTextSecondary}"/>
-                    </StackPanel>
                 </Grid>
 
                 <!-- Patches List -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Style="{StaticResource DarkScrollViewer}">
                     <ItemsControl x:Name="PatchesItemsControl" VerticalAlignment="Top">
+                        <ItemsControl.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,6,4,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                                            <Border Grid.Column="1"
+                                                    Height="1"
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Background="{StaticResource DarkBorder}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                                <!-- Arranges the groups themselves, one under the other. The
+                                     ItemsPanel below arranges the patches inside each group. -->
+                                <GroupStyle.Panel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel/>
+                                    </ItemsPanelTemplate>
+                                </GroupStyle.Panel>
+                            </GroupStyle>
+                        </ItemsControl.GroupStyle>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Columns="2"/>
@@ -167,28 +173,55 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource DarkBorder}" 
-                                        BorderThickness="0" 
-                                        Padding="4"
+                                <Border BorderBrush="{StaticResource DarkBorder}"
+                                        BorderThickness="0"
+                                        Padding="4,3"
                                         Background="{StaticResource DarkSurface}"
                                         Margin="0,0,4,2"
                                         CornerRadius="2">
-                                    <CheckBox IsChecked="{Binding IsSelected}"
-                                              FontWeight="SemiBold"
-                                              FontSize="12"
-                                              Foreground="{StaticResource DarkTextPrimary}">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" 
-                                                       FontWeight="SemiBold"
-                                                       FontSize="12"
-                                                       Foreground="{StaticResource DarkTextPrimary}"/>
-                                            <TextBlock Text="{Binding Description}" 
-                                                       Margin="0,1,0,0"
-                                                       Foreground="{StaticResource DarkTextSecondary}"
-                                                       TextWrapping="Wrap"
-                                                       FontSize="10"/>
-                                        </StackPanel>
-                                    </CheckBox>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected}"
+                                                  FontWeight="SemiBold"
+                                                  FontSize="12"
+                                                  Foreground="{StaticResource DarkTextPrimary}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="12"
+                                                           Foreground="{StaticResource DarkTextPrimary}"/>
+                                                <!-- One line, or the tallest card sets the height of
+                                                     every cell in its group. -->
+                                                <TextBlock Text="{Binding Description}"
+                                                           Margin="0,1,0,0"
+                                                           Foreground="{StaticResource DarkTextSecondary}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding Description}"
+                                                           FontSize="10"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <Button Grid.Column="1"
+                                                Click="PatchConfigButton_Click"
+                                                Tag="{Binding}"
+                                                Width="26"
+                                                Height="26"
+                                                Padding="0"
+                                                Margin="6,0,2,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="{Binding ConfigLabel}"
+                                                Visibility="{Binding HasConfig, Converter={StaticResource BooleanToVisibility}}"
+                                                Style="{StaticResource SecondaryButton}">
+                                            <Path Data="{StaticResource GearGeometry}"
+                                                  Fill="{StaticResource DarkTextPrimary}"
+                                                  Width="14"
+                                                  Height="14"
+                                                  Stretch="Uniform"/>
+                                        </Button>
+                                    </Grid>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -210,9 +243,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="StatusTextBlock" 
+            <TextBlock x:Name="StatusTextBlock"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        FontSize="11"
@@ -220,6 +255,25 @@
                        Margin="8,0"/>
 
             <Button Grid.Column="1"
+                    Content="Reset to Vanilla"
+                    Click="ResetButton_Click"
+                    MinWidth="100"
+                    FontSize="11"
+                    Style="{StaticResource SecondaryButton}"
+                    ToolTip="Re-download every file that differs from the patch server. Reverts edits from any tool and updates the client."
+                    x:Name="ResetButton"/>
+
+            <Button Grid.Column="2"
+                    Content="View Changes"
+                    Click="ViewChangesButton_Click"
+                    MinWidth="100"
+                    FontSize="11"
+                    IsEnabled="False"
+                    Style="{StaticResource SecondaryButton}"
+                    ToolTip="Diff the current backup's originals against the live game files."
+                    x:Name="ViewChangesButton"/>
+
+            <Button Grid.Column="3"
                     Content="Restore Original"
                     Click="RestoreButton_Click"
                     MinWidth="100"
@@ -228,7 +282,7 @@
                     Style="{StaticResource SecondaryButton}"
                     x:Name="RestoreButton"/>
 
-            <Button Grid.Column="2"
+            <Button Grid.Column="4"
                     Content="Apply Patches"
                     Click="ApplyButton_Click"
                     MinWidth="100"
