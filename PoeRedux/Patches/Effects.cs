@@ -5,19 +5,20 @@ using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
-public class Effects : IPatch
+public class Effects : IPatch, ISelectiveSweep
 {
     public string Name => "Effects Patch";
-    public object Description => "Disables all effects in the game.";
+    public object Description =>
+        "Strips spell effect visuals. Sound and animation timing stay, and effects you need to see to survive are kept.";
 
     private List<FileNode> fileNodes = [];
 
-    private readonly string[] extensions = {
+    public IReadOnlyList<string> Extensions { get; } = [
         ".aoc",
         ".ao",
-    };
+    ];
 
-    private readonly HashSet<string> _clientKeep = new(StringComparer.Ordinal) {
+    internal static readonly HashSet<string> ClientKeep = new(StringComparer.Ordinal) {
         "ClientAnimationController",
         "SoundEvents",
         "BoneGroups",
@@ -25,7 +26,7 @@ public class Effects : IPatch
         "SkinMesh",
     };
 
-    private readonly HashSet<string> _pathProtect = new(StringComparer.Ordinal) {
+    public HashSet<string> DisabledPrefixes { get; } = new(StringComparer.Ordinal) {
     // expedition effects
         "metadata/effects/spells/monsters_effects/league_expedition/dynamic_marker",
     // world bosses effects
@@ -233,7 +234,7 @@ public class Effects : IPatch
         return false;
     }
 
-    private static string StripClientBlocks(string data, HashSet<string> keepSet)
+    internal static string StripClientBlocks(string data, HashSet<string> keepSet)
     {
         if (!FindTopLevelBlock(data, "client", out int clientOpenBrace))
             return data;
@@ -281,20 +282,23 @@ public class Effects : IPatch
             data.AsSpan(clientCloseBrace));
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
 
-        if (_pathProtect.Any(p => record.Path.Replace('\\', '/').StartsWith(p, StringComparison.Ordinal)))
-            return;
+        if (DisabledPrefixes.Any(p => record.Path.Replace('\\', '/').StartsWith(p, StringComparison.Ordinal)))
+            return false;
 
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
         if (string.IsNullOrEmpty(data))
-            return;
+            return false;
 
-        data = StripClientBlocks(data, _clientKeep);
+        var patched = StripClientBlocks(data, ClientKeep);
+        if (patched == data)
+            return false;
+        data = patched;
 
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
@@ -303,10 +307,11 @@ public class Effects : IPatch
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
-        extensions.Any(ext =>
+        Extensions.Any(ext =>
             fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
 
     private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
@@ -324,12 +329,22 @@ public class Effects : IPatch
     public void Apply(DirectoryNode root)
     {
         var dir = NavigateTo(root, "metadata", "effects", "spells");
-        if (dir is not null)
-            CollectFileNodesRecursively(dir);
-
-        foreach (var file in fileNodes)
+        if (dir is null)
         {
-            TryPatchFile(file);
+            PatchReport.FileMissing(Scope);
+            return;
         }
+        CollectFileNodesRecursively(dir);
+
+        var changed = 0;
+        foreach (var file in fileNodes)
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch(Scope, "a client block with a strippable sub block");
     }
+
+    public string Root => Scope;
+
+    private const string Scope = "metadata/effects/spells";
 }

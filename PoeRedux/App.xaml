@@ -3,6 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+
+        <!-- 8 tooth cog, drawn in a 100x100 box so one Stretch covers any button size -->
+        <PathGeometry x:Key="GearGeometry"
+                      FillRule="EvenOdd"
+                      Figures="M 50,3 L 63,18.6 L 83.2,16.8 L 81.4,37 L 97,50 L 81.4,63 L 83.2,83.2 L 63,81.4 L 50,97 L 37,81.4 L 16.8,83.2 L 18.6,63 L 3,50 L 18.6,37 L 16.8,16.8 L 37,18.6 Z M 50,32 A 18,18 0 1 0 50,68 A 18,18 0 1 0 50,32 Z"/>
+
         <!-- Dark Theme Colors -->
         <SolidColorBrush x:Key="DarkBackground" Color="#1E1E1E" />
         <SolidColorBrush x:Key="DarkSurface" Color="#2D2D30" />
@@ -48,6 +55,35 @@
                     <Setter Property="Foreground" Value="{StaticResource DarkTextDisabled}"/>
                     <Setter Property="Cursor" Value="Arrow"/>
                 </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <SolidColorBrush x:Key="ButtonGreen" Color="#2E7D46" />
+        <SolidColorBrush x:Key="ButtonGreenHover" Color="#3A9A57" />
+        <SolidColorBrush x:Key="ButtonRed" Color="#A33A3A" />
+        <SolidColorBrush x:Key="ButtonRedHover" Color="#C24A4A" />
+
+        <!-- Add is green, Remove is red, driven by the row's own IsAdded state -->
+        <Style x:Key="AddRemoveButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource ButtonGreen}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAdded}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonRed}"/>
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsAdded}" Value="False"/>
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{StaticResource ButtonGreenHover}"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsAdded}" Value="True"/>
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{StaticResource ButtonRedHover}"/>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -402,6 +438,76 @@
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.6"/>
                             </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0"
+                                        IsItemsHost="True"
+                                        Orientation="Horizontal"
+                                        Margin="0,0,0,6"/>
+                            <Border Grid.Row="1"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkTextSecondary}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Border x:Name="Root"
+                                Background="{StaticResource ButtonGray}"
+                                CornerRadius="3,3,0,0"
+                                Margin="0,0,4,0"
+                                Padding="14,6">
+                            <Grid>
+                                <ContentPresenter ContentSource="Header"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                <Border x:Name="Accent"
+                                        Height="2"
+                                        VerticalAlignment="Bottom"
+                                        Margin="-14,0,-14,-6"
+                                        Background="{StaticResource ButtonBlue}"
+                                        Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource DarkSurface}"/>
+                                <Setter TargetName="Accent" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Foreground" Value="{StaticResource DarkTextPrimary}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource ButtonGrayHover}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DarkTextPrimary}"/>
+                            </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>

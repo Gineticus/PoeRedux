@@ -81,12 +81,13 @@ public class Env : IPatch
                text.Substring(closeBrace + 1);
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
+        var original = data;
         data = data.Replace("\"shadows_enabled\": true", "\"shadows_enabled\": false");
 
         foreach (var func in _functions)
@@ -102,6 +103,9 @@ public class Env : IPatch
         string replacement2 = "${1}0.0${3}";
         data = Regex.Replace(data, pattern2, replacement2);
 
+        if (data == original)
+            return false;
+
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
         {
@@ -109,6 +113,7 @@ public class Env : IPatch
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
@@ -117,12 +122,13 @@ public class Env : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        if (root is not null)
-            CollectFileNodesRecursively(root);
+        CollectFileNodesRecursively(root);
 
+        var changed = 0;
         foreach (var file in fileNodes)
-        {
-            TryPatchFile(file);
-        }
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch("the game files", "an environment setting worth blanking");
     }
 }

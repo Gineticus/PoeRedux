@@ -24,19 +24,19 @@ public class NoCorpse : IPatch
     public void Apply(DirectoryNode root)
     {
         var monsters = NavigateTo(root, "metadata", "monsters");
-        if (monsters is null)
-            return;
-
-        var monsterFile = monsters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
+        var monsterFile = monsters?.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
         if (monsterFile is null)
+        {
+            PatchReport.FileMissing("metadata/monsters/monster.ot");
             return;
+        }
 
         var record = monsterFile.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
-        
-        data = data.Replace("Life\r\n{\r\n}", "Life\r\n{\r\n\ton_spawned_dead = {RemoveEffects(); DisableRendering();}\r\n\ton_death = { DisableRendering(); }\r\n}");
-        data = data.Replace("slow_animations_go_to_idle = true\r\n}", "slow_animations_go_to_idle = true\r\n\ton_start_Revive = {RemoveEffects(); EnableRendering();}\r\n}");
+
+        data = AnchoredText.Replace(data, "monster.ot", "Life\r\n{\r\n}", "Life\r\n{\r\n\ton_spawned_dead = {RemoveEffects(); DisableRendering();}\r\n\ton_death = { DisableRendering(); }\r\n}");
+        data = AnchoredText.Replace(data, "monster.ot", "slow_animations_go_to_idle = true\r\n}", "slow_animations_go_to_idle = true\r\n\ton_start_Revive = {RemoveEffects(); EnableRendering();}\r\n}");
 
         var newBytes = Encoding.Unicode.GetBytes(data);
         BackupManager.RecordOriginal(record);

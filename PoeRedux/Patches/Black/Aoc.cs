@@ -245,16 +245,19 @@ public class Aoc : IPatch
         return false;
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
         if (string.IsNullOrEmpty(data))
-            return;
+            return false;
 
-        data = StripClientBlocks(data, _clientKeep);
+        var patched = StripClientBlocks(data, _clientKeep);
+        if (patched == data)
+            return false;
+        data = patched;
 
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
@@ -263,32 +266,22 @@ public class Aoc : IPatch
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
         extensions.Any(ext =>
             fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
 
-    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
-    {
-        DirectoryNode current = root;
-        foreach (var name in path)
-        {
-            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
-            if (next is null) return null;
-            current = next;
-        }
-        return current;
-    }
-
     public void Apply(DirectoryNode root)
     {
-        if (root is not null)
-            CollectFileNodesRecursively(root);
+        CollectFileNodesRecursively(root);
 
+        var changed = 0;
         foreach (var file in fileNodes)
-        {
-            TryPatchFile(file);
-        }
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch("the game files", "a client block with a strippable sub block");
     }
 }

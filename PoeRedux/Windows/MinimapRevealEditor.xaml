@@ -1,0 +1,189 @@
+<Window x:Class="PoeRedux.MinimapRevealEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PoE Redux"
+        SizeToContent="Height"
+        Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Minimap Reveal"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,4"/>
+
+        <TextBlock Grid.Row="1"
+                   Text="The reveal is a floor under the map's visibility channel, and the two colors are what the shader paints walkable ground and its edges with."
+                   TextWrapping="Wrap"
+                   FontSize="11"
+                   Foreground="{StaticResource DarkTextSecondary}"
+                   Margin="0,0,0,12"/>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource DarkSurface}"
+                CornerRadius="3"
+                Padding="12"
+                Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock Text="Reveal strength"
+                           FontSize="12"
+                           Foreground="{StaticResource DarkTextPrimary}"/>
+                <TextBlock Text="How brightly unexplored terrain draws. 0 leaves the map as the game ships it."
+                           TextWrapping="Wrap"
+                           FontSize="11"
+                           Margin="0,1,0,6"
+                           Foreground="{StaticResource DarkTextSecondary}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="RevealSlider"
+                            Grid.Column="0"
+                            Minimum="0"
+                            Maximum="1"
+                            TickFrequency="0.02"
+                            IsSnapToTickEnabled="True"
+                            Style="{StaticResource RoundGreySlider}"
+                            VerticalAlignment="Center"
+                            ValueChanged="RevealSlider_ValueChanged"/>
+                    <TextBlock x:Name="RevealValueText"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0"
+                               Width="32"
+                               FontSize="12"
+                               Foreground="{StaticResource DarkTextPrimary}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3"
+                Background="{StaticResource DarkSurface}"
+                CornerRadius="3"
+                Padding="12"
+                Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock Text="Walkable ground"
+                           FontSize="12"
+                           Foreground="{StaticResource DarkTextPrimary}"/>
+                <Grid Margin="0,6,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="WalkableHexBox"
+                             Grid.Column="0"
+                             Width="80"
+                             FontSize="12"
+                             TextChanged="WalkableHexBox_TextChanged"/>
+                    <Border x:Name="WalkableSwatch"
+                            Grid.Column="1"
+                            Width="22"
+                            Height="22"
+                            Margin="8,0,0,0"
+                            CornerRadius="2"
+                            BorderThickness="1"
+                            BorderBrush="{StaticResource DarkBorder}"/>
+                    <Slider x:Name="WalkableOpacitySlider"
+                            Grid.Column="2"
+                            Minimum="0"
+                            Maximum="1"
+                            TickFrequency="0.05"
+                            IsSnapToTickEnabled="True"
+                            Margin="12,0,0,0"
+                            Style="{StaticResource RoundGreySlider}"
+                            VerticalAlignment="Center"
+                            ValueChanged="WalkableOpacitySlider_ValueChanged"/>
+                    <TextBlock x:Name="WalkableOpacityText"
+                               Grid.Column="3"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               Width="32"
+                               FontSize="12"
+                               Foreground="{StaticResource DarkTextPrimary}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="4"
+                Background="{StaticResource DarkSurface}"
+                CornerRadius="3"
+                Padding="12"
+                VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="Walls and edges"
+                           FontSize="12"
+                           Foreground="{StaticResource DarkTextPrimary}"/>
+                <TextBlock Text="Drawn overbright, so a mid tone still reads as a bright outline."
+                           TextWrapping="Wrap"
+                           FontSize="11"
+                           Margin="0,1,0,6"
+                           Foreground="{StaticResource DarkTextSecondary}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="EdgeHexBox"
+                             Grid.Column="0"
+                             Width="80"
+                             FontSize="12"
+                             TextChanged="EdgeHexBox_TextChanged"/>
+                    <Border x:Name="EdgeSwatch"
+                            Grid.Column="1"
+                            Width="22"
+                            Height="22"
+                            Margin="8,0,0,0"
+                            CornerRadius="2"
+                            BorderThickness="1"
+                            BorderBrush="{StaticResource DarkBorder}"/>
+                    <Slider x:Name="EdgeOpacitySlider"
+                            Grid.Column="2"
+                            Minimum="0"
+                            Maximum="1"
+                            TickFrequency="0.05"
+                            IsSnapToTickEnabled="True"
+                            Margin="12,0,0,0"
+                            Style="{StaticResource RoundGreySlider}"
+                            VerticalAlignment="Center"
+                            ValueChanged="EdgeOpacitySlider_ValueChanged"/>
+                    <TextBlock x:Name="EdgeOpacityText"
+                               Grid.Column="3"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               Width="32"
+                               FontSize="12"
+                               Foreground="{StaticResource DarkTextPrimary}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="5" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="Defaults" MinWidth="80" Click="DefaultsButton_Click" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Save" MinWidth="80" Click="SaveButton_Click"/>
+                <Button Content="Exit" MinWidth="80" Click="ExitButton_Click" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

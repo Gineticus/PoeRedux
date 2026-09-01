@@ -7,7 +7,7 @@ namespace PoeRedux.Patches;
 public class Delirium : IPatch
 {
     public string Name => "Delirium Patch";
-    public object Description => "Disables the delirium effects in the game.";
+    public object Description => "Removes the Delirium fog and its gore props.";
 
     private List<FileNode> fileNodes = [];
 
@@ -34,15 +34,16 @@ public class Delirium : IPatch
         }
     }
 
-    private void TryPatchFile(FileNode file)
+    private bool TryPatchFile(FileNode file)
     {
         var record = file.Record;
         var bytes = record.Read();
         string data = Encoding.Unicode.GetString(bytes.ToArray());
 
         if (string.IsNullOrEmpty(data))
-            return;
+            return false;
 
+        var original = data;
         if (data.Contains("Metadata/FmtParent") && !data.Contains("AnimatedRender"))
         {
             data = "version 3\nextends \"Metadata/FmtParent\"";
@@ -79,6 +80,9 @@ client
 }";
         }
 
+        if (data == original)
+            return false;
+
         var newBytes = Encoding.Unicode.GetBytes(data);
         if (!newBytes.AsSpan().StartsWith(Encoding.Unicode.GetPreamble()))
         {
@@ -86,6 +90,7 @@ client
         }
         BackupManager.RecordOriginal(record);
         record.Write(newBytes);
+        return true;
     }
 
     private bool HasTargetExtension(string fileName) =>
@@ -107,12 +112,20 @@ client
     public void Apply(DirectoryNode root)
     {
         var dir = NavigateTo(root, "metadata", "effects", "environment", "league_affliction");
-        if (dir is not null)
-            CollectFileNodesRecursively(dir);
-
-        foreach (var file in fileNodes)
+        if (dir is null)
         {
-            TryPatchFile(file);
+            PatchReport.FileMissing(Scope);
+            return;
         }
+        CollectFileNodesRecursively(dir);
+
+        var changed = 0;
+        foreach (var file in fileNodes)
+            if (TryPatchFile(file)) changed++;
+
+        if (changed == 0)
+            PatchReport.NoMatch(Scope, "\"Metadata/FmtParent\" or \"Metadata/Parent\"");
     }
+
+    private const string Scope = "metadata/effects/environment/league_affliction";
 }

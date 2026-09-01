@@ -1,0 +1,250 @@
+<Window x:Class="PoeRedux.TierColorsEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PoE Redux"
+        Height="650"
+        Width="860"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Mod Tier Colors"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="0"
+                   Text="One color per quality band, measured against the best craftable roll for that stat. 100% or more means above it, which only elevated, Maven, essence and unique values reach."
+                   TextWrapping="Wrap"
+                   FontSize="11"
+                   Foreground="{StaticResource DarkTextSecondary}"
+                   Margin="0,22,0,12"/>
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
+            <CheckBox x:Name="PerLadderCheckBox"
+                      VerticalAlignment="Center"
+                      FontSize="11"
+                      Content="Judge each ladder separately"
+                      ToolTip="A maxed one-hand roll reads as perfect even though a two-hander reaches higher. Off compares everything against the single hardest roll."
+                      Foreground="{StaticResource DarkTextPrimary}"/>
+            <TextBlock Text="ignoring ladders under"
+                       VerticalAlignment="Center"
+                       Margin="6,0,4,0"
+                       FontSize="11"
+                       Foreground="{StaticResource DarkTextSecondary}"/>
+            <TextBox x:Name="MinLadderShareBox"
+                     Width="34"
+                     FontSize="11"
+                     VerticalAlignment="Center"
+                     ToolTip="A ladder topping out below this share of the stat's ceiling does not get its own perfect. Stops a weak roll of a long ladder borrowing the verdict of a short one."/>
+            <TextBlock Text="%"
+                       VerticalAlignment="Center"
+                       Margin="2,0,0,0"
+                       FontSize="11"
+                       Foreground="{StaticResource DarkTextSecondary}"/>
+            <CheckBox x:Name="TagPrefixCheckBox"
+                      VerticalAlignment="Center"
+                      Margin="14,0,0,0"
+                      FontSize="11"
+                      Content="Color a label instead of the whole mod"
+                      ToolTip="PERFECT +186 to maximum Life, with only PERFECT colored"
+                      Foreground="{StaticResource DarkTextPrimary}"/>
+            <CheckBox x:Name="CompactTierCheckBox"
+                      VerticalAlignment="Center"
+                      Margin="14,0,0,0"
+                      FontSize="11"
+                      Content="Compact the Tier line"
+                      ToolTip="(Tier: 10) becomes T10, (Tier: 10, Lvl: 3) becomes T10 L3"
+                      Foreground="{StaticResource DarkTextPrimary}"/>
+        </StackPanel>
+
+        <!-- Quality bands -->
+        <ItemsControl x:Name="GroupsItemsControl" Grid.Row="1" Margin="0,4,0,10">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource DarkSurface}"
+                            CornerRadius="3"
+                            Padding="6"
+                            Margin="0,0,4,4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0"
+                                      IsChecked="{Binding IsEnabled}"
+                                      VerticalAlignment="Center"
+                                      Margin="2,0,4,0"/>
+                            <TextBlock Text="{Binding Name}"
+                                       Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource DarkTextPrimary}"/>
+                            <TextBox Grid.Column="2"
+                                     Text="{Binding MinPercent, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="34"
+                                     FontSize="11"
+                                     Margin="4,0,2,0"
+                                     ToolTip="Lowest percent of the best craftable roll that gets this color. 100 or more means above it."/>
+                            <TextBlock Grid.Column="3"
+                                       Text="%"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       Margin="0,0,6,0"
+                                       Foreground="{StaticResource DarkTextSecondary}"/>
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox Text="{Binding Tag, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="62"
+                                         FontSize="11"
+                                         Margin="0,0,4,0"
+                                         ToolTip="Label written before the mod in label mode"/>
+                                <TextBox Text="{Binding Hex, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="76"
+                                         FontSize="11"/>
+                                <Border Width="20"
+                                        Height="20"
+                                        CornerRadius="2"
+                                        Margin="4,0,0,0"
+                                        Background="{Binding Swatch}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Stat assignments -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="SearchBox"
+                             FontSize="12"
+                             Padding="6,0,58,0"
+                             TextChanged="SearchBox_TextChanged"/>
+                    <TextBlock x:Name="SearchHint"
+                               Text="Search stat id, text or group"
+                               IsHitTestVisible="False"
+                               Margin="6,0,0,0"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource DarkTextSecondary}"/>
+                    <Button x:Name="ClearButton"
+                            Content="Clear"
+                            Click="ClearButton_Click"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,2,0"
+                            Padding="6,1"
+                            FontSize="10"
+                            Visibility="Collapsed"
+                            Style="{StaticResource SecondaryButton}"/>
+                </Grid>
+                <Button Grid.Column="1"
+                        Content="All"
+                        Click="SelectAllButton_Click"
+                        MinWidth="50"
+                        FontSize="10"
+                        Margin="6,0,0,0"
+                        Style="{StaticResource SecondaryButton}"/>
+                <Button Grid.Column="2"
+                        Content="None"
+                        Click="SelectNoneButton_Click"
+                        MinWidth="50"
+                        FontSize="10"
+                        Style="{StaticResource SecondaryButton}"/>
+                <TextBlock x:Name="StatusText"
+                           Grid.Column="3"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="11"
+                           Foreground="{StaticResource DarkTextSecondary}"/>
+            </Grid>
+
+            <ListBox x:Name="StatsListBox"
+                     Grid.Row="1"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0"
+                                      IsChecked="{Binding IsSelected}"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,6,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding StatId}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{StaticResource DarkTextPrimary}"/>
+                                <TextBlock Text="{Binding Text}"
+                                           FontSize="10"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{StaticResource DarkTextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"
+                                       FontSize="10"
+                                       Foreground="{StaticResource DarkTextSecondary}">
+                                <Run Text="max "/><Run Text="{Binding Ceiling, Mode=OneWay}"/><Run Text=", "/><Run Text="{Binding ModCount, Mode=OneWay}"/><Run Text=" mods"/>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Save" MinWidth="80" Click="SaveButton_Click"/>
+                <Button Content="Exit" MinWidth="80" Click="ExitButton_Click" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

@@ -52,8 +52,13 @@ public class Mat : IPatch
 
     public void Apply(DirectoryNode root)
     {
-        if (root is not null)
-            CollectFileNodesRecursively(root);
+        CollectFileNodesRecursively(root);
+
+        if (fileNodes.Count == 0)
+        {
+            PatchReport.NoMatch("the game files", string.Join(" or ", extensions) + " files");
+            return;
+        }
 
         foreach (var file in fileNodes)
         {

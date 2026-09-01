@@ -1,0 +1,70 @@
+<Window x:Class="PoeRedux.EnvKeysEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PoE Redux"
+        Height="420"
+        Width="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleText"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource DarkTextPrimary}"
+                   Margin="0,0,0,4"/>
+
+        <TextBlock x:Name="SubtitleText"
+                   Grid.Row="1"
+                   Text="Only the ticked ones are switched off in the game files."
+                   TextWrapping="Wrap"
+                   FontSize="11"
+                   Foreground="{StaticResource DarkTextSecondary}"
+                   Margin="0,0,0,10"/>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource DarkSurface}"
+                CornerRadius="3"
+                Padding="10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource DarkScrollViewer}">
+                <ItemsControl x:Name="KeysList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,8">
+                                <CheckBox Content="{Binding Label}"
+                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          FontSize="12"
+                                          Foreground="{StaticResource DarkTextPrimary}"/>
+                                <TextBlock Text="{Binding Description}"
+                                           TextWrapping="Wrap"
+                                           FontSize="11"
+                                           Margin="20,1,0,0"
+                                           Foreground="{StaticResource DarkTextSecondary}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="All" MinWidth="60" Click="AllButton_Click" Style="{StaticResource SecondaryButton}"/>
+                <Button Content="None" MinWidth="60" Click="NoneButton_Click" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Save" MinWidth="80" Click="SaveButton_Click"/>
+                <Button Content="Exit" MinWidth="80" Click="ExitButton_Click" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

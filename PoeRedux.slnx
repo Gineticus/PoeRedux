@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="PoeRedux/PoeRedux.csproj" />
+  <Project Path="PoeRedux.Tests/PoeRedux.Tests.csproj" />
 </Solution>
