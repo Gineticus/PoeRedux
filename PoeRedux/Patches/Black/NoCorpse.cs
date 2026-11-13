@@ -1,45 +1,15 @@
 using LibBundle3.Nodes;
-using System.Text;
-using PoeRedux.Services;
 
-namespace PoeRedux.Patches;
+namespace PoeRedux.Patches.Black;
 
+/// <summary>
+/// <see cref="Corpse"/>, except that monsters stop rendering the moment they die.
+/// </summary>
 public class NoCorpse : IPatch
 {
     public string Name => "NoCorpse Patch";
-    public object Description => "";
+    public string Description => "";
 
-    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
-    {
-        DirectoryNode current = root;
-        foreach (var name in path)
-        {
-            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
-            if (next is null) return null;
-            current = next;
-        }
-        return current;
-    }
-
-    public void Apply(DirectoryNode root)
-    {
-        var monsters = NavigateTo(root, "metadata", "monsters");
-        if (monsters is null)
-            return;
-
-        var monsterFile = monsters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
-        if (monsterFile is null)
-            return;
-
-        var record = monsterFile.Record;
-        var bytes = record.Read();
-        string data = Encoding.Unicode.GetString(bytes.ToArray());
-        
-        data = data.Replace("Life\r\n{\r\n}", "Life\r\n{\r\n\ton_spawned_dead = {RemoveEffects(); DisableRendering();}\r\n\ton_death = { DisableRendering(); }\r\n}");
-        data = data.Replace("slow_animations_go_to_idle = true\r\n}", "slow_animations_go_to_idle = true\r\n\ton_start_Revive = {RemoveEffects(); EnableRendering();}\r\n}");
-
-        var newBytes = Encoding.Unicode.GetBytes(data);
-        BackupManager.RecordOriginal(record);
-        record.Write(newBytes);
-    }
+    public void Collect(DirectoryNode root, PatchPlan plan) =>
+        Corpse.HideCorpses(root, plan, onDeath: "{ DisableRendering(); }");
 }

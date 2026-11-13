@@ -10,7 +10,7 @@ public class PatchViewModel : INotifyPropertyChanged
 
     public IPatch Patch { get; }
     public string Name => Patch.Name;
-    public string Description => Patch.Description?.ToString() ?? string.Empty;
+    public string Description => Patch.Description;
 
     public bool IsSelected
     {
@@ -28,7 +28,6 @@ public class PatchViewModel : INotifyPropertyChanged
     public PatchViewModel(IPatch patch)
     {
         Patch = patch;
-        _isSelected = false;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

@@ -2,35 +2,32 @@ using LibBundledGGPK3;
 using Microsoft.Win32;
 using PoeRedux.Models;
 using PoeRedux.Patches;
+using PoeRedux.Patches.Black;
 using PoeRedux.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Interop;
-using PoeRedux.Patches.Black;
+using System.Windows.Controls;
 
 namespace PoeRedux;
 
 public partial class MainWindow : Window
 {
-    private readonly ObservableCollection<PatchViewModel> _patches;
-    private readonly ObservableCollection<ColorModsViewModel> _colorMods;
+    private readonly ObservableCollection<PatchViewModel> _patches = new();
+    private readonly ObservableCollection<ColorModsViewModel> _colorMods = new();
     private string _ggpkPath = string.Empty;
-    private double _cameraZoom = 2.4;
     private string? _updateDownloadUrl;
 
     public MainWindow()
     {
-        _patches = new ObservableCollection<PatchViewModel>();
-        _colorMods = new ObservableCollection<ColorModsViewModel>();
         InitializeComponent();
         PatchesItemsControl.ItemsSource = _patches;
-        
+
         UpdateStatus();
 
-        SourceInitialized += (s, e) => ApplyDarkTitleBar();
+        DarkTitleBar.Enable(this);
         Loaded += async (s, e) =>
         {
             UpdateRestoreButtonState();
@@ -38,69 +35,43 @@ public partial class MainWindow : Window
         };
     }
 
-    private void ApplyDarkTitleBar()
-    {
-        if (PresentationSource.FromVisual(this) is HwndSource hwndSource)
-        {
-            IntPtr hwnd = hwndSource.Handle;
+    private PoeGame SelectedGame => GameSelector.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
 
-            // Use DWMWA_USE_IMMERSIVE_DARK_MODE (20) for Windows 11 / Windows 10 build 19041+
-            int attribute = 20;
-            int useImmersiveDarkMode = 1;
-            DwmSetWindowAttribute(hwnd, attribute, ref useImmersiveDarkMode, sizeof(int));
+    private static IPatch[] CreatePatches(PoeGame game)
+    {
+        if (game == PoeGame.PoE1)
+        {
+            return
+            [
+                new Camera(),
+                new Minimap(),
+                new ColorMods(PoeGame.PoE1),
+                new MonsterHP(),
+                new Fog(),
+                new EnvironmentParticles(),
+                new Shadow(),
+                new Light(),
+                new Corpse(),
+                new Delirium(),
+                new Particles(),
+                new Effects(),
+                new BlackScreen(),
+                // new Aoc(),
+                // new Env(),
+                // new Epk(),
+                // new Ffx(),
+                // new Hlsl(),
+                // new Mat(),
+                // new NoCorpse(),
+                // new Pet(),
+            ];
         }
-    }
 
-    [DllImport("dwmapi.dll", PreserveSig = true)]
-    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
-
-    private void InitializePoe1Patches()
-    {
-        var patchInstances = new IPatch[]
-        {
+        return
+        [
             new Camera(),
             new Minimap(),
-            new ColorMods(),
-            new MonsterHP(),
-            new Fog(),
-            new EnvironmentParticles(),
-            new Shadow(),
-            new Light(),
-            new Corpse(),
-            new Delirium(),
-            new Particles(),
-            new Effects(),
-            new BlackScreen(),
-            // new Aoc(),
-            // new Env(),
-            // new Epk(),
-            // new Ffx(),
-            // new Hlsl(),
-            // new Mat(),
-            // new NoCorpse(),
-            // new Pet(),
-        };
-
-        foreach (var patch in patchInstances)
-        {
-            _patches.Add(new PatchViewModel(patch));
-            if (patch is ColorMods colorModsPatch)
-            {
-                foreach (var option in colorModsPatch.ColorModsOptions)
-                {
-                    _colorMods.Add(new ColorModsViewModel(option.Copy()));
-                }
-            }
-        }
-    }
-
-    private void InitializePoe2Patches()
-    {
-        var patchInstances = new IPatch[]
-        {
-            new Camera(),
-            new Minimap(),
-            new ColorMods2(),
+            new ColorMods(PoeGame.PoE2),
             new MonsterHP(),
             new AtlasFog(),
             new Fog(),
@@ -121,42 +92,27 @@ public partial class MainWindow : Window
             // new Mat(),
             // new NoCorpse(),
             // new Pet(),
-        };
-
-        foreach (var patch in patchInstances)
-        {
-            _patches.Add(new PatchViewModel(patch));
-            if (patch is ColorMods2 colorModsPatch)            {
-                foreach (var option in colorModsPatch.ColorModsOptions)
-                {
-                    _colorMods.Add(new ColorModsViewModel(option.Copy()));
-                }
-            }
-        }
+        ];
     }
 
-    private void GameSelector_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private void GameSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_patches == null || _colorMods == null) return;
-
-        var selectedIndex = ((System.Windows.Controls.ComboBox)sender).SelectedIndex;
-
         _patches.Clear();
         _colorMods.Clear();
 
-        if (selectedIndex == 0) // PoE 1
+        foreach (var patch in CreatePatches(SelectedGame))
         {
-            InitializePoe1Patches();
-        }
-        else if (selectedIndex == 1) // PoE 2
-        {
-            InitializePoe2Patches();
+            _patches.Add(new PatchViewModel(patch));
+            if (patch is ColorMods colorMods)
+            {
+                foreach (var option in colorMods.ColorModsOptions)
+                    _colorMods.Add(new ColorModsViewModel(option.Copy()));
+            }
         }
 
+        // The first call comes from InitializeComponent, before the controls below the selector exist.
         if (ModsColorsButton != null)
-        {
             ModsColorsButton.Visibility = _colorMods.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        }
 
         UpdateRestoreButtonState();
     }
@@ -196,7 +152,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void GgpkPathTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    private void GgpkPathTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         _ggpkPath = GgpkPathTextBox.Text.Trim();
         UpdateStatus();
@@ -220,43 +176,32 @@ public partial class MainWindow : Window
 
     private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
+        // The first call comes from InitializeComponent, before ZoomValueText exists.
         if (ZoomValueText != null)
-        {
-            ZoomValueText.Text = e.NewValue.ToString("F1").Replace(',', '.');
-        }
-        _cameraZoom = e.NewValue;
+            ZoomValueText.Text = e.NewValue.ToString("F1", CultureInfo.InvariantCulture);
     }
 
     private async void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
-        var selectedPatches = _patches.Where(p => p.IsSelected).ToList();
-
-        foreach (var patch in selectedPatches)
-        {
-            if (patch.Patch is Camera cameraPatch)
-            {
-                cameraPatch.ZoomLevel = _cameraZoom;
-            }
-            if (patch.Patch is ColorMods colorModsPatch)
-            {
-                colorModsPatch.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
-            }
-            if (patch.Patch is ColorMods2 colorModsPatch2)
-            {
-                colorModsPatch2.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
-            }
-        }
-
-        if (selectedPatches.Count == 0)
+        var patches = _patches.Where(p => p.IsSelected).Select(p => p.Patch).ToList();
+        if (patches.Count == 0)
         {
             MessageBox.Show("Please select at least one patch to apply.", "No Patches Selected");
             return;
         }
 
-        await ApplyPatches(selectedPatches);
+        foreach (var patch in patches)
+        {
+            if (patch is Camera camera)
+                camera.ZoomLevel = ZoomSlider.Value;
+            else if (patch is ColorMods colorMods)
+                colorMods.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
+        }
+
+        await ApplyPatches(patches);
     }
 
-    private async Task ApplyPatches(List<PatchViewModel> patchesToApply)
+    private async Task ApplyPatches(List<IPatch> patches)
     {
         if (string.IsNullOrEmpty(_ggpkPath) || !File.Exists(_ggpkPath))
         {
@@ -266,51 +211,18 @@ public partial class MainWindow : Window
 
         StatusTextBlock.Text = "Starting patching process...";
 
-        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
-
-        // Disable buttons during operation
-        ApplyButton.IsEnabled = false;
-        if (RestoreButton != null) RestoreButton.IsEnabled = false;
-        //ZoomSlider.IsEnabled = false;
-        ProgressBar.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = false;
-        ProgressBar.Minimum = 0;
-        ProgressBar.Maximum = patchesToApply.Count;
-        ProgressBar.Value = 0;
+        var path = _ggpkPath;
+        var game = SelectedGame;
+        var progress = new Progress<PatchProgress>(ShowPatchProgress);
+        SetBusy(true);
+        ProgressBar.IsIndeterminate = true;
 
         try
         {
-            await Task.Run(() =>
-            {
-                BackupManager.Begin(game);
-                try
-                {
-                    if (_ggpkPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
-                    {
-                        using var index = new LibBundle3.Index(_ggpkPath, false);
-                        index.ParsePaths();
-                        PatchIndex(index, patchesToApply);
-                    }
-                    else if (_ggpkPath.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
-                    {
-                        using BundledGGPK ggpk = new(_ggpkPath, false);
-                        var index = ggpk.Index;
-                        index.ParsePaths();
-                        PatchIndex(index, patchesToApply);
-                    }
-                    else
-                    {
-                        throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
-                    }
-                }
-                finally
-                {
-                    BackupManager.End();
-                }
-            });
+            await Task.Run(() => UseIndex(path, index => PatchRunner.Run(index, patches, game, progress)));
 
-            StatusTextBlock.Text = $"Successfully applied {patchesToApply.Count} patch(es)!";
-            MessageBox.Show($"Successfully applied {patchesToApply.Count} patch(es)!", "Success");
+            StatusTextBlock.Text = $"Successfully applied {patches.Count} patch(es)!";
+            MessageBox.Show($"Successfully applied {patches.Count} patch(es)!", "Success");
         }
         catch (Exception ex)
         {
@@ -319,12 +231,7 @@ public partial class MainWindow : Window
         }
         finally
         {
-            // Re-enable buttons
-            ApplyButton.IsEnabled = true;
-            ProgressBar.Visibility = Visibility.Collapsed;
-            ProgressBar.Value = 0;
-            //ZoomSlider.IsEnabled = true;
-            UpdateRestoreButtonState();
+            SetBusy(false);
         }
     }
 
@@ -336,7 +243,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+        var game = SelectedGame;
 
         if (!BackupManager.HasBackup(game))
         {
@@ -347,48 +254,18 @@ public partial class MainWindow : Window
         var fileCount = BackupManager.CountBackedUpFiles(game);
         StatusTextBlock.Text = $"Restoring {fileCount} file(s)...";
 
-        ApplyButton.IsEnabled = false;
-        if (RestoreButton != null) RestoreButton.IsEnabled = false;
-        ProgressBar.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = false;
-        ProgressBar.Minimum = 0;
+        var path = _ggpkPath;
+        var progress = new Progress<(int Done, int Total)>(p =>
+        {
+            StatusTextBlock.Text = $"Restoring ({p.Done}/{p.Total})";
+            ProgressBar.Value = p.Done;
+        });
+        SetBusy(true);
         ProgressBar.Maximum = fileCount;
-        ProgressBar.Value = 0;
 
-        int restored = 0;
         try
         {
-            await Task.Run(() =>
-            {
-                void Progress(int done, int total)
-                {
-                    Dispatcher.BeginInvoke(() =>
-                    {
-                        StatusTextBlock.Text = $"Restoring ({done}/{total})";
-                        ProgressBar.Value = done;
-                    });
-                }
-
-                if (_ggpkPath.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
-                {
-                    using var index = new LibBundle3.Index(_ggpkPath, false);
-                    index.ParsePaths();
-                    restored = BackupManager.Restore(index, game, Progress);
-                    index.Save();
-                }
-                else if (_ggpkPath.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
-                {
-                    using BundledGGPK ggpk = new(_ggpkPath, false);
-                    var index = ggpk.Index;
-                    index.ParsePaths();
-                    restored = BackupManager.Restore(index, game, Progress);
-                    index.Save();
-                }
-                else
-                {
-                    throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
-                }
-            });
+            var restored = await Task.Run(() => UseIndex(path, index => BackupManager.Restore(index, game, progress)));
 
             BackupManager.DeleteBackup(game);
             StatusTextBlock.Text = $"Restored {restored} file(s) to original.";
@@ -401,16 +278,13 @@ public partial class MainWindow : Window
         }
         finally
         {
-            ApplyButton.IsEnabled = true;
-            ProgressBar.Visibility = Visibility.Collapsed;
-            ProgressBar.Value = 0;
-            UpdateRestoreButtonState();
+            SetBusy(false);
         }
     }
 
     private void DeleteBackupButton_Click(object sender, RoutedEventArgs e)
     {
-        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
+        var game = SelectedGame;
 
         if (!BackupManager.HasBackup(game))
         {
@@ -424,38 +298,75 @@ public partial class MainWindow : Window
         UpdateRestoreButtonState();
     }
 
-    private void UpdateRestoreButtonState()
+    /// <summary>
+    /// Opens the game index of a Steam install (_.index.bin) or a standalone one (Content.ggpk)
+    /// and runs <paramref name="action"/> on it.
+    /// </summary>
+    private static T UseIndex<T>(string path, Func<LibBundle3.Index, T> action)
     {
-        if (RestoreButton == null) return;
-        var game = GameSelector?.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
-        var count = BackupManager.CountBackedUpFiles(game);
-        RestoreButton.IsEnabled = count > 0;
-        RestoreButton.Content = count > 0 ? $"Restore Original ({count})" : "Restore Original";
-        if (DeleteBackupButton != null) DeleteBackupButton.IsEnabled = count > 0;
+        if (path.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+        {
+            using var index = new LibBundle3.Index(path, false);
+            index.ParsePaths();
+            return action(index);
+        }
+
+        if (path.EndsWith(".ggpk", StringComparison.OrdinalIgnoreCase))
+        {
+            using var ggpk = new BundledGGPK(path, false);
+            ggpk.Index.ParsePaths();
+            return action(ggpk.Index);
+        }
+
+        throw new InvalidDataException("The selected file is neither a GGPK nor an index BIN file.");
     }
 
-    private void PatchIndex(LibBundle3.Index index, List<PatchViewModel> patches)
+    // While game files change, the progress bar shows and the buttons that touch game files or backups are locked.
+    // Deleting backups during Apply would lose originals, and switching games would turn Restore back on.
+    private void SetBusy(bool busy)
     {
-        var fileTree = index.BuildTree(true);
+        ApplyButton.IsEnabled = !busy;
+        GameSelector.IsEnabled = !busy;
+        ProgressBar.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        ProgressBar.IsIndeterminate = false;
+        ProgressBar.Minimum = 0;
+        ProgressBar.Value = 0;
 
-        for (int i = 0; i < patches.Count; i++)
+        if (busy)
         {
-            var patch = patches[i];
-
-            Dispatcher.Invoke(() =>
-            {
-                StatusTextBlock.Text = $"Applying {patch.Name} ({i + 1}/{patches.Count})...";
-                ProgressBar.Value = i;
-            });
-
-            patch.Patch.Apply(fileTree);
-            index.Save();
-
-            Dispatcher.Invoke(() =>
-            {
-                ProgressBar.Value = i + 1;
-            });
+            RestoreButton.IsEnabled = false;
+            DeleteBackupButton.IsEnabled = false;
         }
+        else
+        {
+            UpdateRestoreButtonState();
+        }
+    }
+
+    private void UpdateRestoreButtonState()
+    {
+        // The first call comes from InitializeComponent, before the buttons exist.
+        if (RestoreButton == null)
+            return;
+
+        var count = BackupManager.CountBackedUpFiles(SelectedGame);
+        RestoreButton.IsEnabled = count > 0;
+        RestoreButton.Content = count > 0 ? $"Restore Original ({count})" : "Restore Original";
+        DeleteBackupButton.IsEnabled = count > 0;
+    }
+
+    private void ShowPatchProgress(PatchProgress progress)
+    {
+        ProgressBar.IsIndeterminate = progress.Total == 0;
+        ProgressBar.Maximum = Math.Max(progress.Total, 1);
+        ProgressBar.Value = progress.Done;
+        StatusTextBlock.Text = progress.Stage switch
+        {
+            PatchStage.Patching => $"Patching files ({progress.Done}/{progress.Total})...",
+            PatchStage.Writing => $"Updating game files ({progress.Done}/{progress.Total})...",
+            PatchStage.Saving => "Saving changes...",
+            _ => "Finding files to patch...",
+        };
     }
 
     private void UpdateStatus()
