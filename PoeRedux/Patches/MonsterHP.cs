@@ -1,71 +1,36 @@
 using LibBundle3.Nodes;
+using PoeRedux.Helpers;
 using System.Text;
-using PoeRedux.Services;
 
 namespace PoeRedux.Patches;
 
 public class MonsterHP : IPatch
 {
     public string Name => "Monster HP Patch";
-    public object Description => "Always shows monster HP.";
+    public string Description => "Always shows monster HP.";
 
-    public double ZoomLevel { get; set; } = 2.4;
-
-    private List<FileNode> fileNodes = [];
-
-    private readonly string[] _extensions = {
-        ".ot",
-        ".otc",
-    };
-
-    private bool HasTargetExtension(string fileName) =>
-        _extensions.Any(ext =>
-            fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-
-    private static DirectoryNode? NavigateTo(DirectoryNode root, params string[] path)
+    public void Collect(DirectoryNode root, PatchPlan plan)
     {
-        DirectoryNode current = root;
-        foreach (var name in path)
-        {
-            var next = current.Children.OfType<DirectoryNode>().FirstOrDefault(d => d.Name == name);
-            if (next is null) return null;
-            current = next;
-        }
-        return current;
+        var monster = GameTree.FindFile(root, "metadata/monsters/monster.ot");
+        if (monster is not null)
+            plan.Add(monster, PatchMonsterFile);
     }
 
-    public void Apply(DirectoryNode root)
+    private static byte[] PatchMonsterFile(byte[] bytes)
     {
-        var metadata = NavigateTo(root, "metadata");
-        if (metadata is null)
-            return;
+        string data = Encoding.Unicode.GetString(bytes);
+        List<string> lines = data.Split("\r\n").ToList();
 
-        // Patch metadata/monsters/monster.ot
-        var monsters = NavigateTo(metadata, "monsters");
-        if (monsters is not null)
+        if (!data.Contains("base_maximum_energy_shield = 1") && !data.Contains("base_maximum_life = 1"))
         {
-            var monsterFile = monsters.Children.OfType<FileNode>().FirstOrDefault(f => f.Name == "monster.ot");
-            if (monsterFile is not null)
+            int index = lines.FindIndex(x => x.Contains("item_drop_slots = 1"));
+            if (index != -1)
             {
-                var record = monsterFile.Record;
-                var bytes = record.Read();
-                string data = Encoding.Unicode.GetString(bytes.ToArray());
-                List<string> lines = data.Split("\r\n").ToList();
-
-                if (!data.Contains("base_maximum_energy_shield = 1") && !data.Contains("base_maximum_life = 1"))
-                {
-                    int index = lines.FindIndex(x => x.Contains("item_drop_slots = 1"));
-                    if (index != -1)
-                    {
-                        lines.Insert(index + 1, "\tbase_maximum_life = 1");
-                        lines.Insert(index + 1, "\tbase_maximum_energy_shield = 1");
-                    }
-                }
-                string newData = string.Join("\r\n", lines);
-                var newBytes = Encoding.Unicode.GetBytes(newData);
-                BackupManager.RecordOriginal(record);
-                record.Write(newBytes);
+                lines.Insert(index + 1, "\tbase_maximum_life = 1");
+                lines.Insert(index + 1, "\tbase_maximum_energy_shield = 1");
             }
         }
+        string newData = string.Join("\r\n", lines);
+        return Encoding.Unicode.GetBytes(newData);
     }
 }

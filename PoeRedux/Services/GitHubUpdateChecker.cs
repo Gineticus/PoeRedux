@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace PoeRedux.Services;
 
-public class GitHubUpdateChecker
+public static class GitHubUpdateChecker
 {
     private const string GitHubApiUrl = "https://api.github.com/repos/{0}/{1}/releases/latest";
     private static readonly HttpClient _httpClient = new()

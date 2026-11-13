@@ -1,36 +1,23 @@
 ﻿using PoeRedux.Models;
 using System.Collections.ObjectModel;
-using System.Media;
-using System.Runtime.InteropServices;
+using System.IO;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Windows;
-using System.Windows.Interop;
 
 namespace PoeRedux;
 
 public partial class ColorModsEditor : Window
 {
+    private readonly ObservableCollection<ColorModsViewModel> _colorMods;
+
     public ColorModsEditor(ObservableCollection<ColorModsViewModel> colorMods)
     {
         InitializeComponent();
+        _colorMods = colorMods;
         ColorModsItemsControl.ItemsSource = colorMods;
-        SourceInitialized += (s, e) => ApplyDarkTitleBar();
+        DarkTitleBar.Enable(this);
     }
-
-    private void ApplyDarkTitleBar()
-    {
-        if (PresentationSource.FromVisual(this) is HwndSource hwndSource)
-        {
-            IntPtr hwnd = hwndSource.Handle;
-
-            // Use DWMWA_USE_IMMERSIVE_DARK_MODE (20) for Windows 11 / Windows 10 build 19041+
-            int attribute = 20;
-            int useImmersiveDarkMode = 1;
-            DwmSetWindowAttribute(hwnd, attribute, ref useImmersiveDarkMode, sizeof(int));
-        }
-    }
-
-    [DllImport("dwmapi.dll", PreserveSig = true)]
-    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
@@ -46,12 +33,6 @@ public partial class ColorModsEditor : Window
 
     private void SaveConfigButton_Click(object sender, RoutedEventArgs e)
     {
-        var colorMods = ColorModsItemsControl.ItemsSource as ObservableCollection<ColorModsViewModel>;
-        if (colorMods == null)
-        {
-            MessageBox.Show("No color mods to save.", "Error");
-            return;
-        }
         var saveFileDialog = new Microsoft.Win32.SaveFileDialog
         {
             Filter = "JSON Files (*.json)|*.json",
@@ -61,7 +42,7 @@ public partial class ColorModsEditor : Window
         if (saveFileDialog.ShowDialog() == true)
         {
             var colorModsDict = new Dictionary<string, object>();
-            foreach (var mod in colorMods)
+            foreach (var mod in _colorMods)
             {
                 colorModsDict[mod.Name] = new
                 {
@@ -69,25 +50,19 @@ public partial class ColorModsEditor : Window
                     color = mod.SelectedColor,
                 };
             }
-            var options = new System.Text.Json.JsonSerializerOptions 
-            { 
+            var options = new JsonSerializerOptions
+            {
                 WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
-            var json = System.Text.Json.JsonSerializer.Serialize(colorModsDict, options);
-            System.IO.File.WriteAllText(saveFileDialog.FileName, json);
+            var json = JsonSerializer.Serialize(colorModsDict, options);
+            File.WriteAllText(saveFileDialog.FileName, json);
             MessageBox.Show("Color mods saved successfully.", "Success");
         }
     }
 
     private void LoadConfigButton_Click(object sender, RoutedEventArgs e)
     {
-        var colorMods = ColorModsItemsControl.ItemsSource as ObservableCollection<ColorModsViewModel>;
-        if (colorMods == null)
-        {
-            MessageBox.Show("No color mods to load.", "Error");
-            return;
-        }
         var openFileDialog = new Microsoft.Win32.OpenFileDialog
         {
             Filter = "JSON Files (*.json)|*.json",
@@ -97,21 +72,21 @@ public partial class ColorModsEditor : Window
         {
             try
             {
-                var json = System.IO.File.ReadAllText(openFileDialog.FileName);
-                var colorModsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, System.Text.Json.JsonElement>>>(json);
+                var json = File.ReadAllText(openFileDialog.FileName);
+                var colorModsDict = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(json);
                 if (colorModsDict != null)
                 {
-                    foreach (var mod in colorMods)
+                    foreach (var mod in _colorMods)
                     {
                         if (colorModsDict.TryGetValue(mod.Name, out var modData))
                         {
-                            if (modData.TryGetValue("enabled", out var enabledObj) 
-                                && (enabledObj.ValueKind == System.Text.Json.JsonValueKind.True || enabledObj.ValueKind == System.Text.Json.JsonValueKind.False))
+                            if (modData.TryGetValue("enabled", out var enabledObj)
+                                && (enabledObj.ValueKind == JsonValueKind.True || enabledObj.ValueKind == JsonValueKind.False))
                             {
                                 mod.IsSelected = enabledObj.GetBoolean();
                             }
-                            if (modData.TryGetValue("color", out var colorObj) 
-                                && colorObj.ValueKind == System.Text.Json.JsonValueKind.String)
+                            if (modData.TryGetValue("color", out var colorObj)
+                                && colorObj.ValueKind == JsonValueKind.String)
                             {
                                 mod.SelectedColor = colorObj.GetString() ?? string.Empty;
                             }

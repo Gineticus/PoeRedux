@@ -118,15 +118,15 @@
 
 Before any patch overwrites a game file, PoeRedux saves the original bytes to a local backup file. The **Restore Original** button in the app uses this backup to revert all changes for the currently selected game.
 
-Backups are stored per game under your Windows Local AppData folder:
+Backups are stored per game in your Windows Local AppData folder. Each file is backed up once, the first time a patch changes it. Applying patches that change other files later adds a new numbered archive:
 
 ```
 %LOCALAPPDATA%\PoeRedux\Backups\
-    poe1.bak    (Path of Exile 1)
-    poe2.bak    (Path of Exile 2)
+    poe1.zip, poe1.2.zip, ...    (Path of Exile 1)
+    poe2.zip, poe2.2.zip, ...    (Path of Exile 2)
 ```
 
-**Note:** If you verify game files via PackCheck or Steam, the backup is no longer needed — you can safely delete the `.bak` file manually.
+**Note:** If you verify game files via PackCheck or Steam, the backups are no longer needed. Delete them with the **Delete Backup** button or remove the `.zip` files manually.
 
 ## System Requirements
 
