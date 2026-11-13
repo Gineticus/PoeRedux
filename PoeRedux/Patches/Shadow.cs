@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using PoeRedux.Helpers;
 
 namespace PoeRedux.Patches;
 

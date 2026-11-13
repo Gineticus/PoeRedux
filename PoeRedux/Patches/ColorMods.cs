@@ -1,4 +1,5 @@
 using LibBundle3.Nodes;
+using PoeRedux.Helpers;
 using PoeRedux.Models;
 using System.Text.RegularExpressions;
 

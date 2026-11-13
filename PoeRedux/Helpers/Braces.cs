@@ -1,4 +1,4 @@
-namespace PoeRedux.Patches.Black;
+namespace PoeRedux.Helpers;
 
 internal static class Braces
 {

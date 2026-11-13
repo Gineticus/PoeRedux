@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace PoeRedux.Patches;
+namespace PoeRedux.Helpers;
 
 /// <summary>
 /// Text of .ao and .aoc files: nested blocks such as <c>client { AnimatedRender { ... } }</c>.

@@ -1,6 +1,6 @@
 using LibBundle3.Nodes;
 
-namespace PoeRedux.Patches;
+namespace PoeRedux.Helpers;
 
 /// <summary>
 /// Lookups in the game's file tree. Paths are relative to the root, separated by '/', and names match exactly.

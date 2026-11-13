@@ -1,7 +1,8 @@
 using LibBundle3.Nodes;
+using PoeRedux.Patches;
 using System.Text.RegularExpressions;
 
-namespace PoeRedux.Patches;
+namespace PoeRedux.Helpers;
 
 /// <summary>
 /// Edits of .env files, the JSON-like area settings for fog, light, weather and other effects.

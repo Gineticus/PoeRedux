@@ -1,6 +1,7 @@
+using PoeRedux.Patches;
 using System.Text;
 
-namespace PoeRedux.Patches;
+namespace PoeRedux.Helpers;
 
 /// <summary>
 /// Helpers for game text files stored as UTF-16 LE.
