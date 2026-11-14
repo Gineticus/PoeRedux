@@ -17,7 +17,8 @@ public enum PatchStage
 
 public readonly record struct PatchProgress(PatchStage Stage, int Done, int Total);
 
-public sealed record PatchResult(int FilesChecked, int FilesChanged, int FilesBackedUp);
+/// <param name="PatchesWithoutFiles">Selected patches that found no game files to work on.</param>
+public sealed record PatchResult(int FilesChecked, int FilesChanged, int FilesBackedUp, IReadOnlyList<IPatch> PatchesWithoutFiles);
 
 /// <summary>
 /// Applies patches in one pass over the index. Every targeted file is read once, grouped by bundle,
@@ -39,8 +40,15 @@ public static class PatchRunner
 
         var plan = new PatchPlan();
         var root = index.BuildTree(true);
+        var withoutFiles = new List<IPatch>();
         foreach (var patch in patches)
+        {
+            var before = plan.TransformCount;
             patch.Collect(root, plan);
+            // Either the other game is selected, or a game update moved or renamed the files.
+            if (plan.TransformCount == before)
+                withoutFiles.Add(patch);
+        }
 
         var files = plan.Files;
         using var backup = BackupManager.Begin(game);
@@ -65,7 +73,7 @@ public static class PatchRunner
             index.Save();
         }
 
-        return new(files.Count, changed, backup.Count);
+        return new(files.Count, changed, backup.Count, withoutFiles);
     }
 
     private static byte[]?[] ReadAndPatch(IReadOnlyList<PlannedFile> files, BackupSession backup, IProgress<PatchProgress>? progress)

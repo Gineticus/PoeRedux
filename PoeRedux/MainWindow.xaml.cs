@@ -219,10 +219,28 @@ public partial class MainWindow : Window
 
         try
         {
-            await Task.Run(() => UseIndex(path, index => PatchRunner.Run(index, patches, game, progress)));
+            var result = await Task.Run(() => UseIndex(path, index => PatchRunner.Run(index, patches, game, progress)));
 
-            StatusTextBlock.Text = $"Successfully applied {patches.Count} patch(es)!";
-            MessageBox.Show($"Successfully applied {patches.Count} patch(es)!", "Success");
+            // Patches that found nothing to work on: no files, or, for Color Mods, none of its mods.
+            var foundNothing = result.PatchesWithoutFiles
+                .Concat(patches.OfType<ColorMods>().Where(c => c.ModsFound == 0))
+                .Distinct()
+                .ToList();
+            if (foundNothing.Count == 0)
+            {
+                StatusTextBlock.Text = $"Successfully applied {patches.Count} patch(es)!";
+                MessageBox.Show($"Successfully applied {patches.Count} patch(es)!", "Success");
+            }
+            else
+            {
+                var applied = $"Applied {patches.Count - foundNothing.Count} of {patches.Count} patch(es).";
+                var missing = $"Nothing to patch was found for: {string.Join(", ", foundNothing.Select(p => p.Name))}.";
+                StatusTextBlock.Text = $"{applied} {missing}";
+                // The dialog shows about four lines without scrolling, so the patch count stays in the status bar.
+                MessageBox.Show(
+                    $"{missing}\nCheck that the selected game (PoE 1 or PoE 2) matches this file. If it does, PoE Redux needs an update.",
+                    "Nothing Found");
+            }
         }
         catch (Exception ex)
         {

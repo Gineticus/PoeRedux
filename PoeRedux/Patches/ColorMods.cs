@@ -21,6 +21,7 @@ public class ColorMods : IPatch
 
     private readonly string _directory;
     private readonly string _extension;
+    private int _modsFound;
 
     public ColorMods(PoeGame game)
     {
@@ -42,8 +43,15 @@ public class ColorMods : IPatch
     public string Description => "Changes colors of mods in the game.";
     public List<ColorModsOption> ColorModsOptions { get; set; }
 
+    /// <summary>
+    /// Description blocks of the mods in <see cref="ColorModsOptions"/> that the last apply found in the game files.
+    /// Zero means the game no longer has these mods where this patch looks for them.
+    /// </summary>
+    public int ModsFound => _modsFound;
+
     public void Collect(DirectoryNode root, PatchPlan plan)
     {
+        _modsFound = 0;
         var transform = Utf16.Edit(Recolor);
         foreach (var file in GameTree.FindFiles(GameTree.FindDirectory(root, _directory), _extension))
             plan.Add(file, transform);
@@ -81,9 +89,10 @@ public class ColorMods : IPatch
             {
                 case ReadState.ReadingStatName:
                     string[] words = line.Split(' ');
-                    if (words.Length >= 2
-                        && ColorModsOptions.FirstOrDefault(x => x.Name == words[1]) is { } option
-                        && Colors.TryGetValue(option.Color.ToLower(), out var rgb))
+                    var option = words.Length >= 2 ? ColorModsOptions.FirstOrDefault(x => x.Name == words[1]) : null;
+                    if (option is not null)
+                        Interlocked.Increment(ref _modsFound); // files are patched in parallel
+                    if (option is not null && Colors.TryGetValue(option.Color.ToLower(), out var rgb))
                     {
                         color = rgb;
                         enabled = option.IsEnabled;
