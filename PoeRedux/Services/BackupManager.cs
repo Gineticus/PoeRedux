@@ -106,6 +106,7 @@ public static class BackupManager
 
     /// <summary>
     /// Writes the backed-up originals of <paramref name="game"/> back to the game files and saves the index.
+    /// Files are found by path hash, so the index does not need <see cref="LibBundle3.Index.ParsePaths"/>.
     /// </summary>
     /// <returns>Number of files restored.</returns>
     public static int Restore(LibBundle3.Index index, PoeGame game, IProgress<(int Done, int Total)>? progress = null)
