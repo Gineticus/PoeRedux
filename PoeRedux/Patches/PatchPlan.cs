@@ -19,6 +19,11 @@ public sealed class PatchPlan
 
     public IReadOnlyList<PlannedFile> Files => _files;
 
+    /// <summary>
+    /// Number of transforms added so far, over all files. A patch that adds none found no files to work on.
+    /// </summary>
+    public int TransformCount { get; private set; }
+
     public void Add(FileNode file, FileTransform transform) => Add(file.Record, transform);
 
     public void Add(FileRecord record, FileTransform transform)
@@ -30,6 +35,7 @@ public sealed class PatchPlan
             _files.Add(planned);
         }
         planned.Transforms.Add(transform);
+        TransformCount++;
     }
 }
 
