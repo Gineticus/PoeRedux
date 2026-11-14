@@ -33,7 +33,7 @@ public class ColorMods : IPatch
         else
         {
             _directory = "metadata/statdescriptions";
-            _extension = ".txt";
+            _extension = ".csd";
             ColorModsOptions = Poe1Options();
         }
     }
@@ -135,7 +135,9 @@ public class ColorMods : IPatch
     [
         // maps and more
         new ColorModsOption("map_monsters_reflect_%_physical_damage", "yellow", true),
+        new ColorModsOption("map_rare_monsters_physical_thorns_for_x_damage", "yellow", true),
         new ColorModsOption("map_monsters_reflect_%_elemental_damage", "green", true),
+        new ColorModsOption("map_rare_monsters_elemental_thorns_for_x_damage", "green", true),
         new ColorModsOption("map_player_cannot_expose", "red", true),
         new ColorModsOption("map_players_no_regeneration_including_es", "red", true),
         new ColorModsOption("map_player_non_curse_aura_effect_+%", "red", true),

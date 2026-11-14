@@ -38,12 +38,7 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Applying patches is faster and uses less memory. Only files that patches change are written and backed up.
-          - Fixed the "being used by another process" error and growing memory use when patches are applied again without restarting the app.
-          - If a patch fails, game files are left unchanged.
-          - While patches are applied, the window shows how many files are done out of the total.
-          - Delete Backup and the Game selector are disabled while Apply Patches or Restore Original is running.
-          - Backups made by older versions can still be restored with Restore Original.
+          - Fixed Color Mods patch not working.
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`
