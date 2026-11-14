@@ -38,7 +38,9 @@ jobs:
           ## PoE Redux ${{ github.ref_name }}
 
           ### Changelog
-          - Fixed Color Mods patch not working.
+          - Apply Patches now warns when a selected patch finds nothing to patch, for example when the other game is selected or a game update moved the files.
+          - Restore Original takes about 3 seconds less on PoE 2 and 2 seconds less on PoE 1.
+          - After Apply Patches and Restore Original, PoE Redux gives the memory it used back to Windows instead of keeping several gigabytes.
           
           ### Installation
           1. Download `PoeRedux-${{ github.ref_name }}-win-x64.exe`
