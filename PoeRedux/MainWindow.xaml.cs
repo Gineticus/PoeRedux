@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -317,14 +318,30 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Opens the game index of a Steam install (_.index.bin) or a standalone one (Content.ggpk)
-    /// and runs <paramref name="action"/> on it.
+    /// Opens the game index of a Steam install (_.index.bin) or a standalone one (Content.ggpk),
+    /// runs <paramref name="action"/> on it, and gives the memory it used back to Windows.
     /// </summary>
     /// <param name="parsePaths">
     /// Whether to read the file paths. Apply needs them to build the file tree. Restore finds files by
     /// path hash and skips this, which saves 2 s on PoE 1 and 3.5 s on PoE 2.
     /// </param>
     private static T UseIndex<T>(string path, bool parsePaths, Func<LibBundle3.Index, T> action)
+    {
+        try
+        {
+            return OpenIndexAndRun(path, parsePaths, action);
+        }
+        finally
+        {
+            // The index has millions of records. Once it is closed, the .NET GC keeps the freed memory
+            // (about 3 GB for PoE 2) for later use; an aggressive collection returns it so the game can use it.
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+        }
+    }
+
+    // Kept out of line, so that nothing in UseIndex still points to the index during the collection.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static T OpenIndexAndRun<T>(string path, bool parsePaths, Func<LibBundle3.Index, T> action)
     {
         if (path.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
         {
