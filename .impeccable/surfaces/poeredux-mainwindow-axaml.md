@@ -17,11 +17,11 @@ Constraints: native Avalonia controls only (CheckBox, ToggleSwitch, Slider, Comb
 
 THESIS: The window speaks the loot filter's color language: a mod group is a drop label, and the player sees on a waystone preview exactly how the game will print each line. It refuses the grey settings list with one accent.
 
-OWN-WORLD: Near-black stage (#0b0c0f) with one raised panel tone (#14161b, #1b1d23 for selection); white text; amber (#ffb000) for the primary action and checked state; mod group inks as drop-label chips: colored text on a dark tint of the same hue with a 2 px border of the hue. Segoe UI throughout, tabular figures for counts.
+OWN-WORLD: Near-black stage (#0b0c0f) with one raised panel tone (#14161b, #1b1d23 for selection); white text; light blue (#4AA8FF) for the primary action and checked state, pinned by the user on 18 Nov 2026 in place of amber; amber (#F0B429) only for warnings; mod group inks as drop-label chips: colored text on a dark tint of the same hue with a 2 px border of the hue. Segoe UI throughout, tabular figures for counts.
 
 STORY: The player sees which game and file are loaded, which patches are on and what each changes, previews mod colors as the game will show them, applies, and can always restore the originals.
 
-FIRST VIEWPORT: Top bar: name, PoE 1 / PoE 2 switch, game file path with Browse. Left column (about 460 px): patch list grouped Readability / Map and camera / Visual noise, each row a toggle, name and a short value (zoom 2.4, 5 of 7). Right area: the selected patch's settings; for Color Mods the group chips and a waystone or map tooltip preview with real mod lines in group colors. Footer: backup state and Restore Original on the left, Apply N patches in amber on the right.
+FIRST VIEWPORT: Top bar: name, PoE 1 / PoE 2 switch, game file path with Browse. Left column (about 460 px): patch list grouped Readability / Map and camera / Visual noise, each row a toggle, name and a short value (zoom 2.4, 5 of 7). Right area: the selected patch's settings; for Color Mods the group chips and a waystone or map tooltip preview with real mod lines in group colors. Footer: backup state and Restore Original on the left, Apply N patches in light blue on the right.
 
 FORM: Loot Filter Tiers, my top-ranked grounded candidate (position 1 on the list), chosen by the user as the pick card. seed:b5e264db2d2ad2cb
 

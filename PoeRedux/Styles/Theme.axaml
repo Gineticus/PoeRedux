@@ -57,29 +57,29 @@
     <Setter Property="Background" Value="{StaticResource HairlineBrush}" />
   </Style>
 
-  <!-- Buttons: amber for the one main action, outlined for the rest, plain text for small actions. -->
+  <!-- Buttons: light blue for the one main action, outlined for the rest, plain text for small actions. -->
   <Style Selector="Button">
     <Setter Property="CornerRadius" Value="5" />
     <Setter Property="Padding" Value="14,7" />
     <Setter Property="FontSize" Value="14" />
   </Style>
   <Style Selector="Button.primary">
-    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Background" Value="{StaticResource AccentBrush}" />
     <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
     <Setter Property="FontWeight" Value="Bold" />
     <Setter Property="Padding" Value="22,10" />
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AmberHoverColor}" />
+    <Setter Property="Background" Value="{StaticResource AccentHoverColor}" />
     <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
   </Style>
   <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AmberPressedColor}" />
+    <Setter Property="Background" Value="{StaticResource AccentPressedColor}" />
     <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
   </Style>
   <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#3A3322" />
-    <Setter Property="Foreground" Value="#9C8F72" />
+    <Setter Property="Background" Value="#1D2A38" />
+    <Setter Property="Foreground" Value="#7F93A8" />
   </Style>
   <Style Selector="Button.outline">
     <Setter Property="Background" Value="Transparent" />
@@ -130,10 +130,10 @@
     <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
   </Style>
   <Style Selector="RadioButton.segment:checked /template/ Border#Segment">
-    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Background" Value="{StaticResource AccentBrush}" />
   </Style>
   <Style Selector="RadioButton.segment:focus-visible /template/ Border#Segment">
-    <Setter Property="BoxShadow" Value="0 0 0 2 #FFC23D" />
+    <Setter Property="BoxShadow" Value="0 0 0 2 #8CCBFF" />
   </Style>
 
   <!-- A patch row: selecting it shows its settings; its toggle decides whether Apply uses it. -->
@@ -156,7 +156,7 @@
     <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
   </Style>
   <Style Selector="RadioButton.patch:focus-visible /template/ Border#Row">
-    <Setter Property="BoxShadow" Value="inset 0 0 0 2 #FFC23D" />
+    <Setter Property="BoxShadow" Value="inset 0 0 0 2 #8CCBFF" />
   </Style>
 
   <Style Selector="ToggleSwitch">
@@ -167,8 +167,8 @@
 
   <Style Selector="TextBox">
     <Setter Property="CornerRadius" Value="5" />
-    <Setter Property="SelectionBrush" Value="#66FFB000" />
-    <Setter Property="CaretBrush" Value="{StaticResource AmberBrush}" />
+    <Setter Property="SelectionBrush" Value="#664AA8FF" />
+    <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}" />
   </Style>
   <Style Selector="TextBox.path">
     <Setter Property="FontFamily" Value="{StaticResource PathFont}" />
@@ -192,6 +192,6 @@
   </Style>
 
   <Style Selector="Slider">
-    <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
   </Style>
 </Styles>

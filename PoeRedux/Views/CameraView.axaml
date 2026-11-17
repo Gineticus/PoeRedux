@@ -7,7 +7,7 @@
     <Grid ColumnDefinitions="*,Auto">
       <TextBlock Text="Default zoom" Classes="heading" VerticalAlignment="Bottom" />
       <TextBlock Grid.Column="1" Text="{Binding ZoomText}" FontSize="28" FontWeight="SemiBold"
-                 Foreground="{StaticResource AmberBrush}" FontFeatures="+tnum" />
+                 Foreground="{StaticResource AccentBrush}" FontFeatures="+tnum" />
     </Grid>
     <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Zoom}"
             TickFrequency="0.1" IsSnapToTickEnabled="True" SmallChange="0.1" LargeChange="0.2"
