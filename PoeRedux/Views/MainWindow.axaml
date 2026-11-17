@@ -91,7 +91,7 @@
     </Border>
 
     <!-- Patches on the left, the chosen patch's settings on the right. -->
-    <Grid Grid.Row="2" ColumnDefinitions="440,*" Margin="0,8,0,0">
+    <Grid Grid.Row="2" ColumnDefinitions="400,*" Margin="0,8,0,0">
       <ScrollViewer Grid.Column="0" Padding="12,4,12,16" IsEnabled="{Binding IsIdle}">
         <ItemsControl ItemsSource="{Binding Groups}">
           <ItemsControl.ItemTemplate>
