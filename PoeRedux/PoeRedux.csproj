@@ -27,7 +27,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="LibGGPK3.LibBundledGGPK3" Version="2.7.5" />
+    <ProjectReference Include="..\PoeRedux.Core\PoeRedux.Core.csproj" />
   </ItemGroup>
 
 </Project>
