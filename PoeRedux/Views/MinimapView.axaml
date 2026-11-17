@@ -9,7 +9,7 @@
         <Grid ColumnDefinitions="*,Auto">
           <TextBlock Text="Unexplored areas" Classes="heading" />
           <TextBlock Grid.Column="1" Text="{Binding RevealPercent, StringFormat='{}{0:0}%'}" Classes="number"
-                     Foreground="{StaticResource AmberBrush}" FontWeight="SemiBold" />
+                     Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" />
         </Grid>
         <Slider Minimum="0" Maximum="100" Value="{Binding RevealPercent}" TickFrequency="1" IsSnapToTickEnabled="True"
                 AutomationProperties.Name="How strongly unexplored areas show" />

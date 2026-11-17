@@ -10,8 +10,8 @@ public sealed record ModColorDefault(string Key, string Group, string? Category 
 /// <summary>
 /// Which mod lines are colored out of the box, and in which group.
 /// <para>
-/// The first part of each list is what PoE Redux colored before groups existed (red, green, yellow, blue
-/// and pink became Dangerous, Annoying, Good, Great and Neutral). Entries were dropped when no mod in the
+/// The first part of each list is what PoE Redux colored before groups existed: lines that were red, green,
+/// yellow, blue and pink are now in Dangerous, Annoying, Good, Great and Neutral. Entries were dropped when no mod in the
 /// game uses the stat any more, checked against Mods.datc64 on 18 Nov 2026.
 /// </para>
 /// <para>

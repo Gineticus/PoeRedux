@@ -31,14 +31,15 @@ public sealed class ModColorGroup(string id, Rgb defaultColor)
     public Rgb Color { get; set; } = defaultColor;
 
     /// <summary>
-    /// The five groups. Their default colors are the five colors PoE Redux used before groups existed,
-    /// so a default apply writes the same text as before.
+    /// The five groups. Red, blue and pink are the colors PoE Redux used before groups existed. Green and yellow
+    /// swapped meaning: green used to mark annoying mods and yellow good ones; now Good is green and Annoying is
+    /// yellow, as players read them.
     /// </summary>
     public static List<ModColorGroup> CreateDefaults() =>
     [
         new(ModColorDefaults.Dangerous, new Rgb(209, 46, 46)),
-        new(ModColorDefaults.Annoying, new Rgb(74, 230, 58)),
-        new(ModColorDefaults.Good, new Rgb(255, 204, 27)),
+        new(ModColorDefaults.Annoying, new Rgb(255, 204, 27)),
+        new(ModColorDefaults.Good, new Rgb(74, 230, 58)),
         new(ModColorDefaults.Great, new Rgb(14, 186, 255)),
         new(ModColorDefaults.Neutral, new Rgb(227, 158, 255)),
     ];

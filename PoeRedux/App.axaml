@@ -5,7 +5,7 @@
 
   <Application.Resources>
     <ResourceDictionary>
-      <!-- Palette: a near-black stage, one raised panel tone, white text, amber for the main action and
+      <!-- Palette: a near-black stage, one raised panel tone, white text, light blue for the main action and
            for anything switched on. Mod group colors come from the data and are not listed here. -->
       <Color x:Key="StageColor">#0B0C0F</Color>
       <Color x:Key="PanelColor">#14161B</Color>
@@ -14,9 +14,10 @@
       <Color x:Key="TextColor">#ECECEC</Color>
       <Color x:Key="SecondaryTextColor">#A9ADB6</Color>
       <Color x:Key="MutedTextColor">#8A8F99</Color>
-      <Color x:Key="AmberColor">#FFB000</Color>
-      <Color x:Key="AmberHoverColor">#FFC23D</Color>
-      <Color x:Key="AmberPressedColor">#E09A00</Color>
+      <Color x:Key="AccentColor">#4AA8FF</Color>
+      <Color x:Key="AccentHoverColor">#6DBAFF</Color>
+      <Color x:Key="AccentPressedColor">#2E8FE6</Color>
+      <Color x:Key="WarningColor">#F0B429</Color>
       <Color x:Key="DangerColor">#FF6B5E</Color>
       <Color x:Key="SuccessColor">#7BDB6E</Color>
       <Color x:Key="InfoColor">#5CC8FF</Color>
@@ -30,7 +31,8 @@
       <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
       <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
       <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
-      <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource AmberColor}" />
+      <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+      <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
       <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
       <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
       <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}" />
@@ -57,7 +59,7 @@
     <FluentTheme>
       <FluentTheme.Palettes>
         <ColorPaletteResources x:Key="Dark"
-                               Accent="#FFB000"
+                               Accent="#4AA8FF"
                                RegionColor="#0B0C0F"
                                AltHigh="#0B0C0F"
                                ChromeMediumLow="#14161B"

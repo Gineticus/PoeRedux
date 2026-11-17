@@ -82,7 +82,7 @@
         <Panel Grid.Column="0" Margin="0,2,12,0" VerticalAlignment="Top">
           <Path Classes="icon" Data="{StaticResource IconCheck}" Stroke="{StaticResource SuccessBrush}"
                 IsVisible="{Binding Notice.IsSuccess, FallbackValue=False}" />
-          <Path Classes="icon" Data="{StaticResource IconWarning}" Stroke="{StaticResource AmberBrush}"
+          <Path Classes="icon" Data="{StaticResource IconWarning}" Stroke="{StaticResource WarningBrush}"
                 IsVisible="{Binding Notice.IsWarning, FallbackValue=False}" />
           <Path Classes="icon" Data="{StaticResource IconWarning}" Stroke="{StaticResource DangerBrush}"
                 IsVisible="{Binding Notice.IsError, FallbackValue=False}" />
@@ -169,7 +169,7 @@
           <TextBlock Text="{Binding Stage}" Classes="secondary number" />
           <ProgressBar Value="{Binding Progress}" Maximum="{Binding ProgressMax}"
                        IsIndeterminate="{Binding ProgressIsIndeterminate}" Height="4" MinHeight="4"
-                       Foreground="{StaticResource AmberBrush}" />
+                       Foreground="{StaticResource AccentBrush}" />
         </StackPanel>
 
         <Button Grid.Column="4" Classes="primary" Content="{Binding ApplyText}" Command="{Binding ApplyCommand}"
