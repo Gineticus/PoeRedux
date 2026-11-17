@@ -2,15 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:PoeRedux.ViewModels"
         xmlns:views="using:PoeRedux.Views"
-        xmlns:chrome="using:Avalonia.Controls.Chrome"
         x:Class="PoeRedux.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="PoE Redux"
         Icon="avares://PoeRedux/Assets/icon.ico"
         Width="1240" Height="800" MinWidth="1040" MinHeight="640"
-        WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="52">
+        WindowStartupLocation="CenterScreen">
 
   <Window.DataTemplates>
     <DataTemplate DataType="vm:ColorModsViewModel"><views:ColorModsView /></DataTemplate>
@@ -23,17 +20,12 @@
 
   <Grid RowDefinitions="52,Auto,*,Auto">
 
-    <!-- Title bar: name, game, game file. The window's own buttons sit on the right. -->
-    <Border Grid.Row="0" chrome:WindowDecorationProperties.ElementRole="TitleBar"
+    <!-- Game and game file. -->
+    <Border Grid.Row="0"
             BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1">
-      <Grid ColumnDefinitions="Auto,Auto,*,Auto,150" Margin="16,0,0,0" IsEnabled="{Binding IsIdle}">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-          <Image Source="avares://PoeRedux/Assets/icon.ico" Width="20" Height="20" />
-          <TextBlock Text="PoE Redux" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
-        </StackPanel>
-
-        <Border Grid.Column="1" Margin="20,0,16,0" Padding="3" CornerRadius="6" VerticalAlignment="Center"
-                Background="{StaticResource PanelBrush}" chrome:WindowDecorationProperties.ElementRole="User">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0" IsEnabled="{Binding IsIdle}">
+        <Border Grid.Column="0" Margin="0,0,16,0" Padding="3" CornerRadius="6" VerticalAlignment="Center"
+                Background="{StaticResource PanelBrush}">
           <StackPanel Orientation="Horizontal" Spacing="2">
             <RadioButton Classes="segment" GroupName="game" Content="PoE 1" IsChecked="{Binding IsPoe1}"
                          ToolTip.Tip="Path of Exile" />
@@ -42,9 +34,8 @@
           </StackPanel>
         </Border>
 
-        <Grid Grid.Column="2" ColumnDefinitions="*,Auto" VerticalAlignment="Center"
-              chrome:WindowDecorationProperties.ElementRole="User">
-          <TextBox Classes="path" Text="{Binding GamePath}" VerticalContentAlignment="Center"
+        <Grid Grid.Column="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+          <TextBox Classes="path" Classes.invalid="{Binding HasPathError}" Text="{Binding GamePath}" VerticalContentAlignment="Center"
                    PlaceholderText="Content.ggpk or Bundles2\_.index.bin"
                    ToolTip.Tip="{Binding PathProblem}" />
           <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Command="{Binding BrowseCommand}">
@@ -55,9 +46,9 @@
           </Button>
         </Grid>
 
-        <Button Grid.Column="3" Classes="text" Margin="12,0,0,0" VerticalAlignment="Center"
+        <Button Grid.Column="2" Classes="text" Margin="12,0,0,0" VerticalAlignment="Center"
                 IsVisible="{Binding UpdateText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                Command="{Binding OpenUpdateCommand}" chrome:WindowDecorationProperties.ElementRole="User">
+                Command="{Binding OpenUpdateCommand}">
           <StackPanel Orientation="Horizontal" Spacing="6">
             <Path Classes="icon" Data="{StaticResource IconArrowUp}" Stroke="{StaticResource SuccessBrush}" />
             <TextBlock Text="{Binding UpdateText}" Foreground="{StaticResource SuccessBrush}" />

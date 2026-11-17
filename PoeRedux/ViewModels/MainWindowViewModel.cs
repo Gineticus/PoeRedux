@@ -61,7 +61,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(PathProblem))]
+    [NotifyPropertyChangedFor(nameof(PathProblem), nameof(HasPathError))]
     [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(RestoreCommand))]
     public partial string GamePath { get; set; } = "";
 
@@ -106,6 +106,9 @@ public partial class MainWindowViewModel : ObservableObject
         1 => "Apply 1 patch",
         _ => $"Apply {SelectedCount} patches",
     };
+
+    /// <summary>A path was typed or chosen, and it cannot be used.</summary>
+    public bool HasPathError => GamePath.Trim().Length > 0 && PathProblem is not null;
 
     /// <summary>Why the game file cannot be used, or null when it can.</summary>
     public string? PathProblem =>
