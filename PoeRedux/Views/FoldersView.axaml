@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PoeRedux.ViewModels"
+             x:Class="PoeRedux.Views.FoldersView"
+             x:DataType="vm:FoldersViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <TextBlock Classes="secondary" TextWrapping="Wrap" Margin="0,0,0,12"
+               Text="Files in these folders stay as they are. A folder also keeps every folder whose name starts the same way." />
+
+    <StackPanel Grid.Row="1" Spacing="6" Margin="0,0,0,16">
+      <Grid ColumnDefinitions="*,Auto">
+        <AutoCompleteBox Text="{Binding NewFolder}" ItemsSource="{Binding Suggestions}" FilterMode="Contains"
+                         PlaceholderText="{Binding Root, StringFormat='{}{0}…'}" FontFamily="{StaticResource PathFont}"
+                         FontSize="13" MaxDropDownHeight="320" AutomationProperties.Name="Folder to keep" />
+        <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Command="{Binding AddCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Path Classes="icon" Data="{StaticResource IconPlus}" />
+            <TextBlock Text="Keep folder" />
+          </StackPanel>
+        </Button>
+      </Grid>
+      <TextBlock Classes="muted" Text="{Binding FolderListNote}" IsVisible="{Binding FolderListNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+
+    <ScrollViewer Grid.Row="2">
+      <ItemsControl ItemsSource="{Binding Kept}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <Border Padding="0,3" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1">
+              <Grid ColumnDefinitions="*,Auto">
+                <SelectableTextBlock Text="{Binding}" FontFamily="{StaticResource PathFont}" FontSize="13"
+                                     VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Classes="text" ToolTip.Tip="Stop keeping this folder"
+                        Command="{Binding $parent[UserControl].((vm:FoldersViewModel)DataContext).RemoveCommand}"
+                        CommandParameter="{Binding}">
+                  <Path Classes="icon" Data="{StaticResource IconClose}" />
+                </Button>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

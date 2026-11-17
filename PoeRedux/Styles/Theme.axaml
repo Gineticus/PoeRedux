@@ -1,0 +1,197 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource StageBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+
+  <!-- Type scale: 20 / 15 / 14 / 12.5, one family. -->
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.heading">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.group">
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.secondary">
+    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.small">
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+  <Style Selector="TextBlock.muted">
+    <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+  <Style Selector="TextBlock.number">
+    <Setter Property="FontFeatures" Value="+tnum" />
+  </Style>
+
+  <!-- Icons are open strokes, drawn at 16 x 16. -->
+  <Style Selector="Path.icon">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Stretch" Value="None" />
+    <Setter Property="StrokeThickness" Value="1.5" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+    <Setter Property="Stroke" Value="{Binding $parent[ContentPresenter].Foreground, FallbackValue={StaticResource TextBrush}}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+  <Style Selector="Border.rule">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{StaticResource HairlineBrush}" />
+  </Style>
+
+  <!-- Buttons: amber for the one main action, outlined for the rest, plain text for small actions. -->
+  <Style Selector="Button">
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="Padding" Value="14,7" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Padding" Value="22,10" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AmberHoverColor}" />
+    <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AmberPressedColor}" />
+    <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#3A3322" />
+    <Setter Property="Foreground" Value="#9C8F72" />
+  </Style>
+  <Style Selector="Button.outline">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="#3A3E49" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="Button.outline:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
+    <Setter Property="BorderBrush" Value="#4A4F5C" />
+  </Style>
+  <Style Selector="Button.text">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="8,5" />
+    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+  </Style>
+  <Style Selector="Button.text:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="#5A1C17" />
+    <Setter Property="Foreground" Value="#FFE1DD" />
+  </Style>
+  <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#702219" />
+    <Setter Property="Foreground" Value="#FFFFFF" />
+  </Style>
+
+  <!-- PoE 1 / PoE 2 switch: two radio buttons drawn as one segmented control. -->
+  <Style Selector="RadioButton.segment">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Segment" Background="Transparent" Padding="14,6" CornerRadius="4">
+          <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center"
+                            Foreground="{TemplateBinding Foreground}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="RadioButton.segment:pointerover /template/ Border#Segment">
+    <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
+  </Style>
+  <Style Selector="RadioButton.segment:checked">
+    <Setter Property="Foreground" Value="{StaticResource StageBrush}" />
+  </Style>
+  <Style Selector="RadioButton.segment:checked /template/ Border#Segment">
+    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+  </Style>
+  <Style Selector="RadioButton.segment:focus-visible /template/ Border#Segment">
+    <Setter Property="BoxShadow" Value="0 0 0 2 #FFC23D" />
+  </Style>
+
+  <!-- A patch row: selecting it shows its settings; its toggle decides whether Apply uses it. -->
+  <Style Selector="RadioButton.patch">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Row" Background="Transparent" CornerRadius="5" Padding="12,9">
+          <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="Stretch" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.patch:pointerover /template/ Border#Row">
+    <Setter Property="Background" Value="#16181E" />
+  </Style>
+  <Style Selector="RadioButton.patch:checked /template/ Border#Row">
+    <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
+  </Style>
+  <Style Selector="RadioButton.patch:focus-visible /template/ Border#Row">
+    <Setter Property="BoxShadow" Value="inset 0 0 0 2 #FFC23D" />
+  </Style>
+
+  <Style Selector="ToggleSwitch">
+    <Setter Property="OnContent" Value="" />
+    <Setter Property="OffContent" Value="" />
+    <Setter Property="MinWidth" Value="0" />
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="SelectionBrush" Value="#66FFB000" />
+    <Setter Property="CaretBrush" Value="{StaticResource AmberBrush}" />
+  </Style>
+  <Style Selector="TextBox.path">
+    <Setter Property="FontFamily" Value="{StaticResource PathFont}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="ScrollBar">
+    <Setter Property="AllowAutoHide" Value="True" />
+  </Style>
+
+  <!-- Mod group chip, in the drop-label style of loot filters: the group's color as text and border over a
+       dark tint of the same hue. -->
+  <Style Selector="Border.chip">
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="Padding" Value="10,4" />
+  </Style>
+  <Style Selector="Border.chip TextBlock">
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+  </Style>
+</Styles>

@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PoeRedux.ViewModels"
+             x:Class="PoeRedux.Views.ColorModsView"
+             x:DataType="vm:ColorModsViewModel">
+  <Grid RowDefinitions="Auto,*">
+
+    <!-- Groups, as loot filter drop labels. Click one to change its color. -->
+    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,18">
+      <ItemsControl ItemsSource="{Binding Groups}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ModGroupViewModel">
+            <Button Padding="0" Margin="0,0,10,8" Background="Transparent" BorderThickness="0"
+                    ToolTip.Tip="Change the color of this group"
+                    AutomationProperties.Name="{Binding Name, StringFormat='{}{0} color'}">
+              <Border Classes="chip" BorderBrush="{Binding Brush}" Background="{Binding TintBrush}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" />
+                  <TextBlock Text="{Binding Count}" Foreground="{Binding Brush}" Opacity="0.8" FontWeight="Normal"
+                             FontFeatures="+tnum" />
+                </StackPanel>
+              </Border>
+              <Button.Flyout>
+                <Flyout Placement="BottomEdgeAlignedLeft">
+                  <StackPanel Spacing="10" Width="300">
+                    <TextBlock Text="{Binding Name}" Classes="heading" />
+                    <ColorView Color="{Binding Color}" IsAlphaEnabled="False" IsAlphaVisible="False"
+                               IsColorPaletteVisible="False" IsAccentColorsVisible="False" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,24,330">
+      <!-- Every mod line the game has for maps or waystones, plus strongboxes, expeditions and altars. -->
+      <Grid Grid.Column="0" RowDefinitions="Auto,*">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+          <TextBox Text="{Binding Search}" PlaceholderText="Find a mod line" />
+          <ComboBox Grid.Column="1" Margin="8,0,0,0" ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter}"
+                    MinWidth="140">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:LineFilter">
+                <TextBlock Text="{Binding Converter={x:Static vm:LabelConverter.Instance}}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+        <ScrollViewer Grid.Row="1" Padding="0,0,12,0">
+          <StackPanel>
+            <TextBlock Classes="secondary" Margin="0,8" IsVisible="{Binding HasNoMatches}"
+                       Text="No mod line matches. Clear the search or show all lines." TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding Categories}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ModCategoryViewModel">
+                  <StackPanel Margin="0,4,0,10">
+                    <TextBlock Classes="group" Text="{Binding Title}" Margin="0,0,0,4" />
+                    <ItemsControl ItemsSource="{Binding Lines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ModLineViewModel">
+                          <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,1">
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsOn}" VerticalAlignment="Center"
+                                      AutomationProperties.Name="{Binding Text}" />
+                            <Button Grid.Column="1" Classes="text" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left" Padding="4,4"
+                                    Command="{Binding $parent[UserControl].((vm:ColorModsViewModel)DataContext).SelectLineCommand}"
+                                    CommandParameter="{Binding}">
+                              <TextBlock Text="{Binding Text}" Foreground="{Binding Brush}" TextWrapping="Wrap" />
+                            </Button>
+                            <ComboBox Grid.Column="2" Margin="8,0,0,0" MinWidth="120" VerticalAlignment="Center"
+                                      ItemsSource="{Binding Groups}" SelectedItem="{Binding Group}"
+                                      AutomationProperties.Name="Group">
+                              <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ModGroupViewModel">
+                                  <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Border Width="10" Height="10" CornerRadius="2" Background="{Binding Brush}"
+                                            VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Name}" />
+                                  </StackPanel>
+                                </DataTemplate>
+                              </ComboBox.ItemTemplate>
+                            </ComboBox>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+
+      <!-- The preview: lines as the game prints them on the item. -->
+      <StackPanel Grid.Column="2" Spacing="10">
+        <Border Background="#050505" BorderBrush="#3A3A3A" BorderThickness="1" CornerRadius="2">
+          <StackPanel>
+            <Border Background="#1A1712" BorderBrush="#3A3A3A" BorderThickness="0,0,0,1" Padding="8,7">
+              <TextBlock Text="{Binding ItemName}" HorizontalAlignment="Center" Foreground="#D6D2C8" FontSize="15" />
+            </Border>
+            <ItemsControl ItemsSource="{Binding PreviewLines}" Margin="12,10,12,12">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ModLineViewModel">
+                  <TextBlock Text="{Binding Sample}" Foreground="{Binding Brush}" TextAlignment="Center"
+                             TextWrapping="Wrap" Margin="0,2" FontSize="13.5" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="Sample values. Lines without a check mark keep the game's own blue." />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>
