@@ -40,7 +40,7 @@
                      VerticalAlignment="Center" MinWidth="40" TextAlignment="Right" />
         </Grid>
         <TextBlock Classes="muted" TextWrapping="Wrap"
-                   Text="The game brightens the edge color many times over, so a low opacity is already clearly visible." />
+                   Text="The game makes the edge color 12 times brighter, so a low opacity already shows clearly." />
       </StackPanel>
     </StackPanel>
 

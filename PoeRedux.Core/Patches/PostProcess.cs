@@ -12,14 +12,14 @@ public class PostProcess : SwitchPatch
 {
     public override string Id => "post-process";
     public override string Name => "Screen Filters";
-    public override string Description => "Turns off the dark screen edges, background blur and gray-out.";
+    public override string Description => "Turns off dark screen edges, background blur and gray-out.";
     public override PatchGroup Group => PatchGroup.VisualNoise;
 
     public override IReadOnlyList<PatchSwitch> Switches { get; } =
     [
         new("vignette", "Dark screen edges", t => t.Replace("if( vignette_enable )", "if( 0 )", StringComparison.Ordinal)),
         new("depth_of_field", "Background blur", t => t.Replace("if ( dof_enable )", "if ( 0 )", StringComparison.Ordinal)),
-        new("desaturation", "Gray-out on low life or when chilled", t => t.Replace("if( desaturation_enable )", "if( 0 )", StringComparison.Ordinal)),
+        new("desaturation", "Gray-out", t => t.Replace("if( desaturation_enable )", "if( 0 )", StringComparison.Ordinal)),
     ];
 
     public override void Collect(DirectoryNode root, PatchPlan plan)

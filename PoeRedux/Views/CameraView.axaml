@@ -17,6 +17,6 @@
       <TextBlock Grid.Column="1" Classes="muted" Text="2.4: farther" HorizontalAlignment="Right" />
     </Grid>
     <TextBlock Classes="secondary" TextWrapping="Wrap"
-               Text="Sets the zoom the camera starts at in every area. Scenes that move or zoom the camera on their own, such as some boss intros, are told not to." />
+               Text="The camera starts at this zoom in every area. Camera moves that the game scripts into some objects are removed, so the zoom stays where you set it." />
   </StackPanel>
 </UserControl>

@@ -7,7 +7,7 @@ public class BlackScreen : IPatch
 {
     public string Id => "black-screen";
     public string Name => "Black Screen";
-    public string Description => "Draws almost nothing but the interface. Experimental.";
+    public string Description => "Makes the game screen black. Experimental.";
     public PatchGroup Group => PatchGroup.Experimental;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
