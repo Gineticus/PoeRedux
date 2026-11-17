@@ -108,6 +108,9 @@ public sealed partial class ModLineViewModel : ObservableObject
         }
     }
 
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void SetGroup(ModGroupViewModel group) => Group = group;
+
     /// <summary>The color the game will print this line in after Apply.</summary>
     public IBrush Brush => IsOn ? Group.Brush : ModBlue;
 
