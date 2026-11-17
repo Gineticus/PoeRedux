@@ -17,7 +17,6 @@ namespace PoeRedux;
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<PatchViewModel> _patches = new();
-    private readonly ObservableCollection<ColorModsViewModel> _colorMods = new();
     private string _ggpkPath = string.Empty;
     private string? _updateDownloadUrl;
 
@@ -38,105 +37,14 @@ public partial class MainWindow : Window
 
     private PoeGame SelectedGame => GameSelector.SelectedIndex == 1 ? PoeGame.PoE2 : PoeGame.PoE1;
 
-    private static IPatch[] CreatePatches(PoeGame game)
-    {
-        if (game == PoeGame.PoE1)
-        {
-            return
-            [
-                new Camera(),
-                new Minimap(),
-                new ColorMods(PoeGame.PoE1),
-                new MonsterHP(),
-                new Fog(),
-                new EnvironmentParticles(),
-                new Shadow(),
-                new Light(),
-                new Corpse(),
-                new Delirium(),
-                new Particles(),
-                new Effects(),
-                new BlackScreen(),
-                // new Aoc(),
-                // new Env(),
-                // new Epk(),
-                // new Ffx(),
-                // new Hlsl(),
-                // new Mat(),
-                // new NoCorpse(),
-                // new Pet(),
-            ];
-        }
-
-        return
-        [
-            new Camera(),
-            new Minimap(),
-            new ColorMods(PoeGame.PoE2),
-            new MonsterHP(),
-            new AtlasFog(),
-            new Fog(),
-            new Rain(),
-            new Clouds(),
-            new EnvironmentParticles2(),
-            new Shadow(),
-            new Light(),
-            new Delirium(),
-            new Particles(),
-            new Effects(),
-            new BlackScreen(),
-            // new Aoc(),
-            // new Env(),
-            // new Epk(),
-            // new Ffx(),
-            // new Hlsl(),
-            // new Mat(),
-            // new NoCorpse(),
-            // new Pet(),
-        ];
-    }
+    private static List<IPatch> CreatePatches(PoeGame game) => PatchCatalog.Create(game);
 
     private void GameSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         _patches.Clear();
-        _colorMods.Clear();
-
         foreach (var patch in CreatePatches(SelectedGame))
-        {
             _patches.Add(new PatchViewModel(patch));
-            if (patch is ColorMods colorMods)
-            {
-                foreach (var option in colorMods.ColorModsOptions)
-                    _colorMods.Add(new ColorModsViewModel(option.Copy()));
-            }
-        }
-
-        // The first call comes from InitializeComponent, before the controls below the selector exist.
-        if (ModsColorsButton != null)
-            ModsColorsButton.Visibility = _colorMods.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-
         UpdateRestoreButtonState();
-    }
-
-    private void ModsColorsButton_Click(object sender, RoutedEventArgs e)
-    {
-        var result = ColorModsEditor.Show(_colorMods);
-        if (result == true)
-        {
-            foreach (var colorMod in _colorMods)
-            {
-                colorMod.Option.Color = colorMod.SelectedColor;
-                colorMod.Option.IsEnabled = colorMod.IsSelected;
-            }
-        }
-        else
-        {
-            foreach (var colorMod in _colorMods)
-            {
-                colorMod.IsSelected = colorMod.Option.IsEnabled;
-                colorMod.SelectedColor = colorMod.Option.Color;
-            }
-        }
     }
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e)
@@ -191,13 +99,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        foreach (var patch in patches)
-        {
-            if (patch is Camera camera)
-                camera.ZoomLevel = ZoomSlider.Value;
-            else if (patch is ColorMods colorMods)
-                colorMods.ColorModsOptions = _colorMods.Select(cm => cm.Option.Copy()).ToList();
-        }
+        foreach (var camera in patches.OfType<Camera>())
+            camera.ZoomLevel = ZoomSlider.Value;
 
         await ApplyPatches(patches);
     }
@@ -264,19 +167,20 @@ public partial class MainWindow : Window
 
         var game = SelectedGame;
 
-        if (!BackupManager.HasBackup(game))
+        if (!BackupStore.HasBackup(game))
         {
             MessageBox.Show("No backup found for this game.", "Nothing to Restore");
             return;
         }
 
-        var fileCount = BackupManager.CountBackedUpFiles(game);
+        var fileCount = BackupStore.Open(game).PatchedCount;
         StatusTextBlock.Text = $"Restoring {fileCount} file(s)...";
 
         var path = _ggpkPath;
-        var progress = new Progress<(int Done, int Total)>(p =>
+        var progress = new Progress<PatchProgress>(p =>
         {
             StatusTextBlock.Text = $"Restoring ({p.Done}/{p.Total})";
+            ProgressBar.Maximum = Math.Max(p.Total, 1);
             ProgressBar.Value = p.Done;
         });
         SetBusy(true);
@@ -284,9 +188,9 @@ public partial class MainWindow : Window
 
         try
         {
-            var restored = await Task.Run(() => UseIndex(path, parsePaths: false, index => BackupManager.Restore(index, game, progress)));
+            var result = await Task.Run(() => UseIndex(path, parsePaths: false, index => PatchRunner.Restore(index, game, progress)));
 
-            BackupManager.DeleteBackup(game);
+            var restored = result.FilesRestored;
             StatusTextBlock.Text = $"Restored {restored} file(s) to original.";
             MessageBox.Show($"Restored {restored} file(s) to original.\n\nBackup cleared.", "Restore Complete");
         }
@@ -305,14 +209,14 @@ public partial class MainWindow : Window
     {
         var game = SelectedGame;
 
-        if (!BackupManager.HasBackup(game))
+        if (!BackupStore.HasBackup(game))
         {
             MessageBox.Show("No backup found for this game.", "Nothing to Delete");
             UpdateRestoreButtonState();
             return;
         }
 
-        BackupManager.DeleteBackup(game);
+        BackupStore.Delete(game);
         StatusTextBlock.Text = "Backup deleted.";
         UpdateRestoreButtonState();
     }
@@ -390,7 +294,7 @@ public partial class MainWindow : Window
         if (RestoreButton == null)
             return;
 
-        var count = BackupManager.CountBackedUpFiles(SelectedGame);
+        var count = BackupStore.Open(SelectedGame).PatchedCount;
         RestoreButton.IsEnabled = count > 0;
         RestoreButton.Content = count > 0 ? $"Restore Original ({count})" : "Restore Original";
         DeleteBackupButton.IsEnabled = count > 0;

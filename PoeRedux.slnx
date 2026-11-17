@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="PoeRedux.Core/PoeRedux.Core.csproj" />
   <Project Path="PoeRedux/PoeRedux.csproj" />
+  <Project Path="PoeRedux.Tests/PoeRedux.Tests.csproj" />
+  <Project Path="tools/ModCatalogGen/ModCatalogGen.csproj" />
 </Solution>

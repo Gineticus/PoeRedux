@@ -6,8 +6,10 @@ namespace PoeRedux.Patches;
 
 public class Corpse : IPatch
 {
-    public string Name => "Corpse Patch";
-    public string Description => "Removes corpses from the game.";
+    public string Id => "corpse";
+    public string Name => "Corpses";
+    public string Description => "Hides bodies a second after monsters die.";
+    public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan) =>
         HideCorpses(root, plan, onDeath: "{Delay( 1.0, { DisableRendering(); } );}");

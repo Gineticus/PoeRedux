@@ -6,8 +6,10 @@ namespace PoeRedux.Patches;
 
 public class AtlasFog : IPatch
 {
-    public string Name => "Atlas Fog Patch";
-    public string Description => "Removes fog from the Atlas.";
+    public string Id => "atlas-fog";
+    public string Name => "Atlas Fog";
+    public string Description => "Removes the fog that hides the Atlas.";
+    public PatchGroup Group => PatchGroup.MapAndCamera;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
     {

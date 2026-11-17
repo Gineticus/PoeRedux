@@ -6,8 +6,10 @@ namespace PoeRedux.Patches;
 
 public class MonsterHP : IPatch
 {
-    public string Name => "Monster HP Patch";
-    public string Description => "Always shows monster HP.";
+    public string Id => "monster-hp";
+    public string Name => "Monster Life Bars";
+    public string Description => "Shows a life bar over every monster.";
+    public PatchGroup Group => PatchGroup.Readability;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
     {

@@ -7,7 +7,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Ffx : IPatch
 {
+    public string Id => "black-ffx";
     public string Name => "Ffx Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     public void Collect(DirectoryNode root, PatchPlan plan)

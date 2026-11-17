@@ -5,8 +5,10 @@ namespace PoeRedux.Patches;
 
 public class BlackScreen : IPatch
 {
-    public string Name => "Black Screen Patch (Experimental)";
-    public string Description => "Makes the screen black.";
+    public string Id => "black-screen";
+    public string Name => "Black Screen";
+    public string Description => "Draws almost nothing but the interface. Experimental.";
+    public PatchGroup Group => PatchGroup.Experimental;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
     {

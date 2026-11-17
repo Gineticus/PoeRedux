@@ -5,8 +5,10 @@ namespace PoeRedux.Patches;
 
 public class Shadow : IPatch
 {
-    public string Name => "Shadow Patch";
-    public string Description => "Disables the default shadow effect in the game.";
+    public string Id => "shadow";
+    public string Name => "Shadows";
+    public string Description => "Turns off shadows.";
+    public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan) =>
         EnvironmentSettings.EditAll(root, plan, EnvironmentSettings.DisableShadows);

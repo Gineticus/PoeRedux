@@ -5,7 +5,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Epk : IPatch
 {
+    public string Id => "black-epk";
     public string Name => "Epk Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     public void Collect(DirectoryNode root, PatchPlan plan)

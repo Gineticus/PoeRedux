@@ -6,7 +6,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Env : IPatch
 {
+    public string Id => "black-env";
     public string Name => "Env Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     // Settings whose { ... } value is emptied.

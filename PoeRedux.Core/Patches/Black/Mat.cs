@@ -5,7 +5,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Mat : IPatch
 {
+    public string Id => "black-mat";
     public string Name => "Mat Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     public void Collect(DirectoryNode root, PatchPlan plan)

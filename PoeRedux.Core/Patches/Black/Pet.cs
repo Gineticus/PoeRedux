@@ -5,7 +5,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Pet : IPatch
 {
+    public string Id => "black-pet";
     public string Name => "Pet Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     public void Collect(DirectoryNode root, PatchPlan plan)

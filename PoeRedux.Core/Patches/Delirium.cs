@@ -5,8 +5,10 @@ namespace PoeRedux.Patches;
 
 public class Delirium : IPatch
 {
-    public string Name => "Delirium Patch";
-    public string Description => "Disables the delirium effects in the game.";
+    public string Id => "delirium";
+    public string Name => "Delirium";
+    public string Description => "Removes the Delirium fog and its ash.";
+    public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
     {

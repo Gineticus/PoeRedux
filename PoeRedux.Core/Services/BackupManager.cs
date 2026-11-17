@@ -1,26 +1,135 @@
 using PoeRedux.Models;
 using System.Globalization;
-using System.IO;
 using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PoeRedux.Services;
 
 /// <summary>
-/// Original bytes of the game files PoeRedux changes, kept per game as zip archives in
-/// <see cref="BackupDirectory"/>: poe1.zip, poe1.2.zip, poe1.3.zip, and so on. An apply that changes
-/// files without a backup writes one new archive, so each path is stored once and that copy is the original.
+/// What PoE Redux knows about one game file it changed.
 /// </summary>
-public static class BackupManager
+public sealed class BackupEntry
 {
+    /// <summary>Archive file name (poe2.zip, poe2.3.zip) that holds the original bytes.</summary>
+    public required string Archive { get; set; }
+
+    /// <summary>SHA-256 of the original bytes, or null for a backup made before hashes were kept.</summary>
+    public string? Original { get; set; }
+
+    /// <summary>
+    /// SHA-256 of the bytes PoE Redux wrote last, and of the write before it. Empty when the file holds its
+    /// original bytes. A file whose bytes match none of these was replaced by someone else, a game update
+    /// above all, and its stored original belongs to the old game version.
+    /// </summary>
+    public List<string> Written { get; set; } = [];
+
+    /// <summary>True for an entry read from an archive written before hashes were kept.</summary>
+    [JsonIgnore]
+    public bool Legacy => Original is null;
+
+    /// <summary>Whether the game file holds bytes PoE Redux wrote, as far as this entry knows.</summary>
+    [JsonIgnore]
+    public bool IsPatched => Legacy || Written.Count > 0;
+
+    public bool Wrote(string hash) => Written.Contains(hash, StringComparer.Ordinal);
+}
+
+/// <summary>
+/// Original bytes of the game files PoE Redux changes, kept per game in <see cref="BackupDirectory"/>:
+/// archives poe1.zip, poe1.2.zip, ... with the bytes, and poe1.backup.json with one <see cref="BackupEntry"/>
+/// per file. An apply that changes files without a backup writes one new archive. When the game replaces a
+/// file, the next apply backs up the new original in a new archive and the entry points there.
+/// </summary>
+public sealed class BackupStore
+{
+    private const int ManifestVersion = 1;
+    private const int KeptWrites = 2;
+
     public static string BackupDirectory { get; set; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData),
         "PoeRedux", "Backups");
+
+    private readonly string _prefix;
+    private readonly Dictionary<string, BackupEntry> _entries;
+    private readonly Dictionary<string, ZipArchive> _openArchives = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _readLock = new();
+
+    private BackupStore(PoeGame game, Dictionary<string, BackupEntry> entries, List<string> archives)
+    {
+        Game = game;
+        _prefix = Prefix(game);
+        _entries = entries;
+        Archives = archives;
+    }
+
+    public PoeGame Game { get; }
+
+    /// <summary>Archive paths, oldest first.</summary>
+    public List<string> Archives { get; }
+
+    public IReadOnlyDictionary<string, BackupEntry> Entries => _entries;
+
+    /// <summary>Files that hold bytes PoE Redux wrote, as far as the backup knows.</summary>
+    public int PatchedCount => _entries.Values.Count(e => e.IsPatched);
 
     private static string Prefix(PoeGame game) => game == PoeGame.PoE2 ? "poe2" : "poe1";
 
-    /// <summary>
-    /// Backup archives of <paramref name="game"/>, oldest first.
-    /// </summary>
+    private static string ManifestPath(string prefix) => Path.Combine(BackupDirectory, prefix + ".backup.json");
+
+    public static string Hash(ReadOnlySpan<byte> bytes) => Convert.ToHexString(SHA256.HashData(bytes));
+
+    /// <summary>Reads the backup of <paramref name="game"/>. Archives that cannot be opened are set aside as .broken.</summary>
+    public static BackupStore Open(PoeGame game)
+    {
+        var prefix = Prefix(game);
+        var archives = GetArchives(game);
+        var entries = new Dictionary<string, BackupEntry>(StringComparer.Ordinal);
+
+        var manifestPath = ManifestPath(prefix);
+        if (File.Exists(manifestPath))
+        {
+            var manifest = JsonSerializer.Deserialize(File.ReadAllText(manifestPath), BackupJson.Default.Manifest)
+                ?? throw new InvalidDataException("The backup list is empty: " + manifestPath);
+            var names = archives.Select(Path.GetFileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var (path, entry) in manifest.Files)
+            {
+                // An entry whose archive is gone cannot be restored; drop it rather than fail later.
+                if (names.Contains(entry.Archive))
+                    entries[path] = entry;
+            }
+            return new BackupStore(game, entries, archives);
+        }
+
+        // Archives from before the backup list existed: every path is an original of unknown age. The oldest
+        // archive that has a path holds its original.
+        foreach (var archive in archives.ToList())
+        {
+            try
+            {
+                using var zip = ZipFile.OpenRead(archive);
+                foreach (var e in zip.Entries)
+                {
+                    if (!e.FullName.EndsWith('/'))
+                        entries.TryAdd(e.FullName, new BackupEntry { Archive = Path.GetFileName(archive) });
+                }
+            }
+            catch (InvalidDataException)
+            {
+                SetAside(archive);
+                archives.Remove(archive);
+            }
+        }
+        return new BackupStore(game, entries, archives);
+    }
+
+    private static void SetAside(string archive)
+    {
+        try { File.Move(archive, archive + ".broken", true); } catch (IOException) { /* best effort */ }
+    }
+
+    /// <summary>Backup archives of <paramref name="game"/>, oldest first.</summary>
     public static List<string> GetArchives(PoeGame game)
     {
         var prefix = Prefix(game);
@@ -52,96 +161,125 @@ public static class BackupManager
 
     public static bool HasBackup(PoeGame game) => GetArchives(game).Count > 0;
 
-    public static int CountBackedUpFiles(PoeGame game)
+    public BackupEntry? Find(string path) => _entries.GetValueOrDefault(path);
+
+    /// <summary>Original bytes of <paramref name="path"/>. Thread-safe.</summary>
+    public byte[] ReadOriginal(string path)
     {
-        var count = 0;
-        foreach (var path in GetArchives(game))
+        var entry = _entries[path];
+        lock (_readLock)
         {
-            try
+            if (!_openArchives.TryGetValue(entry.Archive, out var zip))
             {
-                using var zip = ZipFile.OpenRead(path);
-                count += zip.Entries.Count(e => !e.FullName.EndsWith('/'));
+                zip = ZipFile.OpenRead(Path.Combine(BackupDirectory, entry.Archive));
+                _openArchives[entry.Archive] = zip;
             }
-            catch { /* unreadable archive */ }
+            var zipEntry = zip.GetEntry(path) ?? throw new InvalidDataException($"{entry.Archive} has no copy of {path}.");
+            using var stream = zipEntry.Open();
+            using var memory = new MemoryStream(checked((int)zipEntry.Length));
+            stream.CopyTo(memory);
+            return memory.ToArray();
         }
-        return count;
     }
 
-    /// <summary>
-    /// Starts recording originals for one apply. Paths stored in earlier archives are skipped.
-    /// </summary>
-    public static BackupSession Begin(PoeGame game)
+    /// <summary>Closes the archives opened by <see cref="ReadOriginal"/>.</summary>
+    public void CloseArchives()
+    {
+        lock (_readLock)
+        {
+            foreach (var zip in _openArchives.Values)
+                zip.Dispose();
+            _openArchives.Clear();
+        }
+    }
+
+    /// <summary>Starts recording new originals in the next numbered archive.</summary>
+    public BackupSession BeginSession()
     {
         Directory.CreateDirectory(BackupDirectory);
-        var prefix = Prefix(game);
-
         // Left over from an apply that was interrupted before it finished.
-        foreach (var temp in Directory.GetFiles(BackupDirectory, prefix + ".*.zip.tmp"))
+        foreach (var temp in Directory.GetFiles(BackupDirectory, _prefix + ".*.zip.tmp"))
         {
-            try { File.Delete(temp); } catch { /* best effort */ }
+            try { File.Delete(temp); } catch (IOException) { /* best effort */ }
         }
-
-        var existing = new HashSet<string>(StringComparer.Ordinal);
-        var last = 0;
-        foreach (var path in GetArchives(game))
-        {
-            last = GetArchiveNumber(Path.GetFileName(path), prefix);
-            try
-            {
-                using var zip = ZipFile.OpenRead(path);
-                foreach (var entry in zip.Entries)
-                    existing.Add(entry.FullName);
-            }
-            catch
-            {
-                // Corrupt/unreadable archive: set it aside and continue without it.
-                try { File.Move(path, path + ".broken", true); } catch { /* best effort */ }
-            }
-        }
-
+        var last = Archives.Count == 0 ? 0 : GetArchiveNumber(Path.GetFileName(Archives[^1]), _prefix);
         var next = last + 1;
-        var archive = Path.Combine(BackupDirectory, next == 1 ? prefix + ".zip" : $"{prefix}.{next}.zip");
-        return new BackupSession(existing, archive);
+        var archive = Path.Combine(BackupDirectory, next == 1 ? _prefix + ".zip" : $"{_prefix}.{next}.zip");
+        return new BackupSession(archive);
+    }
+
+    /// <summary>Records that <paramref name="path"/> now holds bytes with hash <paramref name="written"/>.</summary>
+    public void RecordWrite(string path, BackupEntry entry, string written)
+    {
+        entry.Written.Remove(written);
+        entry.Written.Insert(0, written);
+        if (entry.Written.Count > KeptWrites)
+            entry.Written.RemoveRange(KeptWrites, entry.Written.Count - KeptWrites);
+        _entries[path] = entry;
+    }
+
+    /// <summary>Records that <paramref name="path"/> holds its original bytes, with hash <paramref name="original"/>, again.</summary>
+    public void RecordOriginal(string path, string original)
+    {
+        if (_entries.GetValueOrDefault(path) is not { } entry)
+            return;
+        entry.Written.Clear();
+        entry.Original ??= original;
+    }
+
+    /// <summary>Drops the hash of the write before the last one; called once the index with the last write is saved.</summary>
+    public void KeepLatestWrites()
+    {
+        foreach (var entry in _entries.Values)
+        {
+            if (entry.Written.Count > 1)
+                entry.Written.RemoveRange(1, entry.Written.Count - 1);
+        }
+    }
+
+    /// <summary>Forgets <paramref name="path"/>: the game replaced it, so its stored original is out of date.</summary>
+    public void Forget(string path) => _entries.Remove(path);
+
+    public void AddArchive(string archivePath)
+    {
+        if (!Archives.Contains(archivePath, StringComparer.OrdinalIgnoreCase))
+            Archives.Add(archivePath);
     }
 
     /// <summary>
-    /// Writes the backed-up originals of <paramref name="game"/> back to the game files and saves the index.
-    /// Files are found by path hash, so the index does not need <see cref="LibBundle3.Index.ParsePaths"/>.
+    /// Writes the backup list. Legacy entries are written with an empty original hash so the next run still
+    /// treats them as legacy. Archives that no entry needs any more are deleted.
     /// </summary>
-    /// <returns>Number of files restored.</returns>
-    public static int Restore(LibBundle3.Index index, PoeGame game, IProgress<(int Done, int Total)>? progress = null)
+    public void Save()
     {
-        var archives = new List<ZipArchive>();
-        try
+        Directory.CreateDirectory(BackupDirectory);
+        var manifest = new BackupManifest
         {
-            foreach (var path in GetArchives(game))
-                archives.Add(ZipFile.OpenRead(path));
+            Version = ManifestVersion,
+            Files = new SortedDictionary<string, BackupEntry>(_entries, StringComparer.Ordinal),
+        };
+        var path = ManifestPath(_prefix);
+        var temp = path + ".tmp";
+        File.WriteAllText(temp, JsonSerializer.Serialize(manifest, BackupJson.Default.Manifest));
+        File.Move(temp, path, true);
 
-            var total = archives.Sum(zip => zip.Entries.Count);
-            var restored = new HashSet<string>(StringComparer.Ordinal);
-            int done = 0, count = 0;
-            foreach (var zip in archives)
-            {
-                // Each path is normally stored once; if not, the oldest archive holds the original.
-                var entries = zip.Entries.Where(e => !e.FullName.EndsWith('/') && restored.Add(e.FullName));
-                count += LibBundle3.Index.Replace(index, entries, (record, path) =>
-                {
-                    done++;
-                    progress?.Report((done, total));
-                    return false; // continue
-                }, saveIndex: false);
-            }
-            index.Save();
-            return count;
-        }
-        finally
+        CloseArchives();
+        var used = _entries.Values.Select(e => e.Archive).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var archive in Archives.ToList())
         {
-            foreach (var zip in archives)
-                zip.Dispose();
+            if (used.Contains(Path.GetFileName(archive)))
+                continue;
+            try
+            {
+                File.Delete(archive);
+                Archives.Remove(archive);
+            }
+            catch (IOException) { /* deleted next time */ }
         }
     }
 
-    public static void DeleteBackup(PoeGame game)
+    /// <summary>Deletes every archive and the backup list of <paramref name="game"/>.</summary>
+    public static void Delete(PoeGame game)
     {
         if (!Directory.Exists(BackupDirectory))
             return;
@@ -150,14 +288,27 @@ public static class BackupManager
         {
             var name = Path.GetFileName(path);
             if (GetArchiveNumber(name, prefix) > 0
+                || name.Equals(prefix + ".backup.json", StringComparison.OrdinalIgnoreCase)
                 || name.EndsWith(".zip.broken", StringComparison.OrdinalIgnoreCase)
-                || name.EndsWith(".zip.tmp", StringComparison.OrdinalIgnoreCase))
+                || name.EndsWith(".zip.tmp", StringComparison.OrdinalIgnoreCase)
+                || name.EndsWith(".backup.json.tmp", StringComparison.OrdinalIgnoreCase))
             {
-                try { File.Delete(path); } catch { /* best effort */ }
+                try { File.Delete(path); } catch (IOException) { /* best effort */ }
             }
         }
     }
 }
+
+internal sealed class BackupManifest
+{
+    public int Version { get; set; }
+    public SortedDictionary<string, BackupEntry> Files { get; set; } = new(StringComparer.Ordinal);
+}
+
+[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(BackupManifest), TypeInfoPropertyName = "Manifest")]
+internal sealed partial class BackupJson : JsonSerializerContext;
 
 /// <summary>
 /// Originals recorded during one apply. They are written straight to a temporary file and become a
@@ -165,39 +316,29 @@ public static class BackupManager
 /// </summary>
 public sealed class BackupSession : IDisposable
 {
-    private readonly HashSet<string> _existing;
     private readonly HashSet<string> _added = new(StringComparer.Ordinal);
-    private readonly string _archivePath;
     private readonly string _tempPath;
     private FileStream? _stream;
     private ZipArchive? _zip;
     private bool _finished;
 
-    internal BackupSession(HashSet<string> existing, string archivePath)
+    internal BackupSession(string archivePath)
     {
-        _existing = existing;
-        _archivePath = archivePath;
+        ArchivePath = archivePath;
         _tempPath = archivePath + ".tmp";
     }
 
-    /// <summary>
-    /// Number of originals recorded in this session.
-    /// </summary>
+    public string ArchivePath { get; }
+    public string ArchiveName => Path.GetFileName(ArchivePath);
+
+    /// <summary>Number of originals recorded in this session.</summary>
     public int Count => _added.Count;
 
-    /// <summary>
-    /// Whether <paramref name="path"/> has no backup from an earlier apply. Thread-safe.
-    /// </summary>
-    public bool NeedsBackup(string path) => !string.IsNullOrEmpty(path) && !_existing.Contains(path);
-
-    /// <summary>
-    /// Stores the original bytes of <paramref name="path"/>. Not thread-safe.
-    /// </summary>
+    /// <summary>Stores the original bytes of <paramref name="path"/>. Not thread-safe.</summary>
     public void Add(string path, ReadOnlySpan<byte> original)
     {
-        if (!NeedsBackup(path) || !_added.Add(path))
+        if (!_added.Add(path))
             return;
-
         if (_zip is null)
         {
             _stream = new FileStream(_tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
@@ -208,22 +349,21 @@ public sealed class BackupSession : IDisposable
         entryStream.Write(original);
     }
 
-    /// <summary>
-    /// Finishes the archive and gives it its final name.
-    /// </summary>
-    public void Commit()
+    /// <summary>Finishes the archive and gives it its final name.</summary>
+    /// <returns>Whether an archive was written.</returns>
+    public bool Commit()
     {
         if (_finished)
-            return;
-        if (_zip is not null)
-        {
-            _zip.Dispose();
-            _stream!.Dispose();
-            _zip = null;
-            _stream = null;
-            File.Move(_tempPath, _archivePath);
-        }
+            return false;
         _finished = true;
+        if (_zip is null)
+            return false;
+        _zip.Dispose();
+        _stream!.Dispose();
+        _zip = null;
+        _stream = null;
+        File.Move(_tempPath, ArchivePath);
+        return true;
     }
 
     public void Dispose()
@@ -235,6 +375,6 @@ public sealed class BackupSession : IDisposable
         _stream?.Dispose();
         _zip = null;
         _stream = null;
-        try { File.Delete(_tempPath); } catch { /* best effort */ }
+        try { File.Delete(_tempPath); } catch (IOException) { /* best effort */ }
     }
 }

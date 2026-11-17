@@ -5,7 +5,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Aoc : IPatch
 {
+    public string Id => "black-aoc";
     public string Name => "Aoc Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     // Client blocks that stay; the rest are emptied.

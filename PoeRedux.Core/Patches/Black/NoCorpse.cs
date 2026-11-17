@@ -7,7 +7,9 @@ namespace PoeRedux.Patches.Black;
 /// </summary>
 public class NoCorpse : IPatch
 {
+    public string Id => "black-nocorpse";
     public string Name => "NoCorpse Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     public void Collect(DirectoryNode root, PatchPlan plan) =>

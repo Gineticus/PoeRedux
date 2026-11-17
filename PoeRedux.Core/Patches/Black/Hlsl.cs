@@ -7,7 +7,9 @@ namespace PoeRedux.Patches.Black;
 
 public class Hlsl : IPatch
 {
+    public string Id => "black-hlsl";
     public string Name => "Hlsl Patch";
+    public PatchGroup Group => PatchGroup.Experimental;
     public string Description => "";
 
     private static readonly string[] Targets =

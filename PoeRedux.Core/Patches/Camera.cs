@@ -2,15 +2,29 @@ using LibBundle3.Nodes;
 using PoeRedux.Helpers;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace PoeRedux.Patches;
 
-public class Camera : IPatch
+public class Camera : IPatch, IPatchSettings
 {
-    public string Name => "Camera Patch";
-    public string Description => "Allows adjusting the default camera zoom level.";
+    public const double MinZoom = 1.2;
+    public const double MaxZoom = 2.4;
+    public const double DefaultZoom = 2.4;
 
-    public double ZoomLevel { get; set; } = 2.4;
+    public string Id => "camera";
+    public string Name => "Camera";
+    public string Description => "Sets how far the camera zooms out by default.";
+    public PatchGroup Group => PatchGroup.MapAndCamera;
+
+    private double _zoomLevel = DefaultZoom;
+
+    /// <summary>Default zoom, kept between <see cref="MinZoom"/> and <see cref="MaxZoom"/> and rounded to 0.1.</summary>
+    public double ZoomLevel
+    {
+        get => _zoomLevel;
+        set => _zoomLevel = Math.Round(Math.Clamp(value, MinZoom, MaxZoom), 1);
+    }
 
     // Calls that move or zoom the camera. They are removed from every .ot and .otc file except character.ot.
     private static readonly string[] CameraFunctions =
@@ -31,7 +45,7 @@ public class Camera : IPatch
         var character = GameTree.FindFile(root, "metadata/characters/character.ot");
         if (character is not null)
         {
-            string zoomLevel = ZoomLevel.ToString(CultureInfo.InvariantCulture);
+            string zoomLevel = ZoomLevel.ToString("0.0", CultureInfo.InvariantCulture);
             plan.Add(character, bytes => PatchCharacterFile(bytes, zoomLevel));
         }
 
@@ -42,6 +56,18 @@ public class Camera : IPatch
                 plan.Add(file, removeCalls);
         }
     }
+
+    public JsonObject? SaveSettings() =>
+        ZoomLevel == DefaultZoom ? null : new JsonObject { ["zoom"] = ZoomLevel };
+
+    public void LoadSettings(JsonObject settings)
+    {
+        ResetSettings();
+        if (settings["zoom"] is JsonValue v && v.TryGetValue<double>(out var zoom) && double.IsFinite(zoom))
+            ZoomLevel = zoom;
+    }
+
+    public void ResetSettings() => ZoomLevel = DefaultZoom;
 
     // Sets the default zoom: replaces the line with CreateCameraZoomNode, or adds one after "team = 1".
     private static byte[] PatchCharacterFile(byte[] bytes, string zoomLevel)
