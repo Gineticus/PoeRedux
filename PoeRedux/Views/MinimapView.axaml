@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PoeRedux.ViewModels"
+             x:Class="PoeRedux.Views.MinimapView"
+             x:DataType="vm:MinimapViewModel">
+  <Grid ColumnDefinitions="*,32,220">
+    <StackPanel Spacing="22" MaxWidth="520" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="Unexplored areas" Classes="heading" />
+          <TextBlock Grid.Column="1" Text="{Binding RevealPercent, StringFormat='{}{0:0}%'}" Classes="number"
+                     Foreground="{StaticResource AmberBrush}" FontWeight="SemiBold" />
+        </Grid>
+        <Slider Minimum="0" Maximum="100" Value="{Binding RevealPercent}" TickFrequency="1" IsSnapToTickEnabled="True"
+                AutomationProperties.Name="How strongly unexplored areas show" />
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="0% draws the map as the game does. 100% draws unexplored parts as if you had been there." />
+      </StackPanel>
+
+      <StackPanel Spacing="8">
+        <TextBlock Text="Floor" Classes="heading" />
+        <Grid ColumnDefinitions="Auto,*,Auto" >
+          <ColorPicker Color="{Binding WalkableColor}" IsAlphaEnabled="False" IsAlphaVisible="False"
+                       AutomationProperties.Name="Floor color" />
+          <Slider Grid.Column="1" Margin="14,0" Minimum="0" Maximum="100" Value="{Binding WalkableOpacityPercent}"
+                  TickFrequency="1" IsSnapToTickEnabled="True" AutomationProperties.Name="Floor opacity" />
+          <TextBlock Grid.Column="2" Text="{Binding WalkableOpacityPercent, StringFormat='{}{0:0}%'}" Classes="number"
+                     VerticalAlignment="Center" MinWidth="40" TextAlignment="Right" />
+        </Grid>
+      </StackPanel>
+
+      <StackPanel Spacing="8">
+        <TextBlock Text="Walls and edges" Classes="heading" />
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <ColorPicker Color="{Binding EdgeColor}" IsAlphaEnabled="False" IsAlphaVisible="False"
+                       AutomationProperties.Name="Edge color" />
+          <Slider Grid.Column="1" Margin="14,0" Minimum="0" Maximum="100" Value="{Binding EdgeOpacityPercent}"
+                  TickFrequency="1" IsSnapToTickEnabled="True" AutomationProperties.Name="Edge opacity" />
+          <TextBlock Grid.Column="2" Text="{Binding EdgeOpacityPercent, StringFormat='{}{0:0}%'}" Classes="number"
+                     VerticalAlignment="Center" MinWidth="40" TextAlignment="Right" />
+        </Grid>
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="The game brightens the edge color many times over, so a low opacity is already clearly visible." />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- A sketch of the result: floor fill with an edge around it. -->
+    <StackPanel Grid.Column="2" Spacing="8">
+      <Border Width="220" Height="160" CornerRadius="4" Background="#20232A" ClipToBounds="True">
+        <Border Margin="28,24" CornerRadius="10" Background="{Binding WalkableBrush}"
+                BorderBrush="{Binding EdgeBrush}" BorderThickness="2" />
+      </Border>
+      <TextBlock Classes="muted" TextWrapping="Wrap" Text="Rough sketch. The game blends these colors over the map." />
+    </StackPanel>
+  </Grid>
+</UserControl>

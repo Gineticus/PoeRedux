@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>PoeRedux</RootNamespace>
-    <UseWPF>true</UseWPF>
     <ApplicationIcon>..\icon.ico</ApplicationIcon>
     <Version>1.1.20</Version>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Disables CET / shadow-stack on the exe to avoid a fatal startup crash (0x80131506) caused by the native non-CET-aware oo2core.dll. See issue #29. -->
     <CETCompat>false</CETCompat>
   </PropertyGroup>
@@ -16,16 +16,24 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <!-- <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile> -->
   </PropertyGroup>
-  
+
   <ItemGroup>
     <None Update="oo2core.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
+    <AvaloniaResource Include="..\icon.ico" Link="Assets\icon.ico" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.6" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\PoeRedux.Core\PoeRedux.Core.csproj" />
   </ItemGroup>

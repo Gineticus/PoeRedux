@@ -88,7 +88,8 @@ public static class GitHubUpdateChecker
 
     private static string GetCurrentVersion()
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        // The app's version, not this library's: the library is built without one.
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version;
         return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v1.0.0";
     }

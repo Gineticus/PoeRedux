@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PoeRedux.ViewModels"
+             x:Class="PoeRedux.Views.CameraView"
+             x:DataType="vm:CameraViewModel">
+  <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBlock Text="Default zoom" Classes="heading" VerticalAlignment="Bottom" />
+      <TextBlock Grid.Column="1" Text="{Binding ZoomText}" FontSize="28" FontWeight="SemiBold"
+                 Foreground="{StaticResource AmberBrush}" FontFeatures="+tnum" />
+    </Grid>
+    <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Zoom}"
+            TickFrequency="0.1" IsSnapToTickEnabled="True" SmallChange="0.1" LargeChange="0.2"
+            AutomationProperties.Name="Default zoom" />
+    <Grid ColumnDefinitions="*,*">
+      <TextBlock Classes="muted" Text="1.2: closer" />
+      <TextBlock Grid.Column="1" Classes="muted" Text="2.4: farther" HorizontalAlignment="Right" />
+    </Grid>
+    <TextBlock Classes="secondary" TextWrapping="Wrap"
+               Text="Sets the zoom the camera starts at in every area. Scenes that move or zoom the camera on their own, such as some boss intros, are told not to." />
+  </StackPanel>
+</UserControl>
