@@ -154,7 +154,7 @@
       <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
         <TextBlock Grid.Column="0" Text="{Binding BackupText}" Classes="secondary number" VerticalAlignment="Center" />
         <Button Grid.Column="1" Classes="outline" Margin="16,0,0,0" Command="{Binding RestoreCommand}"
-                ToolTip.Tip="Writes the backed-up originals back into the game and deletes the backup">
+                ToolTip.Tip="Puts the backed-up originals back into the game and deletes the backup">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <Path Classes="icon" Data="{StaticResource IconRestore}" />
             <TextBlock Text="Restore Original" />

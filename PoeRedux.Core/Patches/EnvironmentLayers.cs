@@ -19,9 +19,9 @@ public class EnvironmentLayers : SwitchPatch
     [
         new("fog", "Fog", t => EnvironmentSettings.DisableKeys(t, "fog")),
         new("screenspace_fog", "Screen fog", t => EnvironmentSettings.DisableKeys(t, "screenspace_fog")),
-        new("area", "Ground and weather effects", t => EnvironmentSettings.DisableKeys(t, "area")),
+        new("area", "Area layer", t => EnvironmentSettings.DisableKeys(t, "area")),
         new("effect_spawner", "Ambient effects", t => EnvironmentSettings.DisableKeys(t, "effect_spawner")),
-        new("post_processing", "Bloom", t => EnvironmentSettings.DisableKeys(t, "post_processing")),
+        new("post_processing", "Post-processing layer", t => EnvironmentSettings.DisableKeys(t, "post_processing")),
         new("rain_intensity", "Rain", t => EnvironmentSettings.SetToZero(t, "rain_intensity")),
         new("clouds_intensity", "Clouds", t => EnvironmentSettings.SetToZero(t, "clouds_intensity")),
     ];

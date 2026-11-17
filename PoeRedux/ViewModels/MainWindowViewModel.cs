@@ -239,7 +239,9 @@ public partial class MainWindowViewModel : ObservableObject
                 .Distinct()
                 .ToList();
             var applied = patches.Count - foundNothing.Count;
-            var text = $"Applied {applied} of {patches.Count} patches: {Files(result.FilesWritten)} changed in the game.";
+            var text = applied == patches.Count
+                ? $"Applied {Patches(applied)}: {Files(result.FilesWritten)} changed in the game."
+                : $"Applied {applied} of {Patches(patches.Count)}: {Files(result.FilesWritten)} changed in the game.";
             if (result.FilesRestored > 0)
                 text += $" {Files(result.FilesRestored)} of patches you turned off got their originals back.";
             if (result.FilesReplacedByGame > 0)
@@ -283,7 +285,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         var confirmed = await Window.ConfirmAsync(
             "Delete the backup?",
-            $"PoE Redux keeps the originals of {Files(PatchedFiles)} it changed. Without them, Restore Original cannot undo the patches; only PackCheck.exe or a file check in Steam can.\n\nDelete the backup only after the game files were checked that way.",
+            $"The backup holds the originals of {Files(PatchedFiles)} that PoE Redux changed. Without it, Restore Original cannot undo the patches. On Steam, Verify integrity of game files can still bring the originals back; PackCheck.exe in the standalone client does not.",
             "Delete backup",
             "Keep backup");
         if (!confirmed)
@@ -325,7 +327,7 @@ public partial class MainWindowViewModel : ObservableObject
         catch (Exception e)
         {
             log.Line("error: " + e);
-            Notice = new Notice(NoticeKind.Error, $"Stopped with an error: {e.Message} Close the game and try again. The log has the details.", log.FilePath);
+            Notice = new Notice(NoticeKind.Error, $"Stopped with an error: {e.Message} If the game is running, close it and try again. The log has the details.", log.FilePath);
         }
         finally
         {
@@ -350,6 +352,8 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     private static string Files(int count) => count == 1 ? "1 file" : $"{count:N0} files";
+
+    private static string Patches(int count) => count == 1 ? "1 patch" : $"{count} patches";
 
     private async Task CheckForUpdateAsync()
     {
