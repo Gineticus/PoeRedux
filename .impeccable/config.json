@@ -38,6 +38,42 @@
         ],
         "createdAt": "2026-11-18T00:35:44.168Z",
         "reason": "agent: spent decision-round sketch in a gitignored runtime folder, not the shipped Avalonia UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-18T00:37:49.204Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, written before DESIGN.md; not the shipped Avalonia UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-18T00:37:49.290Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, written before DESIGN.md; not the shipped Avalonia UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-dense.html"
+        ],
+        "createdAt": "2026-11-18T00:37:49.383Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, written before DESIGN.md; not the shipped Avalonia UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-18T00:37:49.476Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, written before DESIGN.md; not the shipped Avalonia UI"
       }
     ]
   }
