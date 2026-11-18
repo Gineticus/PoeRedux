@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PoeRedux.ViewModels"
+        x:Class="PoeRedux.Views.ChangesWindow"
+        x:DataType="vm:ChangesViewModel"
+        Title="Changed game files"
+        Icon="avares://PoeRedux/Assets/icon.ico"
+        Width="1180" Height="760" MinWidth="900" MinHeight="520"
+        WindowStartupLocation="CenterOwner">
+  <Grid ColumnDefinitions="400,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,*" Margin="0,0,16,0">
+      <TextBox PlaceholderText="Search" Text="{Binding Search}" />
+      <TextBlock Grid.Row="1" Classes="muted number" Text="{Binding Count}" Margin="2,8,0,6" />
+      <ListBox Grid.Row="2" ItemsSource="{Binding Paths}" SelectedItem="{Binding SelectedPath}"
+               Background="{StaticResource PanelBrush}" CornerRadius="6">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{Binding}" FontFamily="{StaticResource PathFont}" FontSize="12.5" TextTrimming="LeadingCharacterEllipsis"
+                       ToolTip.Tip="{Binding}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+
+    <Border Grid.Column="1" Classes="panel" Padding="0,8">
+      <Grid>
+        <TextBlock Classes="secondary" Text="{Binding Note}" Margin="16,8" TextWrapping="Wrap"
+                   IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <ListBox ItemsSource="{Binding Lines}" Background="Transparent">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="MinHeight" Value="0" />
+            </Style>
+            <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+          </ListBox.Styles>
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:DiffRow">
+              <Border Padding="16,1" Classes.removed="{Binding IsRemoved}" Classes.added="{Binding IsAdded}"
+                      Classes.gap="{Binding IsGap}">
+                <Border.Styles>
+                  <Style Selector="Border.removed"><Setter Property="Background" Value="#3A1B1B" /></Style>
+                  <Style Selector="Border.added"><Setter Property="Background" Value="#16351F" /></Style>
+                  <Style Selector="Border.gap TextBlock"><Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" /></Style>
+                </Border.Styles>
+                <SelectableTextBlock Text="{Binding Display}"
+                                     FontFamily="{StaticResource PathFont}" FontSize="12.5" TextWrapping="Wrap" />
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

@@ -1,0 +1,77 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="PoeRedux.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <!-- Palette: a near-black stage, one raised panel tone, white text, light blue for the main action and
+           for anything switched on. Mod group colors come from the data and are not listed here. -->
+      <Color x:Key="StageColor">#0B0C0F</Color>
+      <Color x:Key="PanelColor">#14161B</Color>
+      <Color x:Key="RaisedColor">#1B1D23</Color>
+      <Color x:Key="HairlineColor">#262932</Color>
+      <Color x:Key="TextColor">#ECECEC</Color>
+      <Color x:Key="SecondaryTextColor">#A9ADB6</Color>
+      <Color x:Key="MutedTextColor">#8A8F99</Color>
+      <Color x:Key="AccentColor">#4AA8FF</Color>
+      <Color x:Key="AccentHoverColor">#6DBAFF</Color>
+      <Color x:Key="AccentPressedColor">#2E8FE6</Color>
+      <Color x:Key="WarningColor">#F0B429</Color>
+      <Color x:Key="DangerColor">#FF6B5E</Color>
+      <Color x:Key="SuccessColor">#7BDB6E</Color>
+      <Color x:Key="InfoColor">#5CC8FF</Color>
+      <!-- The color the game prints mod lines in when nothing recolors them. -->
+      <Color x:Key="ModBlueColor">#8888FF</Color>
+
+      <SolidColorBrush x:Key="StageBrush" Color="{StaticResource StageColor}" />
+      <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}" />
+      <SolidColorBrush x:Key="RaisedBrush" Color="{StaticResource RaisedColor}" />
+      <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}" />
+      <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+      <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
+      <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+      <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+      <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
+      <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+      <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
+      <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}" />
+      <SolidColorBrush x:Key="ModBlueBrush" Color="{StaticResource ModBlueColor}" />
+
+      <FontFamily x:Key="UiFont">Segoe UI Variable Text, Segoe UI, Inter, sans-serif</FontFamily>
+      <FontFamily x:Key="PathFont">Cascadia Mono, Consolas, monospace</FontFamily>
+
+      <!-- Icons: one stroke family, drawn for this app, 16 x 16 unless noted. -->
+      <StreamGeometry x:Key="IconFolder">M2.5,4.5 C2.5,3.95 2.95,3.5 3.5,3.5 L6.6,3.5 L8.1,5 L12.5,5 C13.05,5 13.5,5.45 13.5,6 L13.5,12 C13.5,12.55 13.05,13 12.5,13 L3.5,13 C2.95,13 2.5,12.55 2.5,12 Z</StreamGeometry>
+      <StreamGeometry x:Key="IconRestore">M3.5,6.5 L9.5,6.5 C11.43,6.5 13,8.07 13,10 C13,11.93 11.43,13.5 9.5,13.5 L6.5,13.5 M6,3.5 L3,6.5 L6,9.5</StreamGeometry>
+      <StreamGeometry x:Key="IconWarning">M8,2.5 L14,13 L2,13 Z M8,6.5 L8,9.5 M8,11.25 L8,11.5</StreamGeometry>
+      <StreamGeometry x:Key="IconCheck">M3,8.5 L6.5,12 L13,4.5</StreamGeometry>
+      <StreamGeometry x:Key="IconInfo">M8,1.75 C11.45,1.75 14.25,4.55 14.25,8 C14.25,11.45 11.45,14.25 8,14.25 C4.55,14.25 1.75,11.45 1.75,8 C1.75,4.55 4.55,1.75 8,1.75 Z M8,7.25 L8,11 M8,4.9 L8,5.1</StreamGeometry>
+      <StreamGeometry x:Key="IconClose">M4,4 L12,12 M12,4 L4,12</StreamGeometry>
+      <StreamGeometry x:Key="IconArrowUp">M8,13 L8,3.5 M4,7.5 L8,3.5 L12,7.5</StreamGeometry>
+      <StreamGeometry x:Key="IconTrash">M3,4.5 L13,4.5 M6.5,4.5 L6.5,3 L9.5,3 L9.5,4.5 M4.5,4.5 L5,13 L11,13 L11.5,4.5</StreamGeometry>
+      <StreamGeometry x:Key="IconPlus">M8,3 L8,13 M3,8 L13,8</StreamGeometry>
+      <StreamGeometry x:Key="IconSearch">M7,2.5 C9.49,2.5 11.5,4.51 11.5,7 C11.5,9.49 9.49,11.5 7,11.5 C4.51,11.5 2.5,9.49 2.5,7 C2.5,4.51 4.51,2.5 7,2.5 Z M10.3,10.3 L13.5,13.5</StreamGeometry>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#4AA8FF"
+                               RegionColor="#0B0C0F"
+                               AltHigh="#0B0C0F"
+                               ChromeMediumLow="#14161B"
+                               ChromeMedium="#1B1D23"
+                               ChromeLow="#14161B"
+                               BaseHigh="#ECECEC"
+                               BaseMediumHigh="#C9CCD3"
+                               BaseMedium="#A9ADB6"
+                               ErrorText="#FF6B5E" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    <StyleInclude Source="avares://PoeRedux/Styles/Theme.axaml" />
+  </Application.Styles>
+</Application>

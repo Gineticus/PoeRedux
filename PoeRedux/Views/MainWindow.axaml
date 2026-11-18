@@ -1,0 +1,186 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PoeRedux.ViewModels"
+        xmlns:views="using:PoeRedux.Views"
+        x:Class="PoeRedux.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="PoE Redux"
+        Icon="avares://PoeRedux/Assets/icon.ico"
+        Width="1240" Height="800" MinWidth="1120" MinHeight="660"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.DataTemplates>
+    <DataTemplate DataType="vm:ColorModsViewModel"><views:ColorModsView /></DataTemplate>
+    <DataTemplate DataType="vm:CameraViewModel"><views:CameraView /></DataTemplate>
+    <DataTemplate DataType="vm:MinimapViewModel"><views:MinimapView /></DataTemplate>
+    <DataTemplate DataType="vm:SwitchesViewModel"><views:SwitchesView /></DataTemplate>
+    <DataTemplate DataType="vm:FoldersViewModel"><views:FoldersView /></DataTemplate>
+    <DataTemplate DataType="vm:InfoViewModel">
+      <Grid IsVisible="{Binding HasSample}" ColumnDefinitions="Auto,16,Auto" RowDefinitions="Auto,6,Auto" HorizontalAlignment="Left">
+        <TextBlock Classes="group" Text="Before" />
+        <TextBlock Grid.Column="2" Classes="group" Text="After" />
+        <Border Grid.Row="2" Classes="tooltip" Classes.code="{Binding IsCode}">
+          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding Before}" Foreground="#9A9A9A" />
+        </Border>
+        <Border Grid.Row="2" Grid.Column="2" Classes="tooltip" Classes.code="{Binding IsCode}">
+          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding After}" Foreground="#9A9A9A" />
+        </Border>
+      </Grid>
+    </DataTemplate>
+  </Window.DataTemplates>
+
+  <Grid RowDefinitions="52,Auto,*,Auto">
+
+    <!-- Game and game file. -->
+    <Border Grid.Row="0"
+            BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0" IsEnabled="{Binding IsIdle}">
+        <Border Grid.Column="0" Margin="0,0,16,0" Padding="3" CornerRadius="6" VerticalAlignment="Center"
+                Background="{StaticResource PanelBrush}">
+          <StackPanel Orientation="Horizontal" Spacing="2">
+            <RadioButton Classes="segment" GroupName="game" Content="PoE 1" IsChecked="{Binding IsPoe1}"
+                         ToolTip.Tip="Path of Exile" />
+            <RadioButton Classes="segment" GroupName="game" Content="PoE 2" IsChecked="{Binding IsPoe2}"
+                         ToolTip.Tip="Path of Exile 2" />
+          </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+          <TextBox Classes="path" Classes.invalid="{Binding HasPathError}" Text="{Binding GamePath}" VerticalContentAlignment="Center"
+                   PlaceholderText="Content.ggpk or Bundles2\_.index.bin"
+                   ToolTip.Tip="{Binding PathProblem}" />
+          <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Command="{Binding BrowseCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Path Classes="icon" Data="{StaticResource IconFolder}" />
+              <TextBlock Text="Browse" />
+            </StackPanel>
+          </Button>
+        </Grid>
+
+        <Button Grid.Column="2" Classes="text" Margin="12,0,0,0" VerticalAlignment="Center"
+                IsVisible="{Binding UpdateText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                Command="{Binding OpenUpdateCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Path Classes="icon" Data="{StaticResource IconArrowUp}" Stroke="{StaticResource SuccessBrush}" />
+            <TextBlock Text="{Binding UpdateText}" Foreground="{StaticResource SuccessBrush}" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Result of the last apply or restore. -->
+    <Border Grid.Row="1" Margin="16,12,16,0" Padding="14,10" CornerRadius="6"
+            IsVisible="{Binding Notice, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{StaticResource PanelBrush}" BorderThickness="1"
+            Classes.success="{Binding Notice.IsSuccess, FallbackValue=False}"
+            Classes.warning="{Binding Notice.IsWarning, FallbackValue=False}"
+            Classes.error="{Binding Notice.IsError, FallbackValue=False}">
+      <Border.Styles>
+        <Style Selector="Border.success"><Setter Property="BorderBrush" Value="#2F5A2A" /></Style>
+        <Style Selector="Border.warning"><Setter Property="BorderBrush" Value="#6B5420" /></Style>
+        <Style Selector="Border.error"><Setter Property="BorderBrush" Value="#7A2C25" /></Style>
+      </Border.Styles>
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Panel Grid.Column="0" Margin="0,2,12,0" VerticalAlignment="Top">
+          <Path Classes="icon" Data="{StaticResource IconCheck}" Stroke="{StaticResource SuccessBrush}"
+                IsVisible="{Binding Notice.IsSuccess, FallbackValue=False}" />
+          <Path Classes="icon" Data="{StaticResource IconWarning}" Stroke="{StaticResource WarningBrush}"
+                IsVisible="{Binding Notice.IsWarning, FallbackValue=False}" />
+          <Path Classes="icon" Data="{StaticResource IconWarning}" Stroke="{StaticResource DangerBrush}"
+                IsVisible="{Binding Notice.IsError, FallbackValue=False}" />
+        </Panel>
+        <SelectableTextBlock Grid.Column="1" Text="{Binding Notice.Text, FallbackValue=''}" TextWrapping="Wrap"
+                             VerticalAlignment="Center" />
+        <Button Grid.Column="2" Classes="text" Content="Open log" Margin="12,0,0,0" VerticalAlignment="Top"
+                Command="{Binding OpenLogCommand}"
+                IsVisible="{Binding Notice.LogPath, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue=False}" />
+        <Button Grid.Column="3" Classes="text" Margin="4,0,0,0" VerticalAlignment="Top"
+                Command="{Binding DismissNoticeCommand}" ToolTip.Tip="Hide">
+          <Path Classes="icon" Data="{StaticResource IconClose}" />
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Patches on the left, the chosen patch's settings on the right. -->
+    <Grid Grid.Row="2" ColumnDefinitions="400,*" Margin="0,8,0,0">
+      <ScrollViewer Grid.Column="0" Padding="12,4,12,16" IsEnabled="{Binding IsIdle}">
+        <ItemsControl ItemsSource="{Binding Groups}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PatchGroupViewModel">
+              <StackPanel Margin="0,10,0,6">
+                <TextBlock Classes="group" Text="{Binding Title}" Margin="12,0,0,6" />
+                <ItemsControl ItemsSource="{Binding Items}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PatchItemViewModel">
+                      <RadioButton Classes="patch" GroupName="patches" IsChecked="{Binding IsCurrent}"
+                                   AutomationProperties.Name="{Binding Name}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                          <ToggleSwitch Grid.Column="0" IsChecked="{Binding IsSelected}" Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        AutomationProperties.Name="{Binding Name, StringFormat='Use {0}'}" />
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Description}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                          <TextBlock Grid.Column="2" Text="{Binding Summary}" Classes="muted number"
+                                     VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </Grid>
+                      </RadioButton>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <Border Grid.Column="1" Classes="panel" Margin="0,6,16,16" Padding="24,20" IsEnabled="{Binding IsIdle}">
+        <Grid RowDefinitions="Auto,*">
+          <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="title" Text="{Binding Current.Name, FallbackValue=''}" />
+              <TextBlock Classes="secondary" Text="{Binding Current.Notes, FallbackValue=''}" TextWrapping="Wrap" MaxWidth="720"
+                         HorizontalAlignment="Left" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="text" Content="Reset to defaults" VerticalAlignment="Top"
+                    Command="{Binding Current.Settings.ResetCommand, FallbackValue={x:Null}}"
+                    IsVisible="{Binding Current.Settings.CanReset, FallbackValue=False}" />
+          </Grid>
+          <ContentControl Grid.Row="1" Content="{Binding Current.Settings, FallbackValue={x:Null}}" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Backup state and the two actions that change game files. -->
+    <Border Grid.Row="3" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="16,12">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding BackupText}" Classes="secondary number" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="outline" Margin="16,0,0,0" Command="{Binding RestoreCommand}"
+                ToolTip.Tip="Puts the backed-up originals back into the game and deletes the backup">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Path Classes="icon" Data="{StaticResource IconRestore}" />
+            <TextBlock Text="Restore Original" />
+          </StackPanel>
+        </Button>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,0" Spacing="2">
+          <Button Classes="text" Content="View changes" Command="{Binding ViewChangesCommand}" />
+          <Button Classes="text" Command="{Binding DeleteBackupCommand}" ToolTip.Tip="Delete the backup"
+                  AutomationProperties.Name="Delete the backup">
+            <Path Classes="icon" Data="{StaticResource IconTrash}" />
+          </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Column="3" Margin="24,0" VerticalAlignment="Center" Spacing="6" IsVisible="{Binding IsBusy}">
+          <TextBlock Text="{Binding Stage}" Classes="secondary number" />
+          <ProgressBar Value="{Binding Progress}" Maximum="{Binding ProgressMax}"
+                       IsIndeterminate="{Binding ProgressIsIndeterminate}" Height="4" MinHeight="4"
+                       Foreground="{StaticResource AccentBrush}" />
+        </StackPanel>
+
+        <Button Grid.Column="4" Classes="primary" Content="{Binding ApplyText}" Command="{Binding ApplyCommand}"
+                HotKey="Ctrl+Enter" ToolTip.Tip="{Binding PathProblem}" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
