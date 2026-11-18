@@ -212,19 +212,6 @@ public sealed partial class FoldersViewModel : SettingsViewModel
     [ObservableProperty] public partial bool IsLoadingFolders { get; set; }
     [ObservableProperty] public partial string? FolderListNote { get; set; }
 
-    public bool KeepGroundEffects
-    {
-        get => Patch.KeepGroundEffects;
-        set
-        {
-            if (Patch.KeepGroundEffects == value)
-                return;
-            Patch.KeepGroundEffects = value;
-            OnPropertyChanged();
-            NotifyChanged();
-        }
-    }
-
     private bool CanAdd() => NewFolder.Trim().TrimEnd('/') is var f && f.StartsWith(Root, StringComparison.Ordinal) && f.Length > Root.Length && !Patch.Kept.Contains(f);
 
     [RelayCommand(CanExecute = nameof(CanAdd))]
@@ -249,7 +236,6 @@ public sealed partial class FoldersViewModel : SettingsViewModel
         Kept.Clear();
         foreach (var folder in Patch.Kept)
             Kept.Add(folder);
-        OnPropertyChanged(nameof(KeepGroundEffects));
     }
 
     /// <summary>Reads the folder names from the selected game file, once per file, for the add box.</summary>

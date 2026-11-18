@@ -17,7 +17,7 @@ PoeRedux edits the files of Path of Exile and Path of Exile 2 to change what the
 | Light | Turns off sun and moon light, the light around your character, reflections and bounced light. | both |
 | Shadows | Turns off shadows. | both |
 | Screen Filters | Turns off dark screen edges, background blur and gray-out. | both |
-| Particles, Effects, Microtransactions | Remove particle, skill and shop effects. Ground effects such as burning or caustic ground, boss mechanics, portals, map devices and waypoints are kept, and the list of kept folders can be changed. | both |
+| Particles, Effects, Microtransactions | Remove particle, skill and shop effects. Boss mechanics, dangerous ground, portals, map devices and waypoints are kept, and the list of kept folders can be changed. | both |
 | Corpses | Hides bodies a second after monsters die. | PoE 1 |
 | Delirium | Removes the Delirium fog and its ash. | both |
 | Loading Screen | Hides the loading screen picture, tip and area name. | both |
