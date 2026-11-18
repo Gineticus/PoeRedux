@@ -1,0 +1,44 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-18T00:35:43.893Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, not the shipped Avalonia UI"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-18T00:35:43.988Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, not the shipped Avalonia UI"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-dense.html"
+        ],
+        "createdAt": "2026-11-18T00:35:44.080Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, not the shipped Avalonia UI"
+      },
+      {
+        "rule": "monotonous-spacing",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-dense.html"
+        ],
+        "createdAt": "2026-11-18T00:35:44.168Z",
+        "reason": "agent: spent decision-round sketch in a gitignored runtime folder, not the shipped Avalonia UI"
+      }
+    ]
+  }
+}

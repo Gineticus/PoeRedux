@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T00:00:00Z",
+  "title": "Design System: PoE Redux",
+  "extensions": {
+    "platform": "Avalonia 12 desktop (Windows). Tokens live in PoeRedux/App.axaml (colors, brushes, fonts, icon geometries, Fluent dark palette) and PoeRedux/Styles/Theme.axaml (type scale, control styles). Snippets below are CSS translations for preview only.",
+    "colorMeta": {
+      "accent": { "role": "primary", "displayName": "Filter Light Blue", "canonical": "#4AA8FF", "tonalRamp": ["#0A2236", "#103A5C", "#1A5687", "#2E8FE6", "#4AA8FF", "#6DBAFF", "#A3D3FF", "#DCEEFF"] },
+      "focus-ring": { "role": "primary", "displayName": "Focus Ice", "canonical": "#8CCBFF" },
+      "stage": { "role": "neutral", "displayName": "Stage", "canonical": "#0B0C0F", "tonalRamp": ["#0B0C0F", "#14161B", "#16181E", "#1B1D23", "#262932", "#3A3E49", "#4A4F5C", "#8A8F99"] },
+      "panel": { "role": "neutral", "displayName": "Panel", "canonical": "#14161B" },
+      "raised": { "role": "neutral", "displayName": "Raised", "canonical": "#1B1D23" },
+      "row-hover": { "role": "neutral", "displayName": "Row Hover", "canonical": "#16181E" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#262932" },
+      "text": { "role": "neutral", "displayName": "Text", "canonical": "#ECECEC" },
+      "text-secondary": { "role": "neutral", "displayName": "Secondary Text", "canonical": "#A9ADB6" },
+      "text-muted": { "role": "neutral", "displayName": "Muted Text", "canonical": "#8A8F99" },
+      "warning": { "role": "status", "displayName": "Warning Amber", "canonical": "#F0B429", "tonalRamp": ["#2A1F06", "#4A370C", "#6B5420", "#A67C1A", "#F0B429", "#F5C75A", "#F9DC94", "#FDF1D4"] },
+      "danger": { "role": "status", "displayName": "Danger Coral", "canonical": "#FF6B5E", "tonalRamp": ["#2E0E0B", "#5A1C17", "#702219", "#7A2C25", "#C9483D", "#FF6B5E", "#FFA49B", "#FFE1DD"] },
+      "success": { "role": "status", "displayName": "Success Green", "canonical": "#7BDB6E", "tonalRamp": ["#0F2A0C", "#1B3F17", "#2F5A2A", "#4A8F40", "#7BDB6E", "#9CE592", "#C3F0BD", "#E9FAE6"] },
+      "game-mod-blue": { "role": "data", "displayName": "Game Mod Blue", "canonical": "#8888FF" },
+      "game-tooltip-body": { "role": "game-frame", "displayName": "Tooltip Body", "canonical": "#050505" },
+      "game-tooltip-rule": { "role": "game-frame", "displayName": "Tooltip Brown Rule", "canonical": "#4A4236" },
+      "game-tooltip-name": { "role": "game-frame", "displayName": "Tooltip Item Name", "canonical": "#E0D5BD" },
+      "group-dangerous": { "role": "data", "displayName": "Dangerous (default)", "canonical": "rgb(209,46,46)" },
+      "group-annoying": { "role": "data", "displayName": "Annoying (default)", "canonical": "rgb(255,204,27)" },
+      "group-good": { "role": "data", "displayName": "Good (default)", "canonical": "rgb(74,230,58)" },
+      "group-great": { "role": "data", "displayName": "Great (default)", "canonical": "rgb(14,186,255)" },
+      "group-neutral": { "role": "data", "displayName": "Neutral (default)", "canonical": "rgb(227,158,255)" }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "Selected patch name; dialog titles." },
+      "heading": { "displayName": "Heading", "purpose": "Setting groups inside a panel; flyout titles." },
+      "body": { "displayName": "Body", "purpose": "Default window text." },
+      "row-name": { "displayName": "Row Name", "purpose": "Patch names in the list." },
+      "label": { "displayName": "Group Label", "purpose": "List group labels in secondary color, sentence case." },
+      "small": { "displayName": "Small", "purpose": "Descriptions, summaries, hints (muted)." },
+      "chip": { "displayName": "Chip", "purpose": "Drop-label chip text." },
+      "chip-small": { "displayName": "Small Chip", "purpose": "Group chip on each mod line." },
+      "tooltip-line": { "displayName": "Tooltip Line", "purpose": "Centered lines inside the game tooltip frame." },
+      "path": { "displayName": "Path", "purpose": "Game file path field." },
+      "code": { "displayName": "Code", "purpose": "Game file text in Before / After frames." }
+    },
+    "shadows": [
+      { "name": "focus-ring", "value": "0 0 0 2px #8CCBFF", "purpose": "Keyboard focus on segments; inset on patch rows. The only shadow in the system." }
+    ],
+    "motion": [],
+    "breakpoints": [
+      { "name": "window-min", "value": "1120x660" },
+      { "name": "window-default", "value": "1240x800" }
+    ],
+    "fontFeatures": [
+      { "name": "tabular", "value": "+tnum", "purpose": "Counts, percentages, backup state and progress stage." }
+    ],
+    "icons": { "grid": "16x16", "stroke": "1.5px", "caps": "round", "joins": "round", "disabledOpacity": 0.4, "set": ["Folder", "Restore", "Warning", "Check", "Close", "ArrowUp", "Trash", "Plus"] },
+    "titleBar": { "caption": "#0B0C0F", "text": "#ECECEC", "note": "Windows 11 only, via DWMWA_CAPTION_COLOR / DWMWA_TEXT_COLOR." },
+    "chipTint": { "formula": "group color mixed 16% into stage (#0B0C0F)" }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action per window (Apply), light blue with stage-colored bold text.",
+      "html": "<button class=\"ds-btn-primary\">Apply 1 patch</button>",
+      "css": ".ds-btn-primary { background: #4AA8FF; color: #0B0C0F; font: 700 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; padding: 10px 22px; border: 0; border-radius: 5px; cursor: pointer; } .ds-btn-primary:hover { background: #6DBAFF; } .ds-btn-primary:active { background: #2E8FE6; } .ds-btn-primary:focus-visible { outline: 2px solid #8CCBFF; outline-offset: 2px; } .ds-btn-primary:disabled { background: #1D2A38; color: #7F93A8; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions with an icon: Browse, Restore Original.",
+      "html": "<button class=\"ds-btn-outline\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5,6.5 L9.5,6.5 C11.43,6.5 13,8.07 13,10 C13,11.93 11.43,13.5 9.5,13.5 L6.5,13.5 M6,3.5 L3,6.5 L6,9.5\"/></svg>Restore Original</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #ECECEC; border: 1px solid #3A3E49; border-radius: 5px; padding: 7px 14px; font: 400 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; cursor: pointer; } .ds-btn-outline:hover { background: #1B1D23; border-color: #4A4F5C; } .ds-btn-outline:focus-visible { outline: 2px solid #8CCBFF; outline-offset: 2px; } .ds-btn-outline:disabled { border-color: #262932; color: #8A8F99; } .ds-btn-outline:disabled svg { opacity: 0.4; }"
+    },
+    {
+      "name": "Text Button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Small actions: View changes, Reset to defaults, Open log.",
+      "html": "<button class=\"ds-btn-text\">View changes</button>",
+      "css": ".ds-btn-text { background: transparent; color: #A9ADB6; border: 0; border-radius: 5px; padding: 5px 8px; font: 400 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; cursor: pointer; } .ds-btn-text:hover { background: #1B1D23; color: #ECECEC; } .ds-btn-text:focus-visible { outline: 2px solid #8CCBFF; outline-offset: 1px; } .ds-btn-text:disabled { color: #5C616B; background: transparent; }"
+    },
+    {
+      "name": "Game Switch",
+      "kind": "nav",
+      "refersTo": "segment",
+      "description": "PoE 1 / PoE 2 segmented switch on a panel track.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-seg-item\" aria-checked=\"true\" role=\"radio\">PoE 1</button><button class=\"ds-seg-item\" aria-checked=\"false\" role=\"radio\">PoE 2</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; background: #14161B; border-radius: 6px; } .ds-seg-item { background: transparent; color: #A9ADB6; border: 0; border-radius: 4px; padding: 6px 14px; font: 600 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; cursor: pointer; } .ds-seg-item:hover { background: #1B1D23; } .ds-seg-item[aria-checked=\"true\"] { background: #4AA8FF; color: #0B0C0F; } .ds-seg-item:focus-visible { outline: none; box-shadow: 0 0 0 2px #8CCBFF; }"
+    },
+    {
+      "name": "Path Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Game file path in monospace; border turns coral when invalid.",
+      "html": "<input class=\"ds-input-path\" value=\"C:/Games/Grinding Gear Games/Path of Exile/Content.ggpk\" />",
+      "css": ".ds-input-path { width: 100%; background: #0B0C0F; color: #ECECEC; border: 1px solid #3A3E49; border-radius: 5px; padding: 7px 10px; font: 400 13px 'Cascadia Mono', Consolas, monospace; caret-color: #4AA8FF; } .ds-input-path::selection { background: rgba(74,168,255,0.4); } .ds-input-path:focus-visible { outline: none; border-color: #4AA8FF; } .ds-input-path[aria-invalid=\"true\"] { border-color: #FF6B5E; }"
+    },
+    {
+      "name": "Patch Row",
+      "kind": "custom",
+      "refersTo": "patch-row",
+      "description": "Selectable list row: toggle, name over muted description, tabular summary.",
+      "html": "<div class=\"ds-row\" tabindex=\"0\" aria-selected=\"true\"><span class=\"ds-toggle\" aria-checked=\"true\"></span><span class=\"ds-row-text\"><b>Color Mods</b><small>Colors map mods by group</small></span><small class=\"ds-row-sum\">94 lines</small></div>",
+      "css": ".ds-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 5px; width: 360px; color: #ECECEC; font: 400 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; cursor: pointer; } .ds-row:hover { background: #16181E; } .ds-row[aria-selected=\"true\"] { background: #1B1D23; } .ds-row:focus-visible { outline: none; box-shadow: inset 0 0 0 2px #8CCBFF; } .ds-row-text { display: flex; flex-direction: column; gap: 1px; flex: 1; } .ds-row-text b { font-weight: 600; } .ds-row small { color: #8A8F99; font-size: 12.5px; } .ds-row-sum { font-variant-numeric: tabular-nums; } .ds-toggle { width: 40px; height: 20px; border-radius: 10px; background: #4AA8FF; position: relative; } .ds-toggle::after { content: ''; position: absolute; right: 4px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #0B0C0F; }"
+    },
+    {
+      "name": "Drop-Label Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A mod group as a loot filter drop label: hue text and 2px border over the hue mixed 16% into the stage.",
+      "html": "<span class=\"ds-chip\" style=\"--g: rgb(255,204,27); --t: rgb(50,42,16)\">Annoying <span class=\"ds-chip-n\">15</span></span> <span class=\"ds-chip\" style=\"--g: rgb(74,230,58); --t: rgb(21,46,21)\">Good <span class=\"ds-chip-n\">6</span></span> <span class=\"ds-chip ds-chip-sm\" style=\"--g: rgb(209,46,46); --t: rgb(42,17,19)\">Dangerous</span>",
+      "css": ".ds-chip { display: inline-flex; gap: 8px; align-items: center; color: var(--g); background: var(--t); border: 2px solid var(--g); border-radius: 3px; padding: 4px 10px; font: 700 12.5px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; cursor: pointer; } .ds-chip:hover { filter: brightness(1.15); } .ds-chip:focus-visible { outline: 2px solid #8CCBFF; outline-offset: 2px; } .ds-chip-n { font-weight: 400; opacity: 0.8; font-variant-numeric: tabular-nums; } .ds-chip-sm { border-width: 1.5px; padding: 1px 6px; font-size: 11px; }"
+    },
+    {
+      "name": "Game Tooltip Preview",
+      "kind": "card",
+      "refersTo": "game-tooltip",
+      "description": "The in-game item tooltip with mod lines in their group colors; redraws live.",
+      "html": "<div class=\"ds-tip\"><div class=\"ds-tip-head\">Cemetery Map</div><div class=\"ds-tip-body\"><p style=\"color:#7F7F7F\">Map Tier: 16</p><hr /><p style=\"color:rgb(209,46,46)\">45% increased Monster Attack Speed</p><p style=\"color:rgb(255,204,27)\">100% more Monster Life</p><p style=\"color:rgb(74,230,58)\">Rare Monsters have Physical Thorns</p><p style=\"color:#8888FF\">25% chance for Rare Monsters to Fracture on death</p></div></div>",
+      "css": ".ds-tip { background: #050505; border: 1px solid #4A4236; min-width: 240px; width: 340px; font: 400 13.5px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; } .ds-tip-head { background: #1A1712; border-bottom: 1px solid #4A4236; padding: 7px 8px; text-align: center; color: #E0D5BD; font-size: 16px; } .ds-tip-body { padding: 8px 14px 12px; text-align: center; } .ds-tip-body p { margin: 2px 0; } .ds-tip-body hr { border: 0; height: 1px; background: #4A4236; margin: 6px 24px; }"
+    },
+    {
+      "name": "Notice Banner",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Result of the last apply or restore: panel fill, dark status border, status icon.",
+      "html": "<div class=\"ds-notice\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"#7BDB6E\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3,8.5 L6.5,12 L13,4.5\"/></svg><span>Applied 3 patches.</span></div>",
+      "css": ".ds-notice { display: flex; gap: 12px; align-items: center; background: #14161B; border: 1px solid #2F5A2A; border-radius: 6px; padding: 10px 14px; color: #ECECEC; font: 400 14px 'Segoe UI Variable Text', 'Segoe UI', sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Loot Filter",
+    "overview": "PoE Redux is a dark operating window that speaks the color language players already read in a loot filter. A mod group is a drop label: its color as text and border over a dark tint of the same hue. Everything around those labels stays quiet so the group inks and the game's own tooltip are the loudest things on screen. The window is a near-black stage with one raised panel tone, white text, and a single light blue that means \"the main action\" or \"switched on\".\n\nDensity is that of a working tool: a fixed 400 px patch list on the left, the selected patch's settings in one raised panel on the right, a header bar for the game and file, a footer for backup state and Apply. The game's item tooltip is reproduced faithfully (near-black body, warm brown rules, centered lines) and is the one place the window borrows the game's materials instead of its own.\n\nThe Windows 11 title bar is painted in the stage color with light text, so the window reads as one surface from caption to footer.",
+    "keyCharacteristics": [
+      "Near-black stage, one panel tone, one raised tone for selection; depth by tone, not shadow.",
+      "One accent (light blue) for the primary action, checked segments, toggles, sliders, progress, caret.",
+      "Mod group colors come from the user's data and appear only as drop-label chips, colored mod text and the tooltip preview.",
+      "One sans family at four sizes; monospace only for file paths and game file text.",
+      "Hand-drawn 16 px open-stroke icons."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Light blue marks exactly two meanings: the one main action on screen, and the on state of a control. Nothing else is blue except mod data.", "section": "colors" },
+      { "name": "The Data Owns Its Colors Rule", "body": "Group colors are user data. The chrome never takes a group hue, and a group hue is never hard-coded into a view.", "section": "colors" },
+      { "name": "The Game Frame Rule", "body": "Warm browns and the tooltip greys appear only inside a game tooltip frame; they never leak into the app's own chrome.", "section": "colors" },
+      { "name": "The Tabular Count Rule", "body": "Every count, percentage and progress stage uses tabular figures (+tnum), so numbers in the list and footer do not jitter.", "section": "typography" },
+      { "name": "The One Family Rule", "body": "One sans family at 20 / 15 / 14 / 12.5; monospace only where the content is a path or a game file.", "section": "typography" },
+      { "name": "The Tone Not Shadow Rule", "body": "A surface rises by moving one step up the neutral ladder, never by casting a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** keep light blue (#4AA8FF) for the single primary action and for on states; put stage-colored text on it.",
+      "**Do** show a mod group as a drop-label chip: hue text, 2 px hue border, hue mixed 16% into the stage.",
+      "**Do** raise surfaces by tone (stage, panel #14161B, raised #1B1D23) and separate regions with 1 px hairlines.",
+      "**Do** use tabular figures for every count and percentage.",
+      "**Do** draw new icons as 16 px open strokes, 1.5 px, round caps, inheriting the foreground.",
+      "**Do** show mod lines in the game's own words and colors, with Game Mod Blue for lines left unchanged."
+    ],
+    "donts": [
+      "**Don't** use amber (#F0B429) for anything but warnings.",
+      "**Don't** add drop shadows; the only shadow is the focus ring.",
+      "**Don't** use the tooltip's warm browns outside a game tooltip frame.",
+      "**Don't** give a mod group meaning by color alone; it always carries its name in a chip.",
+      "**Don't** add a second filled accent button to a screen; other actions are outline or text buttons."
+    ]
+  }
+}
