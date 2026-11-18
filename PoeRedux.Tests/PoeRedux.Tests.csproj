@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PoeRedux.Core\PoeRedux.Core.csproj" />
-    <None Include="..\PoeRedux\oo2core.dll" Link="oo2core.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\PoeRedux.Shell\oo2core.dll" Link="oo2core.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
