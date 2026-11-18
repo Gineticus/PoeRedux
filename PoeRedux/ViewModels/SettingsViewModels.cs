@@ -54,6 +54,15 @@ public abstract partial class SettingsViewModel : ObservableObject
 
 public sealed class InfoViewModel(IPatch patch) : SettingsViewModel(patch)
 {
+    /// <summary>Lines as the game prints them before and after the patch, for patches that change text.</summary>
+    public IReadOnlyList<(string Before, string After)> Samples { get; } = patch is CompactModLines
+        ? [("Prefix Modifier \"Tyrannical\"", "P \"Tyrannical\""), ("Suffix Modifier \"of Haast\"", "S \"of Haast\"")]
+        : [];
+
+    public bool HasSamples => Samples.Count > 0;
+    public IEnumerable<string> BeforeLines => Samples.Select(s => s.Before);
+    public IEnumerable<string> AfterLines => Samples.Select(s => s.After);
+
     public override void Reload() { }
 }
 
@@ -105,7 +114,10 @@ public sealed partial class MinimapViewModel : SettingsViewModel
     [ObservableProperty] public partial double EdgeOpacityPercent { get; set; }
 
     public IBrush WalkableBrush => new SolidColorBrush(WalkableColor, WalkableOpacityPercent / 100);
-    public IBrush EdgeBrush => new SolidColorBrush(EdgeColor);
+    public IBrush EdgeBrush => new SolidColorBrush(EdgeColor, Math.Min(1, 0.35 + EdgeOpacityPercent / 100 * 6.5));
+
+    /// <summary>How strongly the drawing shows the part of the map nobody has walked.</summary>
+    public double UnexploredOpacity => RevealPercent / 100;
 
     partial void OnRevealPercentChanged(double value) => Push();
     partial void OnWalkableColorChanged(Color value) => Push();
@@ -117,6 +129,7 @@ public sealed partial class MinimapViewModel : SettingsViewModel
     {
         OnPropertyChanged(nameof(WalkableBrush));
         OnPropertyChanged(nameof(EdgeBrush));
+        OnPropertyChanged(nameof(UnexploredOpacity));
         if (_loading)
             return;
         _minimap.Reveal = Math.Round(RevealPercent) / 100;

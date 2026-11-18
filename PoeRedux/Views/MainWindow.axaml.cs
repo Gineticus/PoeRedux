@@ -17,7 +17,23 @@ public partial class MainWindow : Window, IWindowServices
                 vm.Window = this;
         };
         Closing += OnClosing;
+        Opened += (_, _) => MatchTitleBar();
     }
+
+    // Windows 11 draws the title bar in the stage color with light text; older Windows ignore the request
+    // and keep their own dark title bar.
+    private void MatchTitleBar()
+    {
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000) || TryGetPlatformHandle()?.Handle is not { } hwnd)
+            return;
+        var caption = 0x000F0C0B; // COLORREF of #0B0C0F
+        var text = 0x00ECECEC;
+        DwmSetWindowAttribute(hwnd, 35, ref caption, sizeof(int)); // DWMWA_CAPTION_COLOR
+        DwmSetWindowAttribute(hwnd, 36, ref text, sizeof(int)); // DWMWA_TEXT_COLOR
+    }
+
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int size);
 
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 

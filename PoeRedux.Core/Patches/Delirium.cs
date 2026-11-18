@@ -7,7 +7,7 @@ public class Delirium : IPatch
 {
     public string Id => "delirium";
     public string Name => "Delirium";
-    public string Description => "Removes the Delirium fog and its ash.";
+    public string Description => "No Delirium fog or ash";
     public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan)

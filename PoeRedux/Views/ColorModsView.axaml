@@ -38,7 +38,7 @@
       </ItemsControl>
     </StackPanel>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,24,300">
+    <Grid Grid.Row="1" ColumnDefinitions="*,24,340">
       <!-- Every mod line the game has for maps or waystones, plus strongboxes, expeditions and altars. -->
       <Grid Grid.Column="0" RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
@@ -73,10 +73,13 @@
                                     CommandParameter="{Binding}">
                               <TextBlock Text="{Binding Text}" Foreground="{Binding Brush}" TextWrapping="Wrap" />
                             </Button>
-                            <Button Grid.Column="2" Margin="8,0,0,0" Padding="6,4" Classes="text" VerticalAlignment="Center"
+                            <Button Grid.Column="2" Margin="8,0,0,0" Padding="2" Classes="text" VerticalAlignment="Center"
                                     ToolTip.Tip="{Binding Group.Name}"
                                     AutomationProperties.Name="{Binding Group.Name, StringFormat='Group: {0}'}">
-                              <Border Width="14" Height="14" CornerRadius="3" Background="{Binding Group.Brush}" />
+                              <Border Classes="chip small" BorderBrush="{Binding Group.Brush}" Background="{Binding Group.TintBrush}"
+                                      Opacity="{Binding ChipOpacity}">
+                                <TextBlock Text="{Binding Group.Name}" Foreground="{Binding Group.Brush}" />
+                              </Border>
                               <Button.Flyout>
                                 <Flyout Placement="LeftEdgeAlignedTop">
                                   <ItemsControl ItemsSource="{Binding Groups}">
@@ -110,23 +113,26 @@
 
       <!-- The preview: lines as the game prints them on the item. -->
       <StackPanel Grid.Column="2" Spacing="10">
-        <Border Background="#050505" BorderBrush="#3A3A3A" BorderThickness="1" CornerRadius="2">
+        <Border Classes="tooltip" Padding="0">
           <StackPanel>
-            <Border Background="#1A1712" BorderBrush="#3A3A3A" BorderThickness="0,0,0,1" Padding="8,7">
-              <TextBlock Text="{Binding ItemName}" HorizontalAlignment="Center" Foreground="#D6D2C8" FontSize="15" />
+            <Border Background="#1A1712" BorderBrush="#4A4236" BorderThickness="0,0,0,1" Padding="8,7">
+              <TextBlock Text="{Binding ItemName}" HorizontalAlignment="Center" Foreground="#E0D5BD" FontSize="16" />
             </Border>
-            <ItemsControl ItemsSource="{Binding PreviewLines}" Margin="12,10,12,12">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:ModLineViewModel">
-                  <TextBlock Text="{Binding Sample}" Foreground="{Binding Brush}" TextAlignment="Center"
-                             TextWrapping="Wrap" Margin="0,2" FontSize="13.5" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel Margin="14,8,14,12">
+              <TextBlock Classes="tooltipline" Text="{Binding TierLine}" Foreground="#7F7F7F" />
+              <Border Classes="tooltiprule" />
+              <ItemsControl ItemsSource="{Binding PreviewLines}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ModLineViewModel">
+                    <TextBlock Classes="tooltipline" Text="{Binding Sample}" Foreground="{Binding Brush}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
           </StackPanel>
         </Border>
         <TextBlock Classes="muted" TextWrapping="Wrap"
-                   Text="Sample values. Lines without a check mark keep the game's own blue." />
+                   Text="Lines without a check mark keep the game's own blue." />
       </StackPanel>
     </Grid>
   </Grid>

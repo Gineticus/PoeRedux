@@ -8,7 +8,7 @@ public class Corpse : IPatch
 {
     public string Id => "corpse";
     public string Name => "Corpses";
-    public string Description => "Hides bodies a second after monsters die.";
+    public string Description => "Bodies vanish a second after death";
     public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan) =>

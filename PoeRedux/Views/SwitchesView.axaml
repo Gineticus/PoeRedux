@@ -4,7 +4,9 @@
              x:Class="PoeRedux.Views.SwitchesView"
              x:DataType="vm:SwitchesViewModel">
   <StackPanel Spacing="6" MaxWidth="520" HorizontalAlignment="Left">
-    <TextBlock Classes="secondary" Text="Turned on means removed from the game." Margin="0,0,0,8" />
+    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+      <TextBlock Grid.Column="1" Classes="group" Text="Removed" Margin="0,0,6,0" />
+    </Grid>
     <ItemsControl ItemsSource="{Binding Switches}">
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:SwitchItemViewModel">
