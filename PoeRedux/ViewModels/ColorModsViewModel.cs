@@ -147,7 +147,7 @@ public sealed partial class ColorModsViewModel : SettingsViewModel
         Patch = patch;
         Groups = patch.Groups.Select(g => new ModGroupViewModel(g, GroupChanged)).ToList();
         Lines = _lines = patch.Lines.Select(l => new ModLineViewModel(l, this)).ToList();
-        ItemName = patch.Game == PoeGame.PoE2 ? "Waystone (Tier 15)" : "Map (Tier 16)";
+        ItemName = patch.Game == PoeGame.PoE2 ? "Waystone (Tier 15)" : "Cemetery Map";
         TierLine = patch.Game == PoeGame.PoE2 ? "Waystone Tier: 15" : "Map Tier: 16";
         Rebuild();
     }
@@ -158,7 +158,10 @@ public sealed partial class ColorModsViewModel : SettingsViewModel
     public ObservableCollection<ModCategoryViewModel> Categories { get; } = [];
     public ObservableCollection<ModLineViewModel> PreviewLines { get; } = [];
 
-    /// <summary>The item the preview imitates: a map in PoE 1, a waystone in PoE 2.</summary>
+    /// <summary>
+    /// The item the preview imitates. PoE 2 names waystones by tier; PoE 1 maps carry an area name, and Cemetery Map is
+    /// one of the game's map bases.
+    /// </summary>
     public string ItemName { get; }
 
     public string TierLine { get; }
