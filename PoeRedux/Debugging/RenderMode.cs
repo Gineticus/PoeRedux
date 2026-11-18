@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using PoeRedux.Services;
 using PoeRedux.ViewModels;
 using PoeRedux.Views;
@@ -44,7 +45,8 @@ internal static class RenderMode
         };
         File.WriteAllText(AppSettings.FilePath, settings.ToJsonString());
 
-        Program.BuildAvaloniaApp().AfterSetup(_ =>
+        // Popups drawn inside the window, so a window capture includes an open flyout.
+        Program.BuildAvaloniaApp().With(new Win32PlatformOptions { OverlayPopups = true }).AfterSetup(_ =>
         {
             Dispatcher.UIThread.Post(async () =>
             {
@@ -85,6 +87,15 @@ internal static class RenderMode
                             await Task.Delay(700);
                             Save(dialog, Path.Combine(outDir, $"{game}-confirm.png"));
                             dialog.Close();
+                            continue;
+                        case "@flyout":
+                            // Opens the group picker of the second mod line in Color Mods.
+                            var groupButton = window.GetVisualDescendants().OfType<Button>()
+                                .Where(b => b.Flyout is Flyout && b.DataContext is ModLineViewModel).Skip(1).FirstOrDefault();
+                            groupButton?.Flyout?.ShowAt(groupButton);
+                            await Task.Delay(800);
+                            Save(window, Path.Combine(outDir, $"{game}-flyout-{width}x{height}.png"));
+                            groupButton?.Flyout?.Hide();
                             continue;
                         case "@changes":
                             var changes = new ChangesViewModel(path, vm.Game);
