@@ -27,7 +27,7 @@ public class CompactModLines(PoeGame game) : IPatch
 
     public string Id => "compact-mod-lines";
     public string Name => "Compact Mod Lines";
-    public string Description => "Shorter Prefix and Suffix lines";
+    public string Description => "Shorter Prefix, Suffix, Crafted lines";
     public PatchGroup Group => PatchGroup.Readability;
 
     public void Collect(DirectoryNode root, PatchPlan plan)

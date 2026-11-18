@@ -28,7 +28,7 @@ internal static class RenderMode
 
         Directory.CreateDirectory(outDir);
         AppSettings.FilePath = Path.Combine(outDir, "settings.json");
-        BackupStore.BackupDirectory = Path.Combine(outDir, "backups");
+        BackupStore.BackupDirectory = System.Environment.GetEnvironmentVariable("POEREDUX_RENDER_BACKUPS") ?? Path.Combine(outDir, "backups");
         RunLog.LogDirectory = Path.Combine(outDir, "logs");
         var settings = new System.Text.Json.Nodes.JsonObject
         {
@@ -60,12 +60,15 @@ internal static class RenderMode
                     switch (id)
                     {
                         case "@success":
-                            vm.Notice = new Notice(NoticeKind.Success, "Applied 7 patches: 50,732 files changed in the game.", "log");
+                            vm.PatchedFiles = 50732;
+                            vm.Notice = new Notice(NoticeKind.Success, $"Applied {vm.SelectedCount} patches: 50,732 files changed in the game.", "log");
                             break;
                         case "@warning":
-                            vm.Notice = new Notice(NoticeKind.Warning, "Applied 6 of 7 patches: 412 files changed in the game. Nothing to change was found for Atlas Fog. Check that the selected game matches the file; if it does, PoE Redux needs an update.", "log");
+                            vm.PatchedFiles = 50732;
+                            vm.Notice = new Notice(NoticeKind.Warning, $"Applied {vm.SelectedCount - 1} of {vm.SelectedCount} patches: 50,732 files changed in the game. Nothing to change was found for Color Mods. Check that the selected game matches the file; if it does, PoE Redux needs an update.", "log");
                             break;
                         case "@error":
+                            vm.PatchedFiles = 0;
                             vm.Notice = new Notice(NoticeKind.Error, "Stopped with an error: The process cannot access the file because it is being used by another process. If the game is running, close it and try again. The log has the details.", "log");
                             break;
                         case "@busy":
@@ -82,6 +85,18 @@ internal static class RenderMode
                             await Task.Delay(700);
                             Save(dialog, Path.Combine(outDir, $"{game}-confirm.png"));
                             dialog.Close();
+                            continue;
+                        case "@changes":
+                            var changes = new ChangesViewModel(path, vm.Game);
+                            var changesWindow = new ChangesWindow(changes);
+                            changesWindow.Show(window);
+                            await Task.Delay(8000);
+                            changes.Search = "environmentsettings";
+                            await Task.Delay(500);
+                            changes.SelectedPath = changes.Paths.FirstOrDefault();
+                            await Task.Delay(2000);
+                            Save(changesWindow, Path.Combine(outDir, $"{game}-changes.png"));
+                            changesWindow.Close();
                             continue;
                         default:
                             if (vm.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == id) is { } item)

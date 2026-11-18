@@ -12,6 +12,7 @@ public interface IWindowServices
 {
     Task<string?> PickGameFileAsync(string? currentPath);
     Task<bool> ConfirmAsync(string title, string message, string confirm, string cancel);
+    void ShowChanges(ChangesViewModel changes);
     void Open(string pathOrUrl);
 }
 
@@ -62,14 +63,14 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PathProblem), nameof(HasPathError))]
-    [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(RestoreCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(RestoreCommand), nameof(ViewChangesCommand))]
     public partial string GamePath { get; set; } = "";
 
     [ObservableProperty]
     public partial PatchItemViewModel? Current { get; set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(RestoreCommand), nameof(DeleteBackupCommand), nameof(BrowseCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(RestoreCommand), nameof(DeleteBackupCommand), nameof(BrowseCommand), nameof(ViewChangesCommand))]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
     public partial bool IsBusy { get; set; }
 
@@ -82,7 +83,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] public partial Notice? Notice { get; set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(RestoreCommand), nameof(DeleteBackupCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RestoreCommand), nameof(DeleteBackupCommand), nameof(ViewChangesCommand))]
     [NotifyPropertyChangedFor(nameof(BackupText), nameof(HasBackup))]
     public partial int PatchedFiles { get; set; }
 
@@ -139,7 +140,7 @@ public partial class MainWindowViewModel : ObservableObject
         Groups.Clear();
         foreach (var group in _patches.GroupBy(p => p.Group))
         {
-            var items = group.Select(p => new PatchItemViewModel(p, SettingsViewModel.For(p, () => PathProblem is null ? GamePath.Trim() : null))
+            var items = group.Select(p => new PatchItemViewModel(p, SettingsViewModel.For(p, () => PathProblem is null ? GamePath.Trim() : null), game)
             {
                 IsSelected = saved.Selected?.Contains(p.Id) ?? false,
             }).ToList();
@@ -297,6 +298,11 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshBackup();
         Notice = new Notice(NoticeKind.Success, "The backup was deleted.");
     }
+
+    private bool CanViewChanges() => !IsBusy && HasBackup && PathProblem is null;
+
+    [RelayCommand(CanExecute = nameof(CanViewChanges))]
+    private void ViewChanges() => Window?.ShowChanges(new ChangesViewModel(GamePath.Trim(), Game));
 
     [RelayCommand]
     private void DismissNotice() => Notice = null;
