@@ -52,20 +52,9 @@ public abstract partial class SettingsViewModel : ObservableObject
     };
 }
 
+/// <summary>A patch without settings: only its notes show.</summary>
 public sealed class InfoViewModel(IPatch patch) : SettingsViewModel(patch)
 {
-    /// <summary>Tooltip lines before and after, shown for Compact Mod Lines only.</summary>
-    public string? Before => Sample(Patch.Id).Before;
-    public string? After => Sample(Patch.Id).After;
-
-    public bool HasSample => Before is not null;
-
-    private static (string? Before, string? After) Sample(string id) => id switch
-    {
-        "compact-mod-lines" => ("Prefix Modifier \"Tyrannical\"\nSuffix Modifier \"of Haast\"", "P \"Tyrannical\"\nS \"of Haast\""),
-        _ => (null, null),
-    };
-
     public override void Reload() { }
 }
 

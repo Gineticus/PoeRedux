@@ -9,7 +9,6 @@ PoeRedux edits the files of Path of Exile and Path of Exile 2 to change what the
 | Patch | What it does | Game |
 |---|---|---|
 | Color Mods | Gives chosen map and waystone mods a group color: Dangerous, Annoying, Good, Great or Neutral. Group colors can be changed, and each mod line can move to another group or stay uncolored. The list is read from the game's own mod data, so it holds every line a map or waystone can roll. | both |
-| Compact Mod Lines | Shortens the Prefix, Suffix and Crafted lines of advanced mod descriptions: `Prefix Modifier "Name"` becomes `P "Name"`. | both |
 | Monster Life Bars | Shows a life bar over every monster. | both |
 | Camera | Sets the default zoom, from 1.2 to 2.4. | both |
 | Minimap | Shows the whole minimap from the start. Its strength and the floor and edge colors can be changed. | both |

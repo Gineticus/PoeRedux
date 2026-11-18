@@ -17,18 +17,7 @@
     <DataTemplate DataType="vm:MinimapViewModel"><views:MinimapView /></DataTemplate>
     <DataTemplate DataType="vm:SwitchesViewModel"><views:SwitchesView /></DataTemplate>
     <DataTemplate DataType="vm:FoldersViewModel"><views:FoldersView /></DataTemplate>
-    <DataTemplate DataType="vm:InfoViewModel">
-      <Grid IsVisible="{Binding HasSample}" ColumnDefinitions="Auto,16,Auto" RowDefinitions="Auto,6,Auto" HorizontalAlignment="Left">
-        <TextBlock Classes="group" Text="Before" />
-        <TextBlock Grid.Column="2" Classes="group" Text="After" />
-        <Border Grid.Row="2" Classes="tooltip">
-          <TextBlock Classes="tooltipline" Text="{Binding Before}" Foreground="#9A9A9A" />
-        </Border>
-        <Border Grid.Row="2" Grid.Column="2" Classes="tooltip">
-          <TextBlock Classes="tooltipline" Text="{Binding After}" Foreground="#9A9A9A" />
-        </Border>
-      </Grid>
-    </DataTemplate>
+    <DataTemplate DataType="vm:InfoViewModel"><Panel /></DataTemplate>
   </Window.DataTemplates>
 
   <Grid RowDefinitions="52,Auto,*,Auto">

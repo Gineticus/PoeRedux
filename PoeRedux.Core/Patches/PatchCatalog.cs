@@ -14,7 +14,6 @@ public static class PatchCatalog
         var patches = new List<IPatch>
         {
             new ColorMods(game),
-            new CompactModLines(game),
             new MonsterHP(),
             new Camera(),
             new Minimap(),

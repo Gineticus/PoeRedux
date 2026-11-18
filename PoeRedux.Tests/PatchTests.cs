@@ -208,60 +208,6 @@ public class PatchTests
     }
 }
 
-public class CompactModLinesTests
-{
-    // A client strings table: a row count, rows of (id offset, text offset, 36 more bytes), 8 x 0xBB, strings.
-    private static byte[] Table(System.Text.Encoding encoding, params (string Id, string Text)[] rows)
-    {
-        var data = new MemoryStream();
-        data.Write(Enumerable.Repeat((byte)0xBB, 8).ToArray());
-        var offsets = new List<(long, long)>();
-        foreach (var (id, text) in rows)
-        {
-            var idOffset = data.Length;
-            data.Write(encoding.GetBytes(id)); data.Write(new byte[4]);
-            var textOffset = data.Length;
-            data.Write(encoding.GetBytes(text)); data.Write(new byte[4]);
-            offsets.Add((idOffset, textOffset));
-        }
-        var table = new MemoryStream();
-        table.Write(BitConverter.GetBytes(rows.Length));
-        foreach (var (i, t) in offsets)
-        {
-            table.Write(BitConverter.GetBytes(i));
-            table.Write(BitConverter.GetBytes(t));
-            table.Write(new byte[36]);
-        }
-        table.Write(data.ToArray());
-        return table.ToArray();
-    }
-
-    [Theory]
-    [InlineData(2)]
-    [InlineData(4)]
-    public void RewritesOnlyTheThreeRows(int charSize)
-    {
-        var encoding = charSize == 2 ? System.Text.Encoding.Unicode : System.Text.Encoding.UTF32;
-        var table = Table(encoding,
-            ("GameName", "Path of Exile"),
-            ("ModDescriptionLinePrefix", "Prefix Modifier \"{0}\""),
-            ("ModDescriptionLineSuffix", "Suffix Modifier \"{0}\""),
-            ("ModDescriptionLineCrafted", "Master Crafted {0}"));
-
-        var result = CompactModLines.Rewrite(table, encoding, charSize)!;
-
-        // The first row and the whole old data section keep their bytes; only three text offsets change.
-        Assert.True(result.AsSpan(0, 4 + 52).SequenceEqual(table.AsSpan(0, 4 + 52)));
-        Assert.True(result.AsSpan(4 + 4 * 52, table.Length - 4 - 4 * 52).SequenceEqual(table.AsSpan(4 + 4 * 52)));
-        var changedBytes = Enumerable.Range(0, table.Length).Count(i => table[i] != result[i]);
-        Assert.InRange(changedBytes, 3, 3 * 8);
-        Assert.Equal(new byte[4], result[^4..]);
-        Assert.Null(CompactModLines.Rewrite(result, encoding, charSize));
-        var text = encoding.GetString(result, table.Length, result.Length - table.Length);
-        Assert.Equal("P \"{0}\"\0S \"{0}\"\0Crafted {0}\0", text.Replace(new string('\0', 4 / charSize), "\0"));
-    }
-}
-
 public class ChangeReviewTests
 {
     [Fact]
