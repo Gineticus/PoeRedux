@@ -2,15 +2,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:PoeRedux.ViewModels"
         xmlns:views="using:PoeRedux.Views"
-        xmlns:chrome="using:Avalonia.Controls.Chrome"
         x:Class="PoeRedux.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="PoE Redux"
         Icon="avares://PoeRedux/Assets/icon.ico"
         Width="1240" Height="800" MinWidth="1120" MinHeight="660"
         WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="52">
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True">
 
   <Window.DataTemplates>
     <DataTemplate DataType="vm:ColorModsViewModel"><views:ColorModsView /></DataTemplate>
@@ -34,46 +33,55 @@
 
   <Grid RowDefinitions="52,Auto,*,Auto">
 
-    <!-- Title bar: name, game, game file. The window's own buttons sit on the right. -->
-    <Border Grid.Row="0" chrome:WindowDecorationProperties.ElementRole="TitleBar"
+    <!-- Title bar: game, game file and the window's buttons. Its empty part moves the window. -->
+    <Border Grid.Row="0" Background="Transparent" PointerPressed="OnTitleBarPressed" DoubleTapped="OnTitleBarDoubleTapped"
             BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1">
-      <Grid ColumnDefinitions="Auto,Auto,*,Auto,150" Margin="16,0,0,0" IsEnabled="{Binding IsIdle}">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-          <Image Source="avares://PoeRedux/Assets/icon.ico" Width="20" Height="20" />
-          <TextBlock Text="PoE Redux" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
-        </StackPanel>
+      <Grid ColumnDefinitions="*,Auto">
+        <!-- The game file path takes the width left over. The window is grabbed and moved around the controls. -->
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0,12,0" IsEnabled="{Binding IsIdle}">
+          <Border Grid.Column="0" Margin="0,0,16,0" Padding="3" CornerRadius="6" VerticalAlignment="Center"
+                  Background="{StaticResource PanelBrush}">
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <RadioButton Classes="segment" GroupName="game" Content="PoE 1" IsChecked="{Binding IsPoe1}"
+                           ToolTip.Tip="Path of Exile" />
+              <RadioButton Classes="segment" GroupName="game" Content="PoE 2" IsChecked="{Binding IsPoe2}"
+                           ToolTip.Tip="Path of Exile 2" />
+            </StackPanel>
+          </Border>
 
-        <Border Grid.Column="1" Margin="20,0,16,0" Padding="3" CornerRadius="6" VerticalAlignment="Center"
-                Background="{StaticResource PanelBrush}" chrome:WindowDecorationProperties.ElementRole="User">
-          <StackPanel Orientation="Horizontal" Spacing="2">
-            <RadioButton Classes="segment" GroupName="game" Content="PoE 1" IsChecked="{Binding IsPoe1}"
-                         ToolTip.Tip="Path of Exile" />
-            <RadioButton Classes="segment" GroupName="game" Content="PoE 2" IsChecked="{Binding IsPoe2}"
-                         ToolTip.Tip="Path of Exile 2" />
-          </StackPanel>
-        </Border>
+          <Grid Grid.Column="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+            <TextBox Classes="path" Text="{Binding GamePath}" VerticalContentAlignment="Center"
+                     PlaceholderText="Content.ggpk or Bundles2\_.index.bin"
+                     ToolTip.Tip="{Binding PathProblem}" />
+            <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Command="{Binding BrowseCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Path Classes="icon" Data="{StaticResource IconFolder}" />
+                <TextBlock Text="Browse" />
+              </StackPanel>
+            </Button>
+          </Grid>
 
-        <Grid Grid.Column="2" ColumnDefinitions="*,Auto" VerticalAlignment="Center"
-              chrome:WindowDecorationProperties.ElementRole="User">
-          <TextBox Classes="path" Text="{Binding GamePath}" VerticalContentAlignment="Center"
-                   PlaceholderText="Content.ggpk or Bundles2\_.index.bin"
-                   ToolTip.Tip="{Binding PathProblem}" />
-          <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Command="{Binding BrowseCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Path Classes="icon" Data="{StaticResource IconFolder}" />
-              <TextBlock Text="Browse" />
+          <Button Grid.Column="2" Classes="text" Margin="12,0,0,0" VerticalAlignment="Center"
+                  IsVisible="{Binding UpdateText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                  Command="{Binding OpenUpdateCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Path Classes="icon" Data="{StaticResource IconArrowUp}" Stroke="{StaticResource SuccessBrush}" />
+              <TextBlock Text="{Binding UpdateText}" Foreground="{StaticResource SuccessBrush}" />
             </StackPanel>
           </Button>
         </Grid>
 
-        <Button Grid.Column="3" Classes="text" Margin="12,0,0,0" VerticalAlignment="Center"
-                IsVisible="{Binding UpdateText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                Command="{Binding OpenUpdateCommand}" chrome:WindowDecorationProperties.ElementRole="User">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <Path Classes="icon" Data="{StaticResource IconArrowUp}" Stroke="{StaticResource SuccessBrush}" />
-            <TextBlock Text="{Binding UpdateText}" Foreground="{StaticResource SuccessBrush}" />
-          </StackPanel>
-        </Button>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,1">
+          <Button Classes="caption" Click="OnMinimizeClick" ToolTip.Tip="Minimize">
+            <Path Data="M0,0.5 H10" />
+          </Button>
+          <Button Name="MaximizeButton" Classes="caption" Click="OnMaximizeClick" ToolTip.Tip="Maximize">
+            <Path Name="MaximizeIcon" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
+          </Button>
+          <Button Classes="caption close" Click="OnCloseClick" ToolTip.Tip="Close">
+            <Path Data="M0,0 L10,10 M10,0 L0,10" />
+          </Button>
+        </StackPanel>
       </Grid>
     </Border>
 

@@ -1,5 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using PoeRedux.ViewModels;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -18,6 +23,11 @@ public partial class MainWindow : Window, IWindowServices
         };
         Closing += OnClosing;
         Opened += (_, _) => MatchTitleBar();
+        PropertyChanged += (_, e) =>
+        {
+            if (e.Property == WindowStateProperty)
+                ShowWindowState();
+        };
     }
 
     // Windows 11 draws the title bar in the stage color with light text; older Windows ignore the request
@@ -31,6 +41,40 @@ public partial class MainWindow : Window, IWindowServices
         DwmSetWindowAttribute(hwnd, 35, ref caption, sizeof(int)); // DWMWA_CAPTION_COLOR
         DwmSetWindowAttribute(hwnd, 36, ref text, sizeof(int)); // DWMWA_TEXT_COLOR
     }
+
+    // The window draws its own title bar (WindowDecorations="BorderOnly"): Avalonia's drawn title printed over the
+    // window's name and its full screen button over Browse.
+    private void OnTitleBarPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 1)
+            BeginMoveDrag(e);
+    }
+
+    private void OnTitleBarDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (!OnControl(e.Source))
+            ToggleMaximized();
+    }
+
+    private void OnMinimizeClick(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void OnMaximizeClick(object? sender, RoutedEventArgs e) => ToggleMaximized();
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
+
+    private void ToggleMaximized() =>
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+
+    private void ShowWindowState()
+    {
+        var maximized = WindowState == WindowState.Maximized;
+        MaximizeIcon.Data = Geometry.Parse(maximized ? "M2.5,0.5 H9.5 V7.5 M0.5,2.5 H7.5 V9.5 H0.5 Z" : "M0.5,0.5 H9.5 V9.5 H0.5 Z");
+        ToolTip.SetTip(MaximizeButton, maximized ? "Restore" : "Maximize");
+    }
+
+    /// <summary>The pointer is on a button, a text box or another control of the title bar, not on its empty part.</summary>
+    private static bool OnControl(object? source) =>
+        source is Visual visual && visual.GetSelfAndVisualAncestors().Any(v => v is Button or TextBox or RadioButton);
 
     [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int size);
