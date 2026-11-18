@@ -170,9 +170,6 @@
     <Setter Property="SelectionBrush" Value="#664AA8FF" />
     <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}" />
   </Style>
-  <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement">
-    <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
-  </Style>
   <Style Selector="TextBox.path">
     <Setter Property="FontFamily" Value="{StaticResource PathFont}" />
     <Setter Property="FontSize" Value="13" />
