@@ -194,6 +194,46 @@
     <Setter Property="FontSize" Value="12.5" />
   </Style>
 
+  <!-- The game's item tooltip: near-black body, warm header, grey property line, rules between blocks. -->
+  <Style Selector="Border.tooltip">
+    <Setter Property="Background" Value="#050505" />
+    <Setter Property="BorderBrush" Value="#4A4236" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="MinWidth" Value="240" />
+  </Style>
+  <Style Selector="TextBlock.tooltipline">
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="0,2" />
+  </Style>
+  <Style Selector="Border.tooltiprule">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Margin" Value="24,6" />
+    <Setter Property="Background" Value="#4A4236" />
+  </Style>
+
+  <!-- Disabled secondary buttons recede instead of turning into grey slabs. -->
+  <Style Selector="Button.outline:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+  </Style>
+  <Style Selector="Button.text:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="#5C616B" />
+  </Style>
+
+  <!-- Group name on a mod line: a small drop label, so the group never depends on color alone. -->
+  <Style Selector="Border.chip.small">
+    <Setter Property="BorderThickness" Value="1.5" />
+    <Setter Property="Padding" Value="6,1" />
+  </Style>
+  <Style Selector="Border.chip.small TextBlock">
+    <Setter Property="FontSize" Value="11" />
+  </Style>
+
   <Style Selector="Slider">
     <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
   </Style>

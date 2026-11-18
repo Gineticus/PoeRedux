@@ -19,6 +19,9 @@ public partial class PatchItemViewModel : ObservableObject
     public string Name => Patch.Name;
     public string Description => Patch.Description;
 
+    /// <summary>What the patch changes in the game files, shown above its settings.</summary>
+    public string Notes => PatchNotes.For(Patch.Id);
+
     /// <summary>Short state shown at the end of the row, such as "zoom 2.4".</summary>
     public string Summary => Settings.Summary;
 

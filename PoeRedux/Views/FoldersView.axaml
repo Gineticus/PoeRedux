@@ -5,7 +5,7 @@
              x:DataType="vm:FoldersViewModel">
   <Grid RowDefinitions="Auto,Auto,*">
     <TextBlock Classes="secondary" TextWrapping="Wrap" Margin="0,0,0,12"
-               Text="Files in these folders stay as they are. A folder also keeps every folder whose name starts the same way." />
+               Text="A kept folder also keeps every folder whose name starts the same way." />
 
     <StackPanel Grid.Row="1" Spacing="6" Margin="0,0,0,16">
       <Grid ColumnDefinitions="*,Auto">

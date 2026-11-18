@@ -11,7 +11,7 @@ public class LoadingScreen : IPatch
 {
     public string Id => "loading-screen";
     public string Name => "Loading Screen";
-    public string Description => "Hides the loading screen picture, tip and area name.";
+    public string Description => "No picture or tip while loading";
     public PatchGroup Group => PatchGroup.VisualNoise;
 
     public void Collect(DirectoryNode root, PatchPlan plan)

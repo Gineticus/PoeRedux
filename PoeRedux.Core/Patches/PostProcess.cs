@@ -12,7 +12,7 @@ public class PostProcess : SwitchPatch
 {
     public override string Id => "post-process";
     public override string Name => "Screen Filters";
-    public override string Description => "Turns off dark screen edges, background blur and gray-out.";
+    public override string Description => "No dark edges, blur or gray-out";
     public override PatchGroup Group => PatchGroup.VisualNoise;
 
     public override IReadOnlyList<PatchSwitch> Switches { get; } =

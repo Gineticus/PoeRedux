@@ -32,7 +32,7 @@ public class Minimap : IPatch, IPatchSettings
 
     public string Id => "minimap";
     public string Name => "Minimap";
-    public string Description => "Shows the whole minimap from the start and sets its colors.";
+    public string Description => "Whole minimap from the start";
     public PatchGroup Group => PatchGroup.MapAndCamera;
 
     /// <summary>

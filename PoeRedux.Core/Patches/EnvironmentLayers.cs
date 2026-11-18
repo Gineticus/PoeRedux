@@ -11,7 +11,7 @@ public class EnvironmentLayers : SwitchPatch
 {
     public override string Id => "environment";
     public override string Name => "Environment";
-    public override string Description => "Turns off fog, rain, clouds and other weather layers.";
+    public override string Description => "No fog, rain, clouds or weather";
     public override PatchGroup Group => PatchGroup.VisualNoise;
 
     // Every key below occurs in the .env files of both games (checked on 18 Nov 2026), and only as a key.
@@ -39,7 +39,7 @@ public class Light : SwitchPatch
 {
     public override string Id => "light";
     public override string Name => "Light";
-    public override string Description => "Turns off sun, character and reflected light.";
+    public override string Description => "No sun, character or reflected light";
     public override PatchGroup Group => PatchGroup.VisualNoise;
 
     public override IReadOnlyList<PatchSwitch> Switches { get; } =

@@ -30,7 +30,7 @@ public class ColorMods : IPatch, IPatchSettings
 
     public string Id => "color-mods";
     public string Name => "Color Mods";
-    public string Description => "Gives chosen map mods a group color, such as red for dangerous ones.";
+    public string Description => "Colors map mods by group";
     public PatchGroup Group => PatchGroup.Readability;
 
     public PoeGame Game { get; }

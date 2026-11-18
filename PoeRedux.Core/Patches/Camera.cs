@@ -14,7 +14,7 @@ public class Camera : IPatch, IPatchSettings
 
     public string Id => "camera";
     public string Name => "Camera";
-    public string Description => "Sets how far the camera zooms out by default.";
+    public string Description => "Default zoom level";
     public PatchGroup Group => PatchGroup.MapAndCamera;
 
     private double _zoomLevel = DefaultZoom;

@@ -114,6 +114,9 @@ public sealed partial class ModLineViewModel : ObservableObject
     /// <summary>The color the game will print this line in after Apply.</summary>
     public IBrush Brush => IsOn ? Group.Brush : ModBlue;
 
+    /// <summary>The group label of a line that is off stays readable but steps back.</summary>
+    public double ChipOpacity => IsOn ? 1 : 0.45;
+
     public IReadOnlyList<ModGroupViewModel> Groups => _owner.Groups;
 
     public void Refresh()
@@ -121,6 +124,7 @@ public sealed partial class ModLineViewModel : ObservableObject
         OnPropertyChanged(nameof(IsOn));
         OnPropertyChanged(nameof(Group));
         OnPropertyChanged(nameof(Brush));
+        OnPropertyChanged(nameof(ChipOpacity));
     }
 }
 
@@ -146,7 +150,8 @@ public sealed partial class ColorModsViewModel : SettingsViewModel
         Patch = patch;
         Groups = patch.Groups.Select(g => new ModGroupViewModel(g, GroupChanged)).ToList();
         Lines = _lines = patch.Lines.Select(l => new ModLineViewModel(l, this)).ToList();
-        ItemName = patch.Game == PoeGame.PoE2 ? "Waystone" : "Map";
+        ItemName = patch.Game == PoeGame.PoE2 ? "Waystone (Tier 15)" : "Map (Tier 16)";
+        TierLine = patch.Game == PoeGame.PoE2 ? "Waystone Tier: 15" : "Map Tier: 16";
         Rebuild();
     }
 
@@ -156,8 +161,10 @@ public sealed partial class ColorModsViewModel : SettingsViewModel
     public ObservableCollection<ModCategoryViewModel> Categories { get; } = [];
     public ObservableCollection<ModLineViewModel> PreviewLines { get; } = [];
 
-    /// <summary>"Map" in PoE 1, "Waystone" in PoE 2: the item the preview imitates.</summary>
+    /// <summary>The item the preview imitates: a map in PoE 1, a waystone in PoE 2.</summary>
     public string ItemName { get; }
+
+    public string TierLine { get; }
 
     public int TotalLines => Lines.Count;
     public int ColoredLines => Lines.Count(l => l.IsOn);

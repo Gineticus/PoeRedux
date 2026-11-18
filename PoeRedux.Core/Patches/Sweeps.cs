@@ -9,7 +9,7 @@ public class Particles : FolderSweepPatch
 
     public override string Id => "particles";
     public override string Name => "Particles";
-    public override string Description => "Removes particle effects, your own skills included.";
+    public override string Description => "No particle effects";
     public override PatchGroup Group => PatchGroup.VisualNoise;
     public override string Root => "metadata/particles";
     public override IReadOnlyList<string> Extensions { get; } = [".pet", ".trl"];
@@ -52,7 +52,7 @@ public class Effects : FolderSweepPatch
 
     public override string Id => "effects";
     public override string Name => "Effects";
-    public override string Description => "Removes skill and spell effects, your own included.";
+    public override string Description => "No skill and spell effects";
     public override PatchGroup Group => PatchGroup.VisualNoise;
     public override string Root => "metadata/effects/spells";
     public override IReadOnlyList<string> Extensions { get; } = [".aoc", ".ao"];
@@ -115,7 +115,7 @@ public class Mtx : FolderSweepPatch
 
     public override string Id => "mtx";
     public override string Name => "Microtransactions";
-    public override string Description => "Removes cosmetic effects bought in the shop, yours included.";
+    public override string Description => "No shop cosmetic effects";
     public override PatchGroup Group => PatchGroup.VisualNoise;
     public override string Root => "metadata/effects/microtransactions";
     public override IReadOnlyList<string> Extensions { get; } = [".pet", ".trl", ".ao", ".aoc"];

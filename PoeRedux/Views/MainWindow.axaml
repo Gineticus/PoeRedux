@@ -6,7 +6,7 @@
         x:DataType="vm:MainWindowViewModel"
         Title="PoE Redux"
         Icon="avares://PoeRedux/Assets/icon.ico"
-        Width="1240" Height="800" MinWidth="1040" MinHeight="640"
+        Width="1240" Height="800" MinWidth="1120" MinHeight="660"
         WindowStartupLocation="CenterScreen">
 
   <Window.DataTemplates>
@@ -15,7 +15,30 @@
     <DataTemplate DataType="vm:MinimapViewModel"><views:MinimapView /></DataTemplate>
     <DataTemplate DataType="vm:SwitchesViewModel"><views:SwitchesView /></DataTemplate>
     <DataTemplate DataType="vm:FoldersViewModel"><views:FoldersView /></DataTemplate>
-    <DataTemplate DataType="vm:InfoViewModel"><StackPanel /></DataTemplate>
+    <DataTemplate DataType="vm:InfoViewModel">
+      <StackPanel IsVisible="{Binding HasSamples}" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Left">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="group" Text="Before" />
+          <Border Classes="tooltip">
+            <ItemsControl ItemsSource="{Binding BeforeLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String"><TextBlock Classes="tooltipline" Text="{Binding}" Foreground="#7F7F7F" /></DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+        </StackPanel>
+        <StackPanel Spacing="6">
+          <TextBlock Classes="group" Text="After" />
+          <Border Classes="tooltip">
+            <ItemsControl ItemsSource="{Binding AfterLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String"><TextBlock Classes="tooltipline" Text="{Binding}" Foreground="#7F7F7F" /></DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+        </StackPanel>
+      </StackPanel>
+    </DataTemplate>
   </Window.DataTemplates>
 
   <Grid RowDefinitions="52,Auto,*,Auto">
@@ -129,7 +152,8 @@
           <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
             <StackPanel Spacing="4">
               <TextBlock Classes="title" Text="{Binding Current.Name, FallbackValue=''}" />
-              <TextBlock Classes="secondary" Text="{Binding Current.Description, FallbackValue=''}" TextWrapping="Wrap" />
+              <TextBlock Classes="secondary" Text="{Binding Current.Notes, FallbackValue=''}" TextWrapping="Wrap" MaxWidth="720"
+                         HorizontalAlignment="Left" />
             </StackPanel>
             <Button Grid.Column="1" Classes="text" Content="Reset to defaults" VerticalAlignment="Top"
                     Command="{Binding Current.Settings.ResetCommand, FallbackValue={x:Null}}"

@@ -44,13 +44,20 @@
       </StackPanel>
     </StackPanel>
 
-    <!-- A sketch of the result: floor fill with an edge around it. -->
-    <StackPanel Grid.Column="2" Spacing="8">
-      <Border Width="220" Height="160" CornerRadius="4" Background="#20232A" ClipToBounds="True">
-        <Border Margin="28,24" CornerRadius="10" Background="{Binding WalkableBrush}"
-                BorderBrush="{Binding EdgeBrush}" BorderThickness="2" />
+    <!-- An explored room and corridor on the left, an unexplored room on the right. -->
+    <StackPanel Grid.Column="2" Spacing="6">
+      <Border Width="220" Height="160" CornerRadius="4" Background="#2A2D35" ClipToBounds="True">
+        <Canvas>
+          <Path Data="M 18,36 H 92 V 68 H 146 V 94 H 92 V 128 H 18 Z" Fill="{Binding WalkableBrush}"
+                Stroke="{Binding EdgeBrush}" StrokeThickness="2" StrokeJoin="Round" />
+          <Path Data="M 146,26 H 204 V 138 H 146 Z" Fill="{Binding WalkableBrush}" Stroke="{Binding EdgeBrush}"
+                StrokeThickness="2" StrokeJoin="Round" Opacity="{Binding UnexploredOpacity}" />
+        </Canvas>
       </Border>
-      <TextBlock Classes="muted" TextWrapping="Wrap" Text="Rough sketch. The game blends these colors over the map." />
+      <Grid ColumnDefinitions="*,*" Width="220">
+        <TextBlock Classes="muted" Text="explored" />
+        <TextBlock Grid.Column="1" Classes="muted" Text="unexplored" HorizontalAlignment="Right" />
+      </Grid>
     </StackPanel>
   </Grid>
 </UserControl>

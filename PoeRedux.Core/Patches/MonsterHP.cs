@@ -8,7 +8,7 @@ public class MonsterHP : IPatch
 {
     public string Id => "monster-hp";
     public string Name => "Monster Life Bars";
-    public string Description => "Shows a life bar over every monster.";
+    public string Description => "A life bar over every monster";
     public PatchGroup Group => PatchGroup.Readability;
 
     public void Collect(DirectoryNode root, PatchPlan plan)
