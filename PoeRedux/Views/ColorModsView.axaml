@@ -25,7 +25,7 @@
               </Border>
               <Button.Flyout>
                 <Flyout Placement="BottomEdgeAlignedLeft">
-                  <StackPanel Spacing="10" Width="300">
+                  <StackPanel Spacing="10">
                     <TextBlock Text="{Binding Name}" Classes="heading" />
                     <ColorView Color="{Binding Color}" IsAlphaEnabled="False" IsAlphaVisible="False"
                                IsColorPaletteVisible="False" IsAccentColorsVisible="False" />

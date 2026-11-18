@@ -12,7 +12,7 @@ using PoeRedux.Views;
 namespace PoeRedux.Debugging;
 
 /// <summary>
-/// Renders the main window to PNG files for design review:
+/// Renders the main window to PNG files to check the layout:
 /// --render out-dir width height game path patch-id [patch-id ...]
 /// Each listed patch is selected and rendered as the current one. Nothing outside out-dir is written.
 /// </summary>
@@ -97,6 +97,20 @@ internal static class RenderMode
                             Save(window, Path.Combine(outDir, $"{game}-flyout-{width}x{height}.png"));
                             groupButton?.Flyout?.Hide();
                             continue;
+                        case "@groupcolor":
+                            // Opens the color flyout of the first Color Mods group and captures each tab.
+                            var chip = window.GetVisualDescendants().OfType<Button>()
+                                .FirstOrDefault(b => b.Flyout is Flyout && b.DataContext is ModGroupViewModel);
+                            if (chip?.Flyout is { } chipFlyout)
+                                await CaptureColorTabs(window, () => chipFlyout.ShowAt(chip), chipFlyout.Hide, Path.Combine(outDir, $"{game}-groupcolor-{width}x{height}"));
+                            continue;
+                        case "@colorpicker":
+                            // Opens the first ColorPicker of the current settings panel and captures each tab.
+                            var picker = window.GetVisualDescendants().OfType<ColorPicker>().FirstOrDefault();
+                            var dropDown = picker?.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.Flyout is not null);
+                            if (dropDown?.Flyout is { } pickerFlyout)
+                                await CaptureColorTabs(window, () => pickerFlyout.ShowAt(dropDown), pickerFlyout.Hide, Path.Combine(outDir, $"{game}-colorpicker-{width}x{height}"), picker);
+                            continue;
                         case "@changes":
                             var changes = new ChangesViewModel(path, vm.Game);
                             var changesWindow = new ChangesWindow(changes);
@@ -120,6 +134,26 @@ internal static class RenderMode
                 lifetime.Shutdown();
             });
         }).StartWithClassicDesktopLifetime([]);
+    }
+
+    // A ColorPicker owns the tabs of its own flyout; a ColorView placed in a flyout is found once it is open.
+    private static async Task CaptureColorTabs(Window window, Action show, Action hide, string filePrefix, ColorView? colorView = null)
+    {
+        show();
+        await Task.Delay(800);
+        colorView ??= window.GetVisualDescendants().OfType<ColorView>().FirstOrDefault(v => v is not ColorPicker);
+        for (var tab = 0; tab < 3; tab++)
+        {
+            if (colorView is null)
+                break;
+            if (tab == 1 && !colorView.IsColorPaletteVisible)
+                continue;
+            colorView.SelectedIndex = tab;
+            await Task.Delay(500);
+            Save(window, $"{filePrefix}-tab{tab}.png");
+        }
+        hide();
+        await Task.Delay(300);
     }
 
     private static void Save(Window window, string file)

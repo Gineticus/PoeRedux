@@ -19,11 +19,11 @@
       <Grid IsVisible="{Binding HasSample}" ColumnDefinitions="Auto,16,Auto" RowDefinitions="Auto,6,Auto" HorizontalAlignment="Left">
         <TextBlock Classes="group" Text="Before" />
         <TextBlock Grid.Column="2" Classes="group" Text="After" />
-        <Border Grid.Row="2" Classes="tooltip" Classes.code="{Binding IsCode}">
-          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding Before}" Foreground="#9A9A9A" />
+        <Border Grid.Row="2" Classes="tooltip">
+          <TextBlock Classes="tooltipline" Text="{Binding Before}" Foreground="#9A9A9A" />
         </Border>
-        <Border Grid.Row="2" Grid.Column="2" Classes="tooltip" Classes.code="{Binding IsCode}">
-          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding After}" Foreground="#9A9A9A" />
+        <Border Grid.Row="2" Grid.Column="2" Classes="tooltip">
+          <TextBlock Classes="tooltipline" Text="{Binding After}" Foreground="#9A9A9A" />
         </Border>
       </Grid>
     </DataTemplate>
