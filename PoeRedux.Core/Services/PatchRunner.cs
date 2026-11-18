@@ -93,22 +93,22 @@ public static class PatchRunner
     {
         progress?.Report(new(PatchStage.Preparing, 0, 0));
 
-        var plan = new PatchPlan();
-        // Restoring alone needs no tree: files are found by path hash, and the index may be opened without paths.
-        var root = patches.Count > 0 ? index.BuildTree(true) : null;
-        var withoutFiles = new List<IPatch>();
-        foreach (var patch in patches)
-        {
-            var before = plan.TransformCount;
-            patch.Collect(root!, plan);
-            // Either the other game is selected, or a game update moved or renamed the files.
-            if (plan.TransformCount == before)
-                withoutFiles.Add(patch);
-        }
-
         var store = BackupStore.Open(game);
         try
         {
+            var plan = new PatchPlan(records => ReadOriginals(records, store));
+            // Restoring alone needs no tree: files are found by path hash, and the index may be opened without paths.
+            var root = patches.Count > 0 ? index.BuildTree(true) : null;
+            var withoutFiles = new List<IPatch>();
+            foreach (var patch in patches)
+            {
+                var before = plan.TransformCount;
+                patch.Collect(root!, plan);
+                // Either the other game is selected, or a game update moved or renamed the files.
+                if (plan.TransformCount == before)
+                    withoutFiles.Add(patch);
+            }
+
             var work = plan.Files.Select(f => new Work(f.Record.Path, f.Record, f)).ToList();
             var planned = work.Select(w => w.Path).ToHashSet(StringComparer.Ordinal);
             foreach (var (path, entry) in store.Entries)
@@ -163,6 +163,22 @@ public static class PatchRunner
         {
             store.CloseArchives();
         }
+    }
+
+    /// <summary>
+    /// Reads files for a patch that decides from their content, starting from the bytes <see cref="Decide"/>
+    /// starts from: the backup's original when the file holds bytes PoE Redux wrote.
+    /// </summary>
+    private static Dictionary<FileRecord, byte[]> ReadOriginals(IReadOnlyCollection<FileRecord> records, BackupStore store)
+    {
+        var result = PatchPlan.ReadCurrent(records);
+        foreach (var (record, current) in result.ToList())
+        {
+            var entry = store.Find(record.Path);
+            if (entry is not null && (entry.Wrote(BackupStore.Hash(current)) || entry.Legacy && entry.Written.Count == 0))
+                result[record] = store.ReadOriginal(record.Path);
+        }
+        return result;
     }
 
     // Updates the backup list for one file after the writes.

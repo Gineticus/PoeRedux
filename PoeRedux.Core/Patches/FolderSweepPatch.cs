@@ -5,7 +5,8 @@ using System.Text.Json.Nodes;
 namespace PoeRedux.Patches;
 
 /// <summary>
-/// A patch that changes every file of some types under one folder, except in the folders it keeps.
+/// A patch that changes every file of some types under one folder, except in the folders it keeps and, unless
+/// turned off, the files of ground effects.
 /// A kept entry is a path prefix: "a/boss" keeps a/boss/x.pet and also a/boss_room/x.pet. Before this was
 /// configurable, that wider match kept a few more dangerous effects visible (maven_orb under maven, evil_red
 /// under evil), so it stays.
@@ -28,6 +29,9 @@ public abstract class FolderSweepPatch : IPatch, IPatchSettings
     /// <summary>Folders left as they are.</summary>
     public SortedSet<string> Kept { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>Leaves the files of ground effects as they are, wherever they are; see <see cref="GroundEffects"/>.</summary>
+    public bool KeepGroundEffects { get; set; } = true;
+
     // Field initializers of a derived class run before this constructor, so DefaultKept is already set.
     protected FolderSweepPatch() => ResetSettings();
 
@@ -36,10 +40,12 @@ public abstract class FolderSweepPatch : IPatch, IPatchSettings
 
     public void Collect(DirectoryNode root, PatchPlan plan)
     {
-        foreach (var file in GameTree.FindFiles(GameTree.FindDirectory(root, Root), Extensions.ToArray()))
+        var files = GameTree.FindFiles(GameTree.FindDirectory(root, Root), Extensions.ToArray());
+        var ground = KeepGroundEffects && files.Count > 0 ? GroundEffects.Files(root, plan) : null;
+        foreach (var file in files)
         {
             var path = file.Record.Path;
-            if (!Kept.Any(k => path.StartsWith(k, StringComparison.Ordinal)))
+            if (!Kept.Any(k => path.StartsWith(k, StringComparison.Ordinal)) && ground?.Contains(path) != true)
                 plan.Add(file, TransformFor(file));
         }
     }
@@ -49,11 +55,12 @@ public abstract class FolderSweepPatch : IPatch, IPatchSettings
         var defaults = DefaultKept.ToHashSet(StringComparer.Ordinal);
         var added = Kept.Where(k => !defaults.Contains(k)).Select(k => (JsonNode?)k).ToArray();
         var removed = DefaultKept.Where(k => !Kept.Contains(k)).Select(k => (JsonNode?)k).ToArray();
-        if (added.Length == 0 && removed.Length == 0)
+        if (added.Length == 0 && removed.Length == 0 && KeepGroundEffects)
             return null;
         var settings = new JsonObject();
         if (added.Length > 0) settings["keep"] = new JsonArray(added);
         if (removed.Length > 0) settings["dontKeep"] = new JsonArray(removed);
+        if (!KeepGroundEffects) settings["groundEffects"] = false;
         return settings;
     }
 
@@ -67,6 +74,8 @@ public abstract class FolderSweepPatch : IPatch, IPatchSettings
         }
         foreach (var path in Strings(settings["dontKeep"]))
             Kept.Remove(path);
+        if (settings["groundEffects"] is JsonValue ground && ground.TryGetValue<bool>(out var keep))
+            KeepGroundEffects = keep;
     }
 
     public void ResetSettings()
@@ -74,6 +83,7 @@ public abstract class FolderSweepPatch : IPatch, IPatchSettings
         Kept.Clear();
         foreach (var path in DefaultKept)
             Kept.Add(path);
+        KeepGroundEffects = true;
     }
 
     private static IEnumerable<string> Strings(JsonNode? node) =>
