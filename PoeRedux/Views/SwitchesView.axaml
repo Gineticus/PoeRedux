@@ -12,7 +12,7 @@
         <DataTemplate x:DataType="vm:SwitchItemViewModel">
           <Border Padding="0,6" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1">
             <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0" />
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsOn}" AutomationProperties.Name="{Binding Name}" />
             </Grid>
           </Border>

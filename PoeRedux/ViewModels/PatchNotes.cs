@@ -6,10 +6,12 @@ namespace PoeRedux.ViewModels;
 /// </summary>
 public static class PatchNotes
 {
-    public static string For(string patchId) => patchId switch
+    public static string For(string patchId, Models.PoeGame game) => patchId switch
     {
         "color-mods" => "Recolors chosen lines in the game's stat description files. The list holds every line that map and waystone prefixes and suffixes can show, read from the game's own mod data, plus strongbox, Expedition and altar lines.",
-        "compact-mod-lines" => "Rewrites three lines of the English text table clientstrings.datc64. They show when you hold Alt over an item.",
+        "compact-mod-lines" => game == Models.PoeGame.PoE2
+            ? "Rewrites the Prefix and Suffix lines of the English text table clientstrings.datc64; PoE 2 already writes Crafted short. They show when you hold Alt over an item."
+            : "Rewrites the Prefix, Suffix and Master Crafted lines of the English text tables clientstrings.datc64 and clientstrings.datcl64. They show when you hold Alt over an item.",
         "monster-hp" => "Gives every monster 1 base life and 1 base energy shield in metadata/monsters/monster.ot.",
         "camera" => "Sets the starting zoom in metadata/characters/character.ot.",
         "minimap" => "Edits the two minimap shaders, minimap_visibility_pixel.hlsl and minimap_blending_pixel.hlsl.",

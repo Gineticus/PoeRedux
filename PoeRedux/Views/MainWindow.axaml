@@ -16,28 +16,16 @@
     <DataTemplate DataType="vm:SwitchesViewModel"><views:SwitchesView /></DataTemplate>
     <DataTemplate DataType="vm:FoldersViewModel"><views:FoldersView /></DataTemplate>
     <DataTemplate DataType="vm:InfoViewModel">
-      <StackPanel IsVisible="{Binding HasSamples}" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Left">
-        <StackPanel Spacing="6">
-          <TextBlock Classes="group" Text="Before" />
-          <Border Classes="tooltip">
-            <ItemsControl ItemsSource="{Binding BeforeLines}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="x:String"><TextBlock Classes="tooltipline" Text="{Binding}" Foreground="#7F7F7F" /></DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </Border>
-        </StackPanel>
-        <StackPanel Spacing="6">
-          <TextBlock Classes="group" Text="After" />
-          <Border Classes="tooltip">
-            <ItemsControl ItemsSource="{Binding AfterLines}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="x:String"><TextBlock Classes="tooltipline" Text="{Binding}" Foreground="#7F7F7F" /></DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </Border>
-        </StackPanel>
-      </StackPanel>
+      <Grid IsVisible="{Binding HasSample}" ColumnDefinitions="Auto,16,Auto" RowDefinitions="Auto,6,Auto" HorizontalAlignment="Left">
+        <TextBlock Classes="group" Text="Before" />
+        <TextBlock Grid.Column="2" Classes="group" Text="After" />
+        <Border Grid.Row="2" Classes="tooltip" Classes.code="{Binding IsCode}">
+          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding Before}" Foreground="#9A9A9A" />
+        </Border>
+        <Border Grid.Row="2" Grid.Column="2" Classes="tooltip" Classes.code="{Binding IsCode}">
+          <TextBlock Classes="tooltipline" Classes.code="{Binding IsCode}" Text="{Binding After}" Foreground="#9A9A9A" />
+        </Border>
+      </Grid>
     </DataTemplate>
   </Window.DataTemplates>
 
@@ -175,10 +163,13 @@
             <TextBlock Text="Restore Original" />
           </StackPanel>
         </Button>
-        <Button Grid.Column="2" Classes="text" Margin="6,0,0,0" Command="{Binding DeleteBackupCommand}"
-                ToolTip.Tip="Delete the backup">
-          <Path Classes="icon" Data="{StaticResource IconTrash}" />
-        </Button>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,0" Spacing="2">
+          <Button Classes="text" Content="View changes" Command="{Binding ViewChangesCommand}" />
+          <Button Classes="text" Command="{Binding DeleteBackupCommand}" ToolTip.Tip="Delete the backup"
+                  AutomationProperties.Name="Delete the backup">
+            <Path Classes="icon" Data="{StaticResource IconTrash}" />
+          </Button>
+        </StackPanel>
 
         <StackPanel Grid.Column="3" Margin="24,0" VerticalAlignment="Center" Spacing="6" IsVisible="{Binding IsBusy}">
           <TextBlock Text="{Binding Stage}" Classes="secondary number" />

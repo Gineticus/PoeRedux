@@ -208,6 +208,19 @@
     <Setter Property="TextWrapping" Value="Wrap" />
     <Setter Property="Margin" Value="0,2" />
   </Style>
+  <!-- The same frame for game file text: left aligned, monospaced. -->
+  <Style Selector="Border.tooltip.code">
+    <Setter Property="Background" Value="#101217" />
+    <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="TextBlock.tooltipline.code">
+    <Setter Property="FontFamily" Value="{StaticResource PathFont}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="TextAlignment" Value="Left" />
+    <Setter Property="Foreground" Value="#C9CCD3" />
+  </Style>
+
   <Style Selector="Border.tooltiprule">
     <Setter Property="Height" Value="1" />
     <Setter Property="Margin" Value="24,6" />
@@ -223,6 +236,10 @@
   <Style Selector="Button.text:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="#5C616B" />
+  </Style>
+  <!-- Icons inside a disabled button dim with its label. -->
+  <Style Selector="Button:disabled Path.icon">
+    <Setter Property="Opacity" Value="0.4" />
   </Style>
 
   <!-- Group name on a mod line: a small drop label, so the group never depends on color alone. -->

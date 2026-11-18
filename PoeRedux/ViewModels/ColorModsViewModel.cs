@@ -114,8 +114,6 @@ public sealed partial class ModLineViewModel : ObservableObject
     /// <summary>The color the game will print this line in after Apply.</summary>
     public IBrush Brush => IsOn ? Group.Brush : ModBlue;
 
-    /// <summary>The group label of a line that is off stays readable but steps back.</summary>
-    public double ChipOpacity => IsOn ? 1 : 0.45;
 
     public IReadOnlyList<ModGroupViewModel> Groups => _owner.Groups;
 
@@ -124,7 +122,6 @@ public sealed partial class ModLineViewModel : ObservableObject
         OnPropertyChanged(nameof(IsOn));
         OnPropertyChanged(nameof(Group));
         OnPropertyChanged(nameof(Brush));
-        OnPropertyChanged(nameof(ChipOpacity));
     }
 }
 

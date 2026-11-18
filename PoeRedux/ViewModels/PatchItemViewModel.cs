@@ -6,9 +6,10 @@ namespace PoeRedux.ViewModels;
 /// <summary>One row of the patch list.</summary>
 public partial class PatchItemViewModel : ObservableObject
 {
-    public PatchItemViewModel(IPatch patch, SettingsViewModel settings)
+    public PatchItemViewModel(IPatch patch, SettingsViewModel settings, Models.PoeGame game)
     {
         Patch = patch;
+        Notes = PatchNotes.For(patch.Id, game);
         Settings = settings;
         settings.Changed += (_, _) => OnPropertyChanged(nameof(Summary));
     }
@@ -20,7 +21,7 @@ public partial class PatchItemViewModel : ObservableObject
     public string Description => Patch.Description;
 
     /// <summary>What the patch changes in the game files, shown above its settings.</summary>
-    public string Notes => PatchNotes.For(Patch.Id);
+    public string Notes { get; }
 
     /// <summary>Short state shown at the end of the row, such as "zoom 2.4".</summary>
     public string Summary => Settings.Summary;

@@ -54,14 +54,28 @@ public abstract partial class SettingsViewModel : ObservableObject
 
 public sealed class InfoViewModel(IPatch patch) : SettingsViewModel(patch)
 {
-    /// <summary>Lines as the game prints them before and after the patch, for patches that change text.</summary>
-    public IReadOnlyList<(string Before, string After)> Samples { get; } = patch is CompactModLines
-        ? [("Prefix Modifier \"Tyrannical\"", "P \"Tyrannical\""), ("Suffix Modifier \"of Haast\"", "S \"of Haast\"")]
-        : [];
+    /// <summary>
+    /// Before and after, for patches without settings. Compact Mod Lines shows tooltip lines; the others show the
+    /// lines they change in the game files, as they read in both games on 18 Nov 2026.
+    /// </summary>
+    public string? Before => Sample(Patch.Id).Before;
+    public string? After => Sample(Patch.Id).After;
 
-    public bool HasSamples => Samples.Count > 0;
-    public IEnumerable<string> BeforeLines => Samples.Select(s => s.Before);
-    public IEnumerable<string> AfterLines => Samples.Select(s => s.After);
+    /// <summary>Game file text rather than tooltip text.</summary>
+    public bool IsCode => Patch.Id != "compact-mod-lines";
+
+    public bool HasSample => Before is not null;
+
+    private static (string? Before, string? After) Sample(string id) => id switch
+    {
+        "compact-mod-lines" => ("Prefix Modifier \"Tyrannical\"\nSuffix Modifier \"of Haast\"", "P \"Tyrannical\"\nS \"of Haast\""),
+        "monster-hp" => ("item_drop_slots = 1", "item_drop_slots = 1\nbase_maximum_energy_shield = 1\nbase_maximum_life = 1"),
+        "shadow" => ("\"shadows_enabled\": true", "\"shadows_enabled\": false"),
+        "atlas-fog" => ("\"nodes\": [ … ],\n\"links\": [ … ],", "\"nodes\": [],\n\"links\": [],"),
+        "corpse" => ("Life\n{\n}", "Life\n{\n    on_spawned_dead = {RemoveEffects(); DisableRendering();}\n    on_death = {Delay( 1.0, { DisableRendering(); } );}\n}"),
+        "loading-screen" => ("begin Picture\n    id = loading_screen_area_image;", "begin Picture\n    visible = false;\n    mouse_enabled = false;\n    id = loading_screen_area_image;"),
+        _ => (null, null),
+    };
 
     public override void Reload() { }
 }

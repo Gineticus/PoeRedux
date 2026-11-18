@@ -69,6 +69,8 @@ public partial class MainWindow : Window, IWindowServices
         return files.Count > 0 ? files[0].TryGetLocalPath() : null;
     }
 
+    public void ShowChanges(ChangesViewModel changes) => new ChangesWindow(changes).Show(this);
+
     public Task<bool> ConfirmAsync(string title, string message, string confirm, string cancel) =>
         new ConfirmDialog(title, message, confirm, cancel).ShowDialog<bool>(this);
 

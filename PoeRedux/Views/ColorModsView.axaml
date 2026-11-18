@@ -77,7 +77,7 @@
                                     ToolTip.Tip="{Binding Group.Name}"
                                     AutomationProperties.Name="{Binding Group.Name, StringFormat='Group: {0}'}">
                               <Border Classes="chip small" BorderBrush="{Binding Group.Brush}" Background="{Binding Group.TintBrush}"
-                                      Opacity="{Binding ChipOpacity}">
+>
                                 <TextBlock Text="{Binding Group.Name}" Foreground="{Binding Group.Brush}" />
                               </Border>
                               <Button.Flyout>

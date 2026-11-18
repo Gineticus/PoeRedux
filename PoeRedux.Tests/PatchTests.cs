@@ -261,3 +261,30 @@ public class CompactModLinesTests
         Assert.Equal("P \"{0}\"\0S \"{0}\"\0Crafted {0}\0", text.Replace(new string('\0', 4 / charSize), "\0"));
     }
 }
+
+public class ChangeReviewTests
+{
+    [Fact]
+    public void ShowsOnlyChangedLinesWithContext()
+    {
+        var a = Enumerable.Range(0, 20).Select(i => $"line {i}").ToArray();
+        var b = a.ToArray();
+        b[10] = "changed";
+        var diff = PoeRedux.Services.ChangeReview.Diff(a, b);
+        Assert.Contains(diff, d => d.Kind == PoeRedux.Services.DiffKind.Removed && d.Text == "line 10");
+        Assert.Contains(diff, d => d.Kind == PoeRedux.Services.DiffKind.Added && d.Text == "changed");
+        Assert.DoesNotContain(diff, d => d.Text == "line 0");
+        Assert.Equal(4, diff.Count(d => d.Kind == PoeRedux.Services.DiffKind.Same)); // two lines either side
+        Assert.Equal(2, diff.Count(d => d.Kind == PoeRedux.Services.DiffKind.Gap)); // before and after
+    }
+
+    [Fact]
+    public void FindsInsertedLines()
+    {
+        string[] a = ["begin Frame", "id = a;", "end"];
+        string[] b = ["begin Frame", "visible = false;", "mouse_enabled = false;", "id = a;", "end"];
+        var diff = PoeRedux.Services.ChangeReview.Diff(a, b);
+        Assert.Equal(2, diff.Count(d => d.Kind == PoeRedux.Services.DiffKind.Added));
+        Assert.DoesNotContain(diff, d => d.Kind == PoeRedux.Services.DiffKind.Removed);
+    }
+}
